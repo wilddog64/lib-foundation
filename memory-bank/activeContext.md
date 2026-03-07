@@ -42,16 +42,21 @@ Scripts need to resolve their own canonical directory to source siblings reliabl
 
 **Implementation:**
 ```bash
-# Resolve the canonical directory of the calling script, following symlinks.
-# Uses pwd -P (POSIX, bash 3.2+) — works on macOS without GNU coreutils.
+# Resolve the canonical directory of the calling script, following file symlinks.
+# Uses readlink (macOS stock, no -f needed) + pwd -P — bash 3.2+ compatible.
 #
 # Usage (in any script):
 #   SCRIPT_DIR="$(_resolve_script_dir)"
-_resolve_script_dir() {
+function _resolve_script_dir() {
   local src="${BASH_SOURCE[1]}"
   local dir
-  dir="$(cd "$(dirname "$src")" && pwd -P)"
-  echo "$dir"
+  while [[ -h "$src" ]]; do
+    dir="$(cd -P "$(dirname "$src")" && pwd)"
+    src="$(readlink "$src")"
+    if [[ "$src" != /* ]]; then src="$dir/$src"; fi
+  done
+  dir="$(cd -P "$(dirname "$src")" && pwd)"
+  printf '%s\n' "$dir"
 }
 ```
 
