@@ -13,6 +13,8 @@
 - [x] `CLAUDE.md` — navigation + key contracts + testing rules
 - [x] `.clinerules` — Cline-compatible agent instructions
 - [x] `memory-bank/` — context carried over from k3d-manager v0.6.5
+- [x] Branch protection — `required_linear_history`, no force push, required status checks (`shellcheck`, `bats`)
+- [x] CI — `.github/workflows/ci.yaml` — shellcheck + BATS 1.13.0, pre-extraction graceful skip, `env -i` clean env. ✅ green
 
 ---
 

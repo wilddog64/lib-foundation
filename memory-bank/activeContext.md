@@ -2,7 +2,7 @@
 
 ## Current Branch: `main` (as of 2026-03-07)
 
-**Status: Scaffolded** — repo created, structure in place. `core.sh` and `system.sh` not yet extracted.
+**Status: Ready for extraction** — scaffold + CI + branch protection in place. `core.sh` and `system.sh` not yet extracted.
 
 ---
 
@@ -22,9 +22,14 @@ Re-integrated into consumers via git subtree pull.
 **Awaiting git subtree extraction from k3d-manager (Task 3 in v0.6.5)**
 
 The extraction task (Codex) will:
-1. `git subtree push` from k3d-manager → lib-foundation for `scripts/lib/core.sh` + `scripts/lib/system.sh`
-2. Add lib-foundation as a git subtree remote in k3d-manager
-3. Verify BATS tests still pass in both repos after extraction
+1. In k3d-manager: `git mv scripts/lib/core.sh scripts/lib/system.sh scripts/lib/foundation/`
+2. Update all internal `source` references to new paths
+3. `git subtree push --prefix=scripts/lib/foundation` → `lib-foundation/extract/v0.1.0` branch
+4. Open PR on lib-foundation, CI must pass (shellcheck + bats)
+5. Merge → tag `v0.1.0`
+
+**Branch protection:** `main` protected — required status checks `shellcheck` + `bats`, linear history, no force push.
+**CI:** `.github/workflows/ci.yaml` — shellcheck + BATS 1.13.0 in `env -i` clean env. Skips gracefully pre-extraction.
 
 ---
 
