@@ -1,6 +1,6 @@
 # Active Context — lib-foundation
 
-## Current Branch: `main` (as of 2026-03-07)
+## Current Branch: `extract/v0.1.0` (as of 2026-03-07)
 
 **Status: Ready for extraction** — scaffold + CI + branch protection in place. `core.sh` and `system.sh` not yet extracted.
 
