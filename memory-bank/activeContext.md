@@ -3,7 +3,7 @@
 ## Current Branch: `feature/v0.1.1-script-dir-resolver` (as of 2026-03-07)
 
 **v0.1.0 SHIPPED** — PR #1 merged, tag `v0.1.0` pushed.
-**v0.1.1 active** — branch rebased onto `main`.
+**v0.1.1 ready for PR** — Codex task complete, pushed to remote. Awaiting owner PR + merge → tag `v0.1.1`.
 
 ---
 
