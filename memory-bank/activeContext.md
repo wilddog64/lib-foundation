@@ -2,7 +2,9 @@
 
 ## Current Branch: `extract/v0.1.0` (as of 2026-03-07)
 
-**Status: Ready for extraction** — scaffold + CI + branch protection in place. `core.sh` and `system.sh` not yet extracted.
+**Status: Extraction incomplete — shellcheck blocking CI.**
+- `core.sh` ✅ imported, shellcheck passes
+- `system.sh` ❌ shellcheck fails — SC2016×14, SC2046×1, SC2086×2, SC2155×3
 
 ---
 
@@ -19,15 +21,17 @@ Re-integrated into consumers via git subtree pull.
 
 ## Current Focus
 
-**Branch `extract/v0.1.0` cut from `main` — ready for Codex.**
+**Codex: fix system.sh shellcheck failures on `extract/v0.1.0`.**
 
-Codex works on `extract/v0.1.0` in lib-foundation directly:
-1. Clone `lib-foundation`, checkout `extract/v0.1.0`
-2. Copy `core.sh` + `system.sh` from k3d-manager `scripts/lib/` → `scripts/lib/` here
-3. Remove `.gitkeep` stubs
-4. Run shellcheck, fix any issues
-5. Commit + push
-6. Claude opens PR `extract/v0.1.0 → main`, CI must pass, then merge → tag `v0.1.0`
+Issue doc: `k3d-manager/docs/issues/2026-03-07-lib-foundation-shellcheck-failures.md`
+
+Required fix — `system.sh` must pass `shellcheck` with exit 0:
+- SC2016 (×14, info): `bash -c '..."$1"...'` — add `# shellcheck disable=SC2016` per-block (intentional pattern)
+- SC2046 (×1, warning): line 837 — quote `$(lsb_release -is)` → `"$(lsb_release -is)"`
+- SC2086 (×2, info): lines 857, 944 — quote `$USER` → `"$USER"`, `$HELM_GLOBAL_ARGS` → `"${HELM_GLOBAL_ARGS}"`
+- SC2155 (×3, warning): lines 1635, 1669, 1670 — split `local var=$(...)` into `local var; var=(...)`
+
+After fixing: push to `extract/v0.1.0`, verify CI green, update memory-bank.
 
 In k3d-manager (separate Codex task):
 - Update internal `source` references if paths change
