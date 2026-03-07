@@ -74,6 +74,13 @@ PY
    fi
 }
 
+_resolve_script_dir() {
+   local src="${BASH_SOURCE[1]}"
+   local dir
+   dir="$(cd "$(dirname "$src")" && pwd -P)"
+   printf '%s\n' "$dir"
+}
+
 function _k3s_asset_dir() {
    printf '%s/etc/k3s' "$(dirname "$SOURCE")"
 }
