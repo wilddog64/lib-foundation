@@ -15,12 +15,13 @@
 - [x] `memory-bank/` — context carried over from k3d-manager v0.6.5
 - [x] Branch protection — `required_linear_history`, no force push, required status checks (`shellcheck`, `bats`)
 - [x] CI — `.github/workflows/ci.yaml` — shellcheck + BATS 1.13.0, pre-extraction graceful skip, `env -i` clean env. ✅ green
+- [x] `scripts/lib/core.sh` + `scripts/lib/system.sh` imported from k3d-manager (Codex) — shellcheck run; BATS suite empty (1..0)
 
 ---
 
 ## What Is Pending
 
-- [ ] `git subtree push` from k3d-manager — extract `core.sh` + `system.sh` (Codex, k3d-manager v0.6.5)
+- [ ] Wire lib-foundation subtree back into k3d-manager (`git subtree pull/push`, Codex follow-up)
 - [ ] Integrate lib-foundation as subtree remote back into k3d-manager
 - [ ] BATS test suite for lib functions
 - [ ] Consumer integration: `rigor-cli`
