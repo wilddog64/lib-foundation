@@ -175,7 +175,7 @@ _ensure_secret_tool() {
     _run_command --prefer-sudo -- env DEBIAN_FRONTEND=noninteractive apt-get install -y libsecret-tools
   elif _command_exist dnf ; then
     _run_command --prefer-sudo -- dnf -y install libsecret
-  elif _command_exist -v yum >/dev/null 2>&1; then
+  elif _command_exist yum; then
     _run_command --prefer-sudo -- yum -y install libsecret
   elif _command_exist microdnf ; then
     _run_command --prefer-sudo -- microdnf -y install libsecret
@@ -956,11 +956,9 @@ function _helm() {
   done
 
   # If you keep global flags, splice them in *before* user args:
-  if [[ -n "${HELM_GLOBAL_ARGS:-}" ]]; then
-    _run_command "${pre[@]}" --probe 'version --short' -- helm "${HELM_GLOBAL_ARGS}" "$@"
-  else
-    _run_command "${pre[@]}" --probe 'version --short' -- helm "$@"
-  fi
+  local -a helm_global_arr=()
+  read -r -a helm_global_arr <<< "${HELM_GLOBAL_ARGS:-}"
+  _run_command "${pre[@]}" --probe 'version --short' -- helm "${helm_global_arr[@]}" "$@"
 }
 
 function _curl() {
@@ -1652,9 +1650,11 @@ function _add_exit_trap() {
    cur="$(trap -p EXIT | sed -E "s/.*'(.+)'/\1/")"
 
    if [[ -n "$cur" ]]; then
-      trap '"$cur"; "$handler"' EXIT
+      # shellcheck disable=SC2064
+      trap "${cur}; ${handler}" EXIT
    else
-      trap '"$handler"' EXIT
+      # shellcheck disable=SC2064
+      trap "${handler}" EXIT
    fi
 }
 
