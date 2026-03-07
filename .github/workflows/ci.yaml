@@ -26,7 +26,7 @@ jobs:
             echo "No .sh files found — skipping (pre-extraction)"
             exit 0
           fi
-          echo "$shfiles" | xargs shellcheck --severity=error
+          echo "$shfiles" | xargs shellcheck
 
   bats:
     name: bats
