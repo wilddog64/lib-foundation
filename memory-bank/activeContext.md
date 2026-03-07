@@ -2,9 +2,10 @@
 
 ## Current Branch: `extract/v0.1.0` (as of 2026-03-07)
 
-**Status: Extraction incomplete — shellcheck blocking CI.**
-- `core.sh` ✅ imported, shellcheck passes
-- `system.sh` ❌ shellcheck fails — SC2016×14, SC2046×1, SC2086×2, SC2155×3
+**Status: PR #1 open — CI green, ready to merge → tag v0.1.0.**
+- `core.sh` ✅ shellcheck passes
+- `system.sh` ✅ shellcheck passes (SC2016 disable directives, quoting fixes, SC2155 splits)
+- CI run: https://github.com/wilddog64/lib-foundation/actions/runs/22803721742 ✅
 
 ---
 
