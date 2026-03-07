@@ -16,6 +16,7 @@
 - [x] Branch protection — `required_linear_history`, no force push, required status checks (`shellcheck`, `bats`)
 - [x] CI — `.github/workflows/ci.yaml` — shellcheck + BATS 1.13.0, pre-extraction graceful skip, `env -i` clean env. ✅ green
 - [x] `scripts/lib/core.sh` + `scripts/lib/system.sh` imported from k3d-manager (Codex) — shellcheck run; BATS suite empty (1..0)
+- [x] `system.sh` shellcheck cleanup — SC2016 annotations, quoting fixes, and `_detect_cluster_name` locals (Codex)
 
 ---
 

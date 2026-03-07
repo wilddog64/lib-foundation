@@ -380,7 +380,9 @@ function _store_registry_credentials() {
       local service="${context}:${host}"
       local account="${context}"
       local rc=0
+      # shellcheck disable=SC2016
       _no_trace bash -c 'security delete-generic-password -s "$1" >/dev/null 2>&1 || true' _ "$service" >/dev/null 2>&1
+      # shellcheck disable=SC2016
       if ! _no_trace bash -c 'security add-generic-password -s "$1" -a "$2" -w "$3" >/dev/null' _ "$service" "$account" "$blob"; then
          rc=$?
       fi
@@ -391,8 +393,10 @@ function _store_registry_credentials() {
    if _secret_tool_ready; then
       local label="${context} registry ${host}"
       local rc=0
+      # shellcheck disable=SC2016
       _no_trace bash -c 'secret-tool clear service "$1" registry "$2" type "$3" >/dev/null 2>&1 || true' _ "$context" "$host" "helm-oci" >/dev/null 2>&1
       local store_output=""
+      # shellcheck disable=SC2016
       store_output=$(_no_trace bash -c 'secret-tool store --label "$1" service "$2" registry "$3" type "$4" < "$5"' _ "$label" "$context" "$host" "helm-oci" "$blob_file" 2>&1)
       local store_rc=$?
       if (( store_rc != 0 )) || [[ -n "$store_output" ]]; then
@@ -433,8 +437,10 @@ function _registry_login() {
    local login_output=""
    local login_rc=0
    if [[ -n "$registry_config" ]]; then
+      # shellcheck disable=SC2016
       login_output=$(_no_trace bash -c 'HELM_REGISTRY_CONFIG="$4" helm registry login "$1" --username "$2" --password-stdin < "$3"' _ "$host" "$username" "$pass_file" "$registry_config" 2>&1) || login_rc=$?
    else
+      # shellcheck disable=SC2016
       login_output=$(_no_trace bash -c 'helm registry login "$1" --username "$2" --password-stdin < "$3"' _ "$host" "$username" "$pass_file" 2>&1) || login_rc=$?
    fi
    _remove_sensitive_file "$pass_file"
@@ -461,8 +467,10 @@ function _load_registry_credentials() {
 
    if _is_mac; then
       local service="${context}:${host}"
+      # shellcheck disable=SC2016
       blob=$(_no_trace bash -c 'security find-generic-password -s "$1" -w' _ "$service" 2>/dev/null || true)
    elif _command_exist secret-tool; then
+      # shellcheck disable=SC2016
       blob=$(_no_trace bash -c 'secret-tool lookup service "$1" registry "$2" type "$3"' _ "$context" "$host" "helm-oci" 2>/dev/null || true)
    fi
 
@@ -485,7 +493,9 @@ function _secret_store_data() {
 
    if _is_mac; then
       local rc=0
+      # shellcheck disable=SC2016
       _no_trace bash -c 'security delete-generic-password -s "$1" -a "$2" >/dev/null 2>&1 || true' _ "$service" "$key"
+      # shellcheck disable=SC2016
       if ! _no_trace bash -c 'security add-generic-password -s "$1" -a "$2" -w "$3" >/dev/null' _ "$service" "$key" "$data"; then
          rc=$?
       fi
@@ -499,7 +509,9 @@ function _secret_store_data() {
          _remove_sensitive_file "$tmp"
          return 1
       fi
+      # shellcheck disable=SC2016
       _no_trace bash -c 'secret-tool clear service "$1" name "$2" type "$3" >/dev/null 2>&1 || true' _ "$service" "$key" "$type"
+      # shellcheck disable=SC2016
       store_output=$(_no_trace bash -c 'secret-tool store --label "$1" service "$2" name "$3" type "$4" < "$5"' _ "$label" "$service" "$key" "$type" "$tmp" 2>&1)
       rc=$?
       _remove_sensitive_file "$tmp"
@@ -521,8 +533,10 @@ function _secret_load_data() {
    local value=""
 
    if _is_mac; then
+      # shellcheck disable=SC2016
       value=$(_no_trace bash -c 'security find-generic-password -s "$1" -a "$2" -w' _ "$service" "$key" 2>/dev/null || true)
    elif _command_exist secret-tool; then
+      # shellcheck disable=SC2016
       value=$(_no_trace bash -c 'secret-tool lookup service "$1" name "$2" type "$3"' _ "$service" "$key" "$type" 2>/dev/null || true)
    fi
 
@@ -540,11 +554,13 @@ function _secret_clear_data() {
    local type="${3:-note}"
 
    if _is_mac; then
+      # shellcheck disable=SC2016
       _no_trace bash -c 'security delete-generic-password -s "$1" -a "$2" >/dev/null 2>&1 || true' _ "$service" "$key"
       return 0
    fi
 
    if _command_exist secret-tool; then
+      # shellcheck disable=SC2016
       _no_trace bash -c 'secret-tool clear service "$1" name "$2" type "$3" >/dev/null 2>&1 || true' _ "$service" "$key" "$type"
       return 0
    fi
@@ -834,8 +850,8 @@ function _install_debian_docker() {
   _run_command -- sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
   # Add Docker's GPG key
   if [[ ! -e "/usr/share/keyrings/docker-archive-keyring.gpg" ]]; then
-     _curl -fsSL https://download.docker.com/linux/$(lsb_release -is \
-        | tr '[:upper:]' '[:lower:]')/gpg \
+     _curl -fsSL https://download.docker.com/linux/"$(lsb_release -is \
+        | tr '[:upper:]' '[:lower:]')"/gpg \
         | sudo gpg --dearmor \
         -o /usr/share/keyrings/docker-archive-keyring.gpg
   fi
@@ -854,7 +870,7 @@ function _install_debian_docker() {
      _warn "systemd not available; skipping docker service activation"
   fi
   # Add current user to docker group
-  _run_command -- sudo usermod -aG docker $USER
+  _run_command -- sudo usermod -aG docker "$USER"
   echo "Docker installed successfully. You may need to log out and back in for group changes to take effect."
 }
 
@@ -941,7 +957,7 @@ function _helm() {
 
   # If you keep global flags, splice them in *before* user args:
   if [[ -n "${HELM_GLOBAL_ARGS:-}" ]]; then
-    _run_command "${pre[@]}" --probe 'version --short' -- helm ${HELM_GLOBAL_ARGS} "$@"
+    _run_command "${pre[@]}" --probe 'version --short' -- helm "${HELM_GLOBAL_ARGS}" "$@"
   else
     _run_command "${pre[@]}" --probe 'version --short' -- helm "$@"
   fi
@@ -1632,7 +1648,8 @@ function _ensure_cargo() {
 
 function _add_exit_trap() {
    local handler="$1"
-   local cur="$(trap -p EXIT | sed -E "s/.*'(.+)'/\1/")"
+   local cur
+   cur="$(trap -p EXIT | sed -E "s/.*'(.+)'/\1/")"
 
    if [[ -n "$cur" ]]; then
       trap '"$cur"; "$handler"' EXIT
@@ -1660,14 +1677,16 @@ function _failfast_off() {
 }
 
 function _detect_cluster_name() {
-   # shellcheck disable=SC2155
-   local cluster_info="$(_kubectl --quiet -- get nodes | tail -1)"
+   local cluster_info
+   cluster_info="$(_kubectl --quiet -- get nodes | tail -1)"
 
    if [[ -z "$cluster_info" ]]; then
       _err "Cannot detect cluster name: no nodes found"
    fi
-   local cluster_ready=$(echo "$cluster_info" | awk '{print $2}')
-   local cluster_name=$(echo "$cluster_info" | awk '{print $1}')
+   local cluster_ready
+   cluster_ready=$(echo "$cluster_info" | awk '{print $2}')
+   local cluster_name
+   cluster_name=$(echo "$cluster_info" | awk '{print $1}')
 
    if [[ "$cluster_ready" != "Ready" ]]; then
       _err "Cluster node is not ready: $cluster_info"
