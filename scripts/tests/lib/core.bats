@@ -7,13 +7,12 @@ setup() {
 
 _make_test_script() {
   local target="$1"
-  cat <<'SCRIPT' > "$target"
+  cat <<SCRIPT > "$target"
 #!/usr/bin/env bash
-source "__CORE_LIB__"
-SCRIPT_DIR="$(_resolve_script_dir)"
-printf '%s\n' "$SCRIPT_DIR"
+source "$CORE_LIB"
+SCRIPT_DIR="\$(_resolve_script_dir)"
+printf '%s\n' "\$SCRIPT_DIR"
 SCRIPT
-  perl -0pi -e "s|__CORE_LIB__|$CORE_LIB|" "$target"
   chmod +x "$target"
 }
 

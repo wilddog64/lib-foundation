@@ -91,10 +91,19 @@ Per-repo hooks can source from the subtree and call `_resolve_script_dir`.
 
 ## Open Items
 
-- [ ] Codex: implement `_resolve_script_dir` + BATS test (this branch)
+- [x] Codex: implement `_resolve_script_dir` + BATS test (this branch)
 - [ ] BATS test suite for lib functions (broader — future)
 - [ ] Add `rigor-cli` as consumer
 - [ ] Add `shopping-carts` as consumer
+
+### Latest Update (2026-03-07 — Codex)
+
+- Task: `_resolve_script_dir` helper + BATS coverage
+- Status: COMPLETE
+- Files changed: `scripts/tests/lib/core.bats`
+- Shellcheck: PASS (`scripts/lib/core.sh`)
+- BATS: PASS (`env -i HOME="$HOME" PATH="$PATH" bats scripts/tests/lib/core.bats`)
+- Notes: `_make_test_script` now injects the resolved `CORE_LIB` path directly, keeping the helper tests hermetic without Perl substitutions.
 
 ---
 
