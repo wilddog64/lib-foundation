@@ -19,14 +19,19 @@ Re-integrated into consumers via git subtree pull.
 
 ## Current Focus
 
-**Awaiting git subtree extraction from k3d-manager (Task 3 in v0.6.5)**
+**Branch `extract/v0.1.0` cut from `main` — ready for Codex.**
 
-The extraction task (Codex) will:
-1. In k3d-manager: `git mv scripts/lib/core.sh scripts/lib/system.sh scripts/lib/foundation/`
-2. Update all internal `source` references to new paths
-3. `git subtree push --prefix=scripts/lib/foundation` → `lib-foundation/extract/v0.1.0` branch
-4. Open PR on lib-foundation, CI must pass (shellcheck + bats)
-5. Merge → tag `v0.1.0`
+Codex works on `extract/v0.1.0` in lib-foundation directly:
+1. Clone `lib-foundation`, checkout `extract/v0.1.0`
+2. Copy `core.sh` + `system.sh` from k3d-manager `scripts/lib/` → `scripts/lib/` here
+3. Remove `.gitkeep` stubs
+4. Run shellcheck, fix any issues
+5. Commit + push
+6. Claude opens PR `extract/v0.1.0 → main`, CI must pass, then merge → tag `v0.1.0`
+
+In k3d-manager (separate Codex task):
+- Update internal `source` references if paths change
+- Add lib-foundation as git subtree remote for future pull/push
 
 **Branch protection:** `main` protected — required status checks `shellcheck` + `bats`, linear history, no force push.
 **CI:** `.github/workflows/ci.yaml` — shellcheck + BATS 1.13.0 in `env -i` clean env. Skips gracefully pre-extraction.
