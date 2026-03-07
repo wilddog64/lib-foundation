@@ -22,24 +22,10 @@ Re-integrated into consumers via git subtree pull.
 
 ## Current Focus
 
-**Codex: fix system.sh shellcheck failures on `extract/v0.1.0`.**
-
-Issue doc: `k3d-manager/docs/issues/2026-03-07-lib-foundation-shellcheck-failures.md`
-
-Required fix — `system.sh` must pass `shellcheck` with exit 0:
-- SC2016 (×14, info): `bash -c '..."$1"...'` — add `# shellcheck disable=SC2016` per-block (intentional pattern)
-- SC2046 (×1, warning): line 837 — quote `$(lsb_release -is)` → `"$(lsb_release -is)"`
-- SC2086 (×2, info): lines 857, 944 — quote `$USER` → `"$USER"`, `$HELM_GLOBAL_ARGS` → `"${HELM_GLOBAL_ARGS}"`
-- SC2155 (×3, warning): lines 1635, 1669, 1670 — split `local var=$(...)` into `local var; var=(...)`
-
-After fixing: push to `extract/v0.1.0`, verify CI green, update memory-bank.
-
-In k3d-manager (separate Codex task):
-- Update internal `source` references if paths change
-- Add lib-foundation as git subtree remote for future pull/push
+**No active Codex task on lib-foundation.** PR #1 is open, CI green, awaiting owner merge → tag v0.1.0.
 
 **Branch protection:** `main` protected — required status checks `shellcheck` + `bats`, linear history, no force push.
-**CI:** `.github/workflows/ci.yaml` — shellcheck + BATS 1.13.0 in `env -i` clean env. Skips gracefully pre-extraction.
+**CI:** `.github/workflows/ci.yaml` — shellcheck + BATS 1.13.0 in `env -i` clean env.
 
 ---
 
@@ -65,7 +51,7 @@ These function signatures must not change without coordinating across all consum
 
 ## Open Items
 
-- [ ] git subtree extraction of `core.sh` + `system.sh` from k3d-manager (Codex — k3d-manager v0.6.5)
+- [x] Extract `core.sh` + `system.sh` into lib-foundation — ✅ done, PR #1 open, CI green
 - [ ] BATS test suite for lib functions
 - [ ] Add `rigor-cli` as consumer
 - [ ] Add `shopping-carts` as consumer
