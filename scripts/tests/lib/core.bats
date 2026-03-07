@@ -28,16 +28,17 @@ SCRIPT
   [ "$output" = "$expected" ]
 }
 
-@test "_resolve_script_dir resolves symlinked script" {
-  test_dir="${BATS_TEST_TMPDIR}/symlink"
-  mkdir -p "$test_dir"
-  script_path="$test_dir/original.sh"
+@test "_resolve_script_dir resolves symlinked script from different directory" {
+  real_dir="${BATS_TEST_TMPDIR}/real"
+  link_dir="${BATS_TEST_TMPDIR}/bin"
+  mkdir -p "$real_dir" "$link_dir"
+  script_path="$real_dir/original.sh"
   _make_test_script "$script_path"
-  link_path="$test_dir/link.sh"
+  link_path="$link_dir/link.sh"
   ln -sf "$script_path" "$link_path"
 
   run "$link_path"
   [ "$status" -eq 0 ]
-  expected="$(cd "$test_dir" && pwd -P)"
+  expected="$(cd "$real_dir" && pwd -P)"
   [ "$output" = "$expected" ]
 }

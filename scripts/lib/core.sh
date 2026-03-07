@@ -74,10 +74,17 @@ PY
    fi
 }
 
-_resolve_script_dir() {
+function _resolve_script_dir() {
    local src="${BASH_SOURCE[1]}"
    local dir
-   dir="$(cd "$(dirname "$src")" && pwd -P)"
+   while [[ -h "$src" ]]; do
+      dir="$(cd -P "$(dirname "$src")" && pwd)"
+      src="$(readlink "$src")"
+      if [[ "$src" != /* ]]; then
+         src="$dir/$src"
+      fi
+   done
+   dir="$(cd -P "$(dirname "$src")" && pwd)"
    printf '%s\n' "$dir"
 }
 
