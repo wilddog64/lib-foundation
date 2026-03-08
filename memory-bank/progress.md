@@ -23,8 +23,12 @@
 
 ## What Is Pending
 
-- [ ] Wire lib-foundation subtree back into k3d-manager (`git subtree pull/push`, Codex follow-up)
-- [ ] Integrate lib-foundation as subtree remote back into k3d-manager
+- [x] Wire lib-foundation subtree into k3d-manager — DONE in k3d-manager v0.7.0 (subtree at `scripts/lib/foundation/`)
+- [ ] Sync deploy_cluster improvements back from k3d-manager local core.sh → lib-foundation core.sh (CLUSTER_NAME fix, provider helpers, if-count reduction)
+- [ ] Remove duplicate mac+k3s guard in core.sh `deploy_cluster` (already removed in k3d-manager subtree snapshot; apply upstream)
+- [ ] Route bare sudo in `_install_debian_helm` / `_install_debian_docker` through `_run_command` (Copilot flag — k3d-manager PR #24)
+- [ ] Remote installer script integrity — checksum/signature verification for `_install_k3s`, `_install_istioctl`, `_install_bats_from_source`, `_install_copilot_from_release` (Copilot flag — k3d-manager PR #24; dev-only pattern, low priority)
+- [ ] Drop colima support — delete `_install_colima` + `_install_mac_docker` from `system.sh`; update `_install_docker` mac case in `core.sh`. Sync from k3d-manager v0.7.1 once merged.
 - [ ] Broader BATS coverage for remaining lib functions
 - [ ] Consumer integration: `rigor-cli`
 - [ ] Consumer integration: `shopping-carts`
