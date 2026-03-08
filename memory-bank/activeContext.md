@@ -89,6 +89,27 @@ These function signatures must not change without coordinating across all consum
 
 ---
 
+## Core Library Change Rule
+
+**All changes to core library code — new functions, refactors, and bug fixes — must originate
+in lib-foundation, not in a consumer's subtree copy.**
+
+| Change type | Wrong | Right |
+|-------------|-------|-------|
+| Bug fix in `_run_command` | Edit `scripts/lib/foundation/scripts/lib/system.sh` in k3d-manager | Fix in lib-foundation → PR → tag → subtree pull |
+| New helper function | Add to k3d-manager subtree copy | Add to lib-foundation → PR → tag → subtree pull |
+| Refactor | Edit subtree copy directly | Refactor in lib-foundation → PR → tag → subtree pull |
+
+**Why:** Editing the subtree copy directly creates drift — the fix lives only in the
+consumer and is lost or overwritten on the next subtree pull. lib-foundation is the
+source of truth.
+
+**Exception:** Emergency hotfix directly in the subtree copy is acceptable if a blocking
+bug needs an immediate workaround. In that case, a corresponding issue must be filed in
+lib-foundation immediately and the fix ported upstream before the next release.
+
+---
+
 ## Release Protocol (Option A — Independent Versioning)
 
 lib-foundation uses independent semver (`v0.1.x`) separate from k3d-manager.
