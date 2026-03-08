@@ -42,7 +42,94 @@ BATS coverage: 10 targeted tests — `_agent_checkpoint` 3, `_agent_audit` 7 (12
 Unexpected findings: NONE
 
 **Bug fix (staged diff):** `_agent_audit` git diff calls corrected to `--cached` (lines 48, 65, 105); 6 BATS tests updated to `git add` before audit call.
-Status: **COMPLETE — ready for PR**
+Status: **PR open (#4) — Copilot review addressed, 2 fixes pending Codex (see below)**
+
+---
+
+## v0.2.0 Copilot Review — Codex Fix Task
+
+**Status: READY FOR CODEX**
+
+Two bugs flagged by Copilot in PR #4. Fix both in a single commit.
+
+### Fix 1: if-count loop reads working-tree file, not staged blob
+
+**File:** `scripts/lib/agent_rigor.sh`
+**Lines:** ~72–85 (the `while IFS= read -r line` loop)
+
+**Problem:** The loop reads `< "$file"` (working tree). If a file is partially staged, the
+if-count audit checks the wrong content. Must read the staged blob instead.
+
+**Fix:** Replace `done < "$file"` with `git show :"$file" |` piped into the while loop.
+
+Before:
+```bash
+while IFS= read -r line; do
+   ...
+done < "$file"
+```
+
+After:
+```bash
+while IFS= read -r line; do
+   ...
+done < <(git show :"$file" 2>/dev/null || true)
+```
+
+Also update the second `if` block after the loop (same pattern, same file).
+
+### Fix 2: bare-sudo filter skips lines with any `#`, not just comment lines
+
+**File:** `scripts/lib/agent_rigor.sh`
+**Lines:** ~105–110
+
+**Problem:** `grep -v '_run_command\|#'` excludes any line containing `#`, so
+`sudo apt-get update # comment` bypasses the check.
+
+**Fix:** Replace the combined grep with two separate greps — one for `_run_command`,
+one for comment-only lines (first non-whitespace char is `#`):
+
+Before:
+```bash
+| grep -v '_run_command\|#' || true)
+```
+
+After:
+```bash
+| grep -Ev '^[[:space:]]*#' \
+| grep -Ev '^[[:space:]]*_run_command\b' || true)
+```
+
+### BATS updates required
+
+For Fix 1: the existing if-count tests already stage via `git add` before running
+`_agent_audit`. No test changes needed — verify they still pass.
+
+For Fix 2: add a new BATS test `_agent_audit flags sudo with inline comment` that
+verifies `sudo cmd # comment` is caught. Add it after the existing bare-sudo tests.
+
+### Rules
+
+- Edit only `scripts/lib/agent_rigor.sh` and `scripts/tests/lib/agent_rigor.bats`
+- `shellcheck scripts/lib/agent_rigor.sh` must exit 0
+- `env -i HOME="$HOME" PATH="$PATH" bats scripts/tests/lib/` must pass all tests
+- Do NOT run `git rebase`, `git reset --hard`, or `git push --force`
+- Commit locally — Claude handles push
+
+### Required Completion Report
+
+Replace this section in `memory-bank/activeContext.md` with:
+
+```
+## v0.2.0 Copilot Fix — Completion Report (Codex)
+
+Fix 1 (staged blob): DONE — lines [N-N] updated to use git show :"$file"
+Fix 2 (comment filter): DONE — grep split into two -Ev patterns (line N)
+New BATS test: DONE — "_agent_audit flags sudo with inline comment"
+Shellcheck: PASS
+BATS: N/N passing
+Status: COMPLETE
+```
 
 ---
 
@@ -69,6 +156,7 @@ These function signatures must not change without coordinating across all consum
 
 ## Open Items
 
+- [ ] **Add `.github/copilot-instructions.md`** — first commit on next branch (v0.2.1 or v0.3.0); encode bash 3.2+ compat, `_run_command --prefer-sudo`, `env -i` BATS invocation, key contracts
 - [ ] BATS test suite for lib functions (broader — future)
 - [ ] Add `rigor-cli` as consumer
 - [ ] Add `shopping-carts` as consumer
