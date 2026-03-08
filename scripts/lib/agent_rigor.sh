@@ -82,7 +82,7 @@ _agent_audit() {
             elif [[ $line =~ ^[[:space:]]*if[[:space:]\(] ]]; then
                ((++if_count))
             fi
-         done < "$file"
+         done < <(git show :"$file" 2>/dev/null || true)
 
          if [[ -n "$current_func" && $if_count -gt $max_if ]]; then
             offenders_lines+="${current_func}:${if_count}"$'\n'
@@ -106,7 +106,8 @@ _agent_audit() {
             | grep '^+' \
             | sed 's/^+//' \
             | grep -E '\bsudo[[:space:]]' \
-            | grep -v '_run_command\|#' || true)
+            | grep -Ev '^[[:space:]]*#' \
+            | grep -Ev '^[[:space:]]*_run_command\b' || true)
          if [[ -n "$bare_sudo" ]]; then
             _warn "Agent audit: bare sudo call in $file (use _run_command --prefer-sudo):"
             _warn "$bare_sudo"

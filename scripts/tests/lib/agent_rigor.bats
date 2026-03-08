@@ -96,6 +96,19 @@ SCRIPT
   [[ "$output" == *"bare sudo call"* ]]
 }
 
+@test "_agent_audit flags sudo with inline comment" {
+  mkdir -p scripts
+  cat <<'SCRIPT' > scripts/comment.sh
+function action() {
+   sudo apt-get update # refresh packages
+}
+SCRIPT
+  git add scripts/comment.sh
+  run _agent_audit
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"bare sudo call"* ]]
+}
+
 @test "_agent_audit ignores _run_command sudo usage" {
   mkdir -p scripts
   cat <<'SCRIPT' > scripts/run_cmd.sh
