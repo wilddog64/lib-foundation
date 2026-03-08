@@ -28,124 +28,21 @@ Consumed by downstream repos via git subtree pull.
 
 ---
 
-## v0.2.0 — Codex Task: Implement agent_rigor.sh
+## v0.2.0 — Completion Report (Codex)
 
-**Status: active — ready for Codex**
-
-Full spec: `docs/plans/v0.2.0-agent-rigor-spec.md` — read it completely before writing any code.
-
-### Your task
-
-Create exactly 4 new files — nothing else:
-
-1. `scripts/lib/agent_rigor.sh`
-   - `_agent_checkpoint` — port from k3d-manager; replace `_k3dm_repo_root` with `git rev-parse --show-toplevel`
-   - `_agent_audit` — port verbatim; remove kubectl exec credential check (Kubernetes-specific)
-   - `_agent_lint` — generic redesign; gate via `AGENT_LINT_GATE_VAR` + AI wrapper via `AGENT_LINT_AI_FUNC`
-
-2. `scripts/hooks/pre-commit` — hook template (see spec for exact content)
-
-3. `scripts/etc/agent/lint-rules.md` — port 5 rules from k3d-manager (`scripts/etc/agent/lint-rules.md`)
-
-4. `scripts/tests/lib/agent_rigor.bats`
-   - `setup()` creates a temp git repo via `mktemp -d`; `teardown()` removes it
-   - Unit tests for `_agent_checkpoint` (3 cases) and `_agent_audit` (7 cases)
-   - Do NOT test `_agent_lint` — consumer responsibility
-
-### Rules
-
-- Edit only the 4 files listed above — do NOT touch `core.sh`, `system.sh`, or any existing file
-- `shellcheck scripts/lib/agent_rigor.sh` must exit 0
-- `env -i HOME="$HOME" PATH="$PATH" bats scripts/tests/lib/` must pass all suites
-- bash 3.2+ compatible — no `declare -A`, no `mapfile`; `${!gate_var}` indirect expansion is allowed
-- Do NOT run `git rebase`, `git reset --hard`, or `git push --force`
-- Commit locally — Claude handles push and PR
-
-### Required Completion Report
-
-Update `memory-bank/activeContext.md` with:
-
-```
-## v0.2.0 Completion Report (Codex)
-
-Files created: [list all 4]
-Shellcheck: PASS / [issues]
-BATS: N/N passing
-_agent_checkpoint: DONE — repo_root via git rev-parse (line N)
-_agent_audit: DONE — kubectl exec check removed (confirmed)
-_agent_lint: DONE — AGENT_LINT_GATE_VAR + AGENT_LINT_AI_FUNC (lines N-N)
-pre-commit template: DONE
-lint-rules.md: DONE — N rules ported
-BATS coverage: N tests — _agent_checkpoint N, _agent_audit N
-Unexpected findings: NONE / [describe]
-Status: COMPLETE / BLOCKED
-```
-
-## v0.2.0 Completion Report (Codex)
-
-Files created: scripts/lib/agent_rigor.sh; scripts/hooks/pre-commit; scripts/etc/agent/lint-rules.md; scripts/tests/lib/agent_rigor.bats
-Shellcheck: PASS (`shellcheck scripts/lib/agent_rigor.sh`)
-BATS: 12/12 passing (`env -i HOME="$HOME" PATH="$PATH" bats scripts/tests/lib/`)
-_agent_checkpoint: DONE — repo_root derived via `git rev-parse --show-toplevel` (scripts/lib/agent_rigor.sh:10)
-_agent_audit: DONE — kubectl exec credential check removed; retains BATS/if-count/bare-sudo scans (scripts/lib/agent_rigor.sh:40-118)
-_agent_lint: DONE — gated via `AGENT_LINT_GATE_VAR` + `AGENT_LINT_AI_FUNC` indirection (scripts/lib/agent_rigor.sh:121-158)
-pre-commit template: DONE — `scripts/hooks/pre-commit` sources system + agent rigor, runs `_agent_audit` + optional `_agent_lint`
-lint-rules.md: DONE — 5 rules ported from k3d-manager
-BATS coverage: 10 targeted tests — `_agent_checkpoint` 3, `_agent_audit` 7 (total suite 12 including existing `_resolve_script_dir` cases)
-Unexpected findings: NONE
-Status: COMPLETE — pending one bug fix (see below)
-
----
-
-## v0.2.0 Bug Fix Task (Codex)
-
-**Status: READY FOR CODEX**
-
-### Issue: `_agent_audit` audits unstaged diff instead of staged diff
-
-**File:** `scripts/lib/agent_rigor.sh`
-
-**Problem:** Three `git diff` calls inside `_agent_audit` use no flags, which diffs the
-working tree against the index (unstaged changes). A pre-commit hook must audit what is
-**about to be committed** — the staged changes (`git diff --cached`). Without `--cached`,
-the audit may flag edits not going into the commit and miss changes that are.
-
-**Lines to fix:**
-
-| Line | Current | Fix |
-|------|---------|-----|
-| 48 | `git diff -- '*.bats'` | `git diff --cached -- '*.bats'` |
-| 65 | `git diff --name-only -- '*.sh'` | `git diff --cached --name-only -- '*.sh'` |
-| 105 | `git diff -- "$file"` | `git diff --cached -- "$file"` |
-
-**BATS tests to update:** The 7 `_agent_audit` tests in `scripts/tests/lib/agent_rigor.bats`
-currently rely on unstaged changes (files modified but not staged). After the fix, each test
-must `git add` the modified file **before** calling `run _agent_audit` so the staged diff
-is non-empty. The `_agent_audit passes when there are no changes` test (line 48) remains
-valid — no staged changes should still pass.
-
-### Rules
-
-- Edit only `scripts/lib/agent_rigor.sh` and `scripts/tests/lib/agent_rigor.bats`
-- Do NOT touch any other file
-- `shellcheck scripts/lib/agent_rigor.sh` must exit 0
-- `env -i HOME="$HOME" PATH="$PATH" bats scripts/tests/lib/` must pass all 12 tests
-- Do NOT run `git rebase`, `git reset --hard`, or `git push --force`
-- Commit locally — Claude handles push and PR
-
-### Required Completion Report
-
-Update `memory-bank/activeContext.md` replacing this section with:
-
-```
-## v0.2.0 Bug Fix — Completion Report (Codex)
-
-Lines fixed: agent_rigor.sh lines [N, N, N] — added --cached
-BATS updated: [N] tests updated to stage before audit
+Files created: `scripts/lib/agent_rigor.sh`; `scripts/hooks/pre-commit`; `scripts/etc/agent/lint-rules.md`; `scripts/tests/lib/agent_rigor.bats`
 Shellcheck: PASS
 BATS: 12/12 passing
-Status: COMPLETE
-```
+`_agent_checkpoint`: DONE — repo_root via `git rev-parse --show-toplevel` (line 10)
+`_agent_audit`: DONE — kubectl exec credential check removed; retains BATS/if-count/bare-sudo scans (lines 40–118)
+`_agent_lint`: DONE — gated via `AGENT_LINT_GATE_VAR` + `AGENT_LINT_AI_FUNC` indirection (lines 121–158)
+pre-commit template: DONE — sources `system.sh` + `agent_rigor.sh`, runs `_agent_audit` + optional `_agent_lint`
+lint-rules.md: DONE — 5 rules ported from k3d-manager
+BATS coverage: 10 targeted tests — `_agent_checkpoint` 3, `_agent_audit` 7 (12 total including existing `_resolve_script_dir` cases)
+Unexpected findings: NONE
+
+**Bug fix (staged diff):** `_agent_audit` git diff calls corrected to `--cached` (lines 48, 65, 105); 6 BATS tests updated to `git add` before audit call.
+Status: **COMPLETE — ready for PR**
 
 ---
 
@@ -172,15 +69,13 @@ These function signatures must not change without coordinating across all consum
 
 ## Open Items
 
-- [ ] Push tag `v0.1.1` to remote (on next release cycle)
 - [ ] BATS test suite for lib functions (broader — future)
 - [ ] Add `rigor-cli` as consumer
 - [ ] Add `shopping-carts` as consumer
-- [ ] **Sync deploy_cluster fixes from k3d-manager back into lib-foundation** — CLUSTER_NAME propagation + provider helper extraction (done in k3d-manager v0.7.0 local core.sh; not yet in lib-foundation core.sh). Consumers sourcing subtree directly get the old version until this is synced.
-- [ ] **Remove duplicate mac+k3s guard in `deploy_cluster`** (`scripts/lib/core.sh` ~line 771 in k3d-manager subtree snapshot) — dead code, already removed from the subtree copy in k3d-manager v0.7.0 PR; apply same removal upstream here.
-- [ ] **Route bare `sudo` in `_install_debian_helm` and `_install_debian_docker` through `_run_command`** — both functions use `sudo tee` and `sudo gpg` directly in piped commands, violating the no-bare-sudo contract. Refactor to use `_run_command --require-sudo`. Flagged by Copilot in k3d-manager PR #24.
-- [ ] **Remote installer script integrity** — `_install_k3s`, `_install_istioctl`, `_install_bats_from_source`, and `_install_copilot_from_release` download and execute scripts without checksum or signature verification. Low priority for dev-only tooling; document as known dev-only pattern or add hash verification. Flagged by Copilot in k3d-manager PR #24.
-- [ ] **Drop colima support** — delete `_install_colima` and `_install_mac_docker` from `scripts/lib/system.sh`. Update `_install_docker` mac case in `scripts/lib/core.sh` to print an OrbStack info message instead. Changes made by Codex in k3d-manager (both local + subtree copies); Claude pushes back here via `git subtree push`. Target: lib-foundation `v0.1.2`.
+- [ ] **Sync deploy_cluster fixes from k3d-manager back into lib-foundation** — CLUSTER_NAME propagation + provider helper extraction (done in k3d-manager v0.7.0 local core.sh; not yet in lib-foundation core.sh).
+- [ ] **Remove duplicate mac+k3s guard in `deploy_cluster`** — dead code, already removed from subtree copy in k3d-manager v0.7.0 PR; apply same removal upstream here.
+- [ ] **Route bare `sudo` in `_install_debian_helm` and `_install_debian_docker` through `_run_command`** — flagged by Copilot in k3d-manager PR #24.
+- [ ] **Remote installer script integrity** — `_install_k3s`, `_install_istioctl`, `_install_bats_from_source`, `_install_copilot_from_release` download and execute without checksum verification. Low priority for dev-only tooling.
 
 ---
 
@@ -216,11 +111,3 @@ lib-foundation uses independent semver (`v0.1.x`) separate from k3d-manager.
 - **shellcheck**: run on every touched `.sh` file before commit
 - **No bare sudo**: always `_run_command --prefer-sudo`
 - **Branch protection**: 1 required review, dismiss stale, enforce_admins=false (owner can self-merge)
-
-## v0.2.0 Bug Fix — Completion Report (Codex)
-
-Lines fixed: `scripts/lib/agent_rigor.sh` lines 48, 65, 105 — added `--cached`
-BATS updated: 7 `_agent_audit` tests stage files before audit (`scripts/tests/lib/agent_rigor.bats`:62-141)
-Shellcheck: PASS (`shellcheck scripts/lib/agent_rigor.sh`)
-BATS: 12/12 passing (`env -i HOME="$HOME" PATH="$PATH" bats scripts/tests/lib/`)
-Status: COMPLETE
