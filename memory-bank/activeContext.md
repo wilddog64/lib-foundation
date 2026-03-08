@@ -81,6 +81,20 @@ Unexpected findings: NONE / [describe]
 Status: COMPLETE / BLOCKED
 ```
 
+## v0.2.0 Completion Report (Codex)
+
+Files created: scripts/lib/agent_rigor.sh; scripts/hooks/pre-commit; scripts/etc/agent/lint-rules.md; scripts/tests/lib/agent_rigor.bats
+Shellcheck: PASS (`shellcheck scripts/lib/agent_rigor.sh`)
+BATS: 12/12 passing (`env -i HOME="$HOME" PATH="$PATH" bats scripts/tests/lib/`)
+_agent_checkpoint: DONE — repo_root derived via `git rev-parse --show-toplevel` (scripts/lib/agent_rigor.sh:10)
+_agent_audit: DONE — kubectl exec credential check removed; retains BATS/if-count/bare-sudo scans (scripts/lib/agent_rigor.sh:40-118)
+_agent_lint: DONE — gated via `AGENT_LINT_GATE_VAR` + `AGENT_LINT_AI_FUNC` indirection (scripts/lib/agent_rigor.sh:121-158)
+pre-commit template: DONE — `scripts/hooks/pre-commit` sources system + agent rigor, runs `_agent_audit` + optional `_agent_lint`
+lint-rules.md: DONE — 5 rules ported from k3d-manager
+BATS coverage: 10 targeted tests — `_agent_checkpoint` 3, `_agent_audit` 7 (total suite 12 including existing `_resolve_script_dir` cases)
+Unexpected findings: NONE
+Status: COMPLETE
+
 ---
 
 ## Key Contracts
