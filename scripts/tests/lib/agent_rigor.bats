@@ -57,6 +57,7 @@ teardown() {
   git add tests/sample.bats
   git commit -m "add bats" >/dev/null
   printf '%s\n' "${at}test \"one\" {" "  echo \"noop\"" "}" > tests/sample.bats
+  git add tests/sample.bats
   run _agent_audit
   [ "$status" -ne 0 ]
   [[ "$output" == *"assertions removed"* ]]
@@ -69,6 +70,7 @@ teardown() {
   git add tests/count.bats
   git commit -m "add count bats" >/dev/null
   printf '%s\n' "${at}test \"one\" { true; }" > tests/count.bats
+  git add tests/count.bats
   run _agent_audit
   [ "$status" -ne 0 ]
   [[ "$output" == *"number of @test"* ]]
@@ -88,6 +90,7 @@ function needs_sudo() {
    sudo ls
 }
 SCRIPT
+  git add scripts/demo.sh
   run _agent_audit
   [ "$status" -ne 0 ]
   [[ "$output" == *"bare sudo call"* ]]
@@ -107,6 +110,7 @@ function installer() {
    _run_command --prefer-sudo -- apt-get install -y curl
 }
 SCRIPT
+  git add scripts/run_cmd.sh
   run _agent_audit
   [ "$status" -eq 0 ]
 }
@@ -137,6 +141,7 @@ function nested_ok() {
    fi
 }
 SCRIPT
+  git add scripts/if_ok.sh
   run _agent_audit
   [ "$status" -eq 0 ]
 }
@@ -163,6 +168,7 @@ function big_func() {
    fi
 }
 SCRIPT
+  git add scripts/if_fail.sh
   export AGENT_AUDIT_MAX_IF=2
   run _agent_audit
   unset AGENT_AUDIT_MAX_IF

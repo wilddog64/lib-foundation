@@ -93,7 +93,59 @@ pre-commit template: DONE — `scripts/hooks/pre-commit` sources system + agent 
 lint-rules.md: DONE — 5 rules ported from k3d-manager
 BATS coverage: 10 targeted tests — `_agent_checkpoint` 3, `_agent_audit` 7 (total suite 12 including existing `_resolve_script_dir` cases)
 Unexpected findings: NONE
+Status: COMPLETE — pending one bug fix (see below)
+
+---
+
+## v0.2.0 Bug Fix Task (Codex)
+
+**Status: READY FOR CODEX**
+
+### Issue: `_agent_audit` audits unstaged diff instead of staged diff
+
+**File:** `scripts/lib/agent_rigor.sh`
+
+**Problem:** Three `git diff` calls inside `_agent_audit` use no flags, which diffs the
+working tree against the index (unstaged changes). A pre-commit hook must audit what is
+**about to be committed** — the staged changes (`git diff --cached`). Without `--cached`,
+the audit may flag edits not going into the commit and miss changes that are.
+
+**Lines to fix:**
+
+| Line | Current | Fix |
+|------|---------|-----|
+| 48 | `git diff -- '*.bats'` | `git diff --cached -- '*.bats'` |
+| 65 | `git diff --name-only -- '*.sh'` | `git diff --cached --name-only -- '*.sh'` |
+| 105 | `git diff -- "$file"` | `git diff --cached -- "$file"` |
+
+**BATS tests to update:** The 7 `_agent_audit` tests in `scripts/tests/lib/agent_rigor.bats`
+currently rely on unstaged changes (files modified but not staged). After the fix, each test
+must `git add` the modified file **before** calling `run _agent_audit` so the staged diff
+is non-empty. The `_agent_audit passes when there are no changes` test (line 48) remains
+valid — no staged changes should still pass.
+
+### Rules
+
+- Edit only `scripts/lib/agent_rigor.sh` and `scripts/tests/lib/agent_rigor.bats`
+- Do NOT touch any other file
+- `shellcheck scripts/lib/agent_rigor.sh` must exit 0
+- `env -i HOME="$HOME" PATH="$PATH" bats scripts/tests/lib/` must pass all 12 tests
+- Do NOT run `git rebase`, `git reset --hard`, or `git push --force`
+- Commit locally — Claude handles push and PR
+
+### Required Completion Report
+
+Update `memory-bank/activeContext.md` replacing this section with:
+
+```
+## v0.2.0 Bug Fix — Completion Report (Codex)
+
+Lines fixed: agent_rigor.sh lines [N, N, N] — added --cached
+BATS updated: [N] tests updated to stage before audit
+Shellcheck: PASS
+BATS: 12/12 passing
 Status: COMPLETE
+```
 
 ---
 
@@ -164,3 +216,11 @@ lib-foundation uses independent semver (`v0.1.x`) separate from k3d-manager.
 - **shellcheck**: run on every touched `.sh` file before commit
 - **No bare sudo**: always `_run_command --prefer-sudo`
 - **Branch protection**: 1 required review, dismiss stale, enforce_admins=false (owner can self-merge)
+
+## v0.2.0 Bug Fix — Completion Report (Codex)
+
+Lines fixed: `scripts/lib/agent_rigor.sh` lines 48, 65, 105 — added `--cached`
+BATS updated: 7 `_agent_audit` tests stage files before audit (`scripts/tests/lib/agent_rigor.bats`:62-141)
+Shellcheck: PASS (`shellcheck scripts/lib/agent_rigor.sh`)
+BATS: 12/12 passing (`env -i HOME="$HOME" PATH="$PATH" bats scripts/tests/lib/`)
+Status: COMPLETE
