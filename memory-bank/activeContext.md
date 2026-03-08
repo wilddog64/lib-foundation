@@ -78,6 +78,7 @@ These function signatures must not change without coordinating across all consum
 ## Open Items
 
 - [ ] **Add `.github/copilot-instructions.md`** — first commit on next branch (v0.2.1 or v0.3.0); encode bash 3.2+ compat, `_run_command --prefer-sudo`, `env -i` BATS invocation, key contracts
+- [ ] **`_run_command` if-count refactor** — 12 if-blocks exceeds `_agent_audit` threshold (default 8); extract sudo resolution + trace suppression into focused helpers. Consumers workaround with `AGENT_AUDIT_MAX_IF=15`. See `docs/issues/2026-03-08-run-command-if-count-refactor.md`.
 - [ ] BATS test suite for lib functions (broader — future)
 - [ ] Add `rigor-cli` as consumer
 - [ ] Add `shopping-carts` as consumer
