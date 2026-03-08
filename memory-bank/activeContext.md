@@ -70,9 +70,11 @@ lib-foundation uses independent semver (`v0.1.x`) separate from k3d-manager.
 
 1. Codex edits both local k3d-manager copies and `scripts/lib/foundation/` subtree copies.
 2. k3d-manager PR merges.
-3. Claude runs `git subtree push --prefix=scripts/lib/foundation lib-foundation main` to push changes here.
+3. Claude applies the same changes directly to the lib-foundation local clone, opens a PR here, and merges.
+   - `git subtree push` does NOT work — branch protection requires PRs; direct push is rejected.
 4. Claude updates `CHANGE.md` here and cuts a new version tag (e.g. `v0.1.2`).
-5. k3d-manager `CHANGE.md` records `lib-foundation @ v0.1.2`.
+5. Claude runs `git subtree pull` in k3d-manager to sync the merged changes back into the subtree copy.
+6. k3d-manager `CHANGE.md` records `lib-foundation @ v0.1.2`.
 
 **Independent release flow (changes originate here):**
 
