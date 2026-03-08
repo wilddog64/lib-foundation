@@ -28,34 +28,58 @@ Consumed by downstream repos via git subtree pull.
 
 ---
 
-## v0.2.0 Plan — agent_rigor.sh
+## v0.2.0 — Codex Task: Implement agent_rigor.sh
 
-**Goal:** Extract agent rigor primitives from k3d-manager into lib-foundation so all
-consumers (rigor-cli, shopping-carts, etc.) can use them without duplicating code.
+**Status: active — ready for Codex**
 
-**New files:**
-- `scripts/lib/agent_rigor.sh` — `_agent_checkpoint`, `_agent_audit`, `_agent_lint`
-- `scripts/hooks/pre-commit` — tracked hook template consumers can symlink or copy
-- `scripts/etc/agent/lint-rules.md` — portable architectural lint rules
+Full spec: `docs/plans/v0.2.0-agent-rigor-spec.md` — read it completely before writing any code.
 
-**AI gate variable:** Standardized as `ENABLE_AGENT_LINT=1` (generic, not project-prefixed).
-- k3d-manager maps: `export ENABLE_AGENT_LINT="${K3DM_ENABLE_AI:-0}"` in its envrc
-- Other consumers set `ENABLE_AGENT_LINT=1` directly in their own envrc
+### Your task
 
-**`_agent_lint` design:** Generic — accepts a configurable AI wrapper function name.
-Each consumer provides its own copilot/AI wrapper; lib-foundation calls it by name.
+Create exactly 4 new files — nothing else:
 
-**What stays in k3d-manager:**
-- `_k3d_manager_copilot` — k3d-manager specific AI wrapper
-- `K3DM_ENABLE_AI` — k3d-manager specific gate (mapped to `ENABLE_AGENT_LINT`)
+1. `scripts/lib/agent_rigor.sh`
+   - `_agent_checkpoint` — port from k3d-manager; replace `_k3dm_repo_root` with `git rev-parse --show-toplevel`
+   - `_agent_audit` — port verbatim; remove kubectl exec credential check (Kubernetes-specific)
+   - `_agent_lint` — generic redesign; gate via `AGENT_LINT_GATE_VAR` + AI wrapper via `AGENT_LINT_AI_FUNC`
 
-**Tasks:**
-- [ ] Add `scripts/lib/agent_rigor.sh` with generic `ENABLE_AGENT_LINT` gate
-- [ ] Add `scripts/hooks/pre-commit` template
-- [ ] Add `scripts/etc/agent/lint-rules.md`
-- [ ] Add BATS coverage for `_agent_audit` and `_agent_checkpoint`
-- [ ] Update k3d-manager `k3d-manager.envrc` to map `K3DM_ENABLE_AI` → `ENABLE_AGENT_LINT`
-- [ ] Sync subtree back into k3d-manager after PR merges
+2. `scripts/hooks/pre-commit` — hook template (see spec for exact content)
+
+3. `scripts/etc/agent/lint-rules.md` — port 5 rules from k3d-manager (`scripts/etc/agent/lint-rules.md`)
+
+4. `scripts/tests/lib/agent_rigor.bats`
+   - `setup()` creates a temp git repo via `mktemp -d`; `teardown()` removes it
+   - Unit tests for `_agent_checkpoint` (3 cases) and `_agent_audit` (7 cases)
+   - Do NOT test `_agent_lint` — consumer responsibility
+
+### Rules
+
+- Edit only the 4 files listed above — do NOT touch `core.sh`, `system.sh`, or any existing file
+- `shellcheck scripts/lib/agent_rigor.sh` must exit 0
+- `env -i HOME="$HOME" PATH="$PATH" bats scripts/tests/lib/` must pass all suites
+- bash 3.2+ compatible — no `declare -A`, no `mapfile`; `${!gate_var}` indirect expansion is allowed
+- Do NOT run `git rebase`, `git reset --hard`, or `git push --force`
+- Commit locally — Claude handles push and PR
+
+### Required Completion Report
+
+Update `memory-bank/activeContext.md` with:
+
+```
+## v0.2.0 Completion Report (Codex)
+
+Files created: [list all 4]
+Shellcheck: PASS / [issues]
+BATS: N/N passing
+_agent_checkpoint: DONE — repo_root via git rev-parse (line N)
+_agent_audit: DONE — kubectl exec check removed (confirmed)
+_agent_lint: DONE — AGENT_LINT_GATE_VAR + AGENT_LINT_AI_FUNC (lines N-N)
+pre-commit template: DONE
+lint-rules.md: DONE — N rules ported
+BATS coverage: N tests — _agent_checkpoint N, _agent_audit N
+Unexpected findings: NONE / [describe]
+Status: COMPLETE / BLOCKED
+```
 
 ---
 
