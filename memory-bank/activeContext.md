@@ -1,9 +1,9 @@
 # Active Context — lib-foundation
 
-## Current State: `main` (as of 2026-03-07)
+## Current State: `feat/agent-rigor-v0.2.0` (as of 2026-03-08)
 
-**v0.1.1 SHIPPED** — PR #2 merged, tag `v0.1.1` local (push pending next release).
-**No active branch** — next feature branch to be cut when next task is ready.
+**v0.1.2 SHIPPED** — PR #3 merged, tag `v0.1.2` pushed. Colima support dropped.
+**v0.2.0 active** — branch `feat/agent-rigor-v0.2.0` cut from main.
 
 ---
 
@@ -23,7 +23,39 @@ Consumed by downstream repos via git subtree pull.
 |---|---|---|
 | v0.1.0 | released | `core.sh` + `system.sh` extraction, CI, branch protection |
 | v0.1.1 | released | `_resolve_script_dir` — portable symlink-aware script locator |
-| v0.1.2 | planned | Drop colima support; sync deploy_cluster fixes from k3d-manager v0.7.1 |
+| v0.1.2 | released | Drop colima support (PR #3) |
+| v0.2.0 | **active** | `agent_rigor.sh` — `_agent_checkpoint`, `_agent_audit`, `_agent_lint` |
+
+---
+
+## v0.2.0 Plan — agent_rigor.sh
+
+**Goal:** Extract agent rigor primitives from k3d-manager into lib-foundation so all
+consumers (rigor-cli, shopping-carts, etc.) can use them without duplicating code.
+
+**New files:**
+- `scripts/lib/agent_rigor.sh` — `_agent_checkpoint`, `_agent_audit`, `_agent_lint`
+- `scripts/hooks/pre-commit` — tracked hook template consumers can symlink or copy
+- `scripts/etc/agent/lint-rules.md` — portable architectural lint rules
+
+**AI gate variable:** Standardized as `ENABLE_AGENT_LINT=1` (generic, not project-prefixed).
+- k3d-manager maps: `export ENABLE_AGENT_LINT="${K3DM_ENABLE_AI:-0}"` in its envrc
+- Other consumers set `ENABLE_AGENT_LINT=1` directly in their own envrc
+
+**`_agent_lint` design:** Generic — accepts a configurable AI wrapper function name.
+Each consumer provides its own copilot/AI wrapper; lib-foundation calls it by name.
+
+**What stays in k3d-manager:**
+- `_k3d_manager_copilot` — k3d-manager specific AI wrapper
+- `K3DM_ENABLE_AI` — k3d-manager specific gate (mapped to `ENABLE_AGENT_LINT`)
+
+**Tasks:**
+- [ ] Add `scripts/lib/agent_rigor.sh` with generic `ENABLE_AGENT_LINT` gate
+- [ ] Add `scripts/hooks/pre-commit` template
+- [ ] Add `scripts/etc/agent/lint-rules.md`
+- [ ] Add BATS coverage for `_agent_audit` and `_agent_checkpoint`
+- [ ] Update k3d-manager `k3d-manager.envrc` to map `K3DM_ENABLE_AI` → `ENABLE_AGENT_LINT`
+- [ ] Sync subtree back into k3d-manager after PR merges
 
 ---
 
