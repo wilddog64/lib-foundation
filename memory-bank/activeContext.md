@@ -1,9 +1,9 @@
 # Active Context — lib-foundation
 
-## Current State: `main` (as of 2026-03-07)
+## Current State: `feat/agent-rigor-v0.2.0` (as of 2026-03-08)
 
-**v0.1.1 SHIPPED** — PR #2 merged, tag `v0.1.1` local (push pending next release).
-**No active branch** — next feature branch to be cut when next task is ready.
+**v0.1.2 SHIPPED** — PR #3 merged, tag `v0.1.2` pushed. Colima support dropped.
+**v0.2.0 active** — branch `feat/agent-rigor-v0.2.0` cut from main.
 
 ---
 
@@ -23,7 +23,34 @@ Consumed by downstream repos via git subtree pull.
 |---|---|---|
 | v0.1.0 | released | `core.sh` + `system.sh` extraction, CI, branch protection |
 | v0.1.1 | released | `_resolve_script_dir` — portable symlink-aware script locator |
-| v0.1.2 | planned | Drop colima support; sync deploy_cluster fixes from k3d-manager v0.7.1 |
+| v0.1.2 | released | Drop colima support (PR #3) |
+| v0.2.0 | **active** | `agent_rigor.sh` — `_agent_checkpoint`, `_agent_audit`, `_agent_lint` |
+
+---
+
+## v0.2.0 — Completion Report (Codex)
+
+Files created: `scripts/lib/agent_rigor.sh`; `scripts/hooks/pre-commit`; `scripts/etc/agent/lint-rules.md`; `scripts/tests/lib/agent_rigor.bats`
+Shellcheck: PASS
+BATS: 12/12 passing
+`_agent_checkpoint`: DONE — repo_root via `git rev-parse --show-toplevel` (line 10)
+`_agent_audit`: DONE — kubectl exec credential check removed; retains BATS/if-count/bare-sudo scans (lines 40–118)
+`_agent_lint`: DONE — gated via `AGENT_LINT_GATE_VAR` + `AGENT_LINT_AI_FUNC` indirection (lines 121–158)
+pre-commit template: DONE — sources `system.sh` + `agent_rigor.sh`, runs `_agent_audit` + optional `_agent_lint`
+lint-rules.md: DONE — 5 rules ported from k3d-manager
+BATS coverage: 10 targeted tests — `_agent_checkpoint` 3, `_agent_audit` 7 (12 total including existing `_resolve_script_dir` cases)
+Unexpected findings: NONE
+
+**Bug fix (staged diff):** `_agent_audit` git diff calls corrected to `--cached` (lines 48, 65, 105); 6 BATS tests updated to `git add` before audit call.
+
+## v0.2.0 Copilot Fix — Completion Report (Codex)
+
+Fix 1 (staged blob): DONE — `scripts/lib/agent_rigor.sh` lines 72–85 now read staged content via `git show :"$file"`
+Fix 2 (comment filter): DONE — bare-sudo grep split into comment + `_run_command` filters (line 106)
+New BATS test: DONE — `_agent_audit flags sudo with inline comment`
+Shellcheck: PASS (`shellcheck scripts/lib/agent_rigor.sh`)
+BATS: 13/13 passing (`env -i HOME="$HOME" PATH="$PATH" bats scripts/tests/lib/`)
+Status: COMPLETE
 
 ---
 
@@ -50,15 +77,14 @@ These function signatures must not change without coordinating across all consum
 
 ## Open Items
 
-- [ ] Push tag `v0.1.1` to remote (on next release cycle)
+- [ ] **Add `.github/copilot-instructions.md`** — first commit on next branch (v0.2.1 or v0.3.0); encode bash 3.2+ compat, `_run_command --prefer-sudo`, `env -i` BATS invocation, key contracts
 - [ ] BATS test suite for lib functions (broader — future)
 - [ ] Add `rigor-cli` as consumer
 - [ ] Add `shopping-carts` as consumer
-- [ ] **Sync deploy_cluster fixes from k3d-manager back into lib-foundation** — CLUSTER_NAME propagation + provider helper extraction (done in k3d-manager v0.7.0 local core.sh; not yet in lib-foundation core.sh). Consumers sourcing subtree directly get the old version until this is synced.
-- [ ] **Remove duplicate mac+k3s guard in `deploy_cluster`** (`scripts/lib/core.sh` ~line 771 in k3d-manager subtree snapshot) — dead code, already removed from the subtree copy in k3d-manager v0.7.0 PR; apply same removal upstream here.
-- [ ] **Route bare `sudo` in `_install_debian_helm` and `_install_debian_docker` through `_run_command`** — both functions use `sudo tee` and `sudo gpg` directly in piped commands, violating the no-bare-sudo contract. Refactor to use `_run_command --require-sudo`. Flagged by Copilot in k3d-manager PR #24.
-- [ ] **Remote installer script integrity** — `_install_k3s`, `_install_istioctl`, `_install_bats_from_source`, and `_install_copilot_from_release` download and execute scripts without checksum or signature verification. Low priority for dev-only tooling; document as known dev-only pattern or add hash verification. Flagged by Copilot in k3d-manager PR #24.
-- [ ] **Drop colima support** — delete `_install_colima` and `_install_mac_docker` from `scripts/lib/system.sh`. Update `_install_docker` mac case in `scripts/lib/core.sh` to print an OrbStack info message instead. Changes made by Codex in k3d-manager (both local + subtree copies); Claude pushes back here via `git subtree push`. Target: lib-foundation `v0.1.2`.
+- [ ] **Sync deploy_cluster fixes from k3d-manager back into lib-foundation** — CLUSTER_NAME propagation + provider helper extraction (done in k3d-manager v0.7.0 local core.sh; not yet in lib-foundation core.sh).
+- [ ] **Remove duplicate mac+k3s guard in `deploy_cluster`** — dead code, already removed from subtree copy in k3d-manager v0.7.0 PR; apply same removal upstream here.
+- [ ] **Route bare `sudo` in `_install_debian_helm` and `_install_debian_docker` through `_run_command`** — flagged by Copilot in k3d-manager PR #24.
+- [ ] **Remote installer script integrity** — `_install_k3s`, `_install_istioctl`, `_install_bats_from_source`, `_install_copilot_from_release` download and execute without checksum verification. Low priority for dev-only tooling.
 
 ---
 
