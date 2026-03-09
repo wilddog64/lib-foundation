@@ -35,6 +35,40 @@
 
 ---
 
+## v0.3.0 — Shell Utility Enhancements
+
+Inspired by analysis of `claude-code-statusline` script (aleksander-dytko/claude-code-statusline).
+Script to download for reference: `https://raw.githubusercontent.com/aleksander-dytko/claude-code-statusline/main/statusline.sh`
+
+### New helpers to add to `system.sh`:
+
+- **`_stat_mtime <file>`** — cross-platform `stat` mtime (GNU vs BSD). Pattern from statusline script:
+  ```bash
+  if stat -c %Y /dev/null >/dev/null 2>&1; then
+      _stat_mtime() { stat -c %Y "$1" 2>/dev/null; }
+  else
+      _stat_mtime() { stat -f %m "$1" 2>/dev/null; }
+  fi
+  ```
+  Detected once at load time, not per-call. Add BATS coverage for both code paths.
+
+- **`_acquire_lock <lock_dir>` / `_release_lock <lock_dir>`** — atomic `mkdir`-based locking with stale lock detection (30s threshold). Pattern from statusline script. Useful for cron jobs, parallel scripts, any script needing mutual exclusion.
+  ```bash
+  # Acquire: mkdir is POSIX-atomic
+  # Stale detection: if lock older than 30s, remove and retry once
+  # Release: rmdir + trap cleanup on INT/TERM/EXIT
+  ```
+  Add BATS coverage: acquire succeeds, second acquire fails, stale lock cleared.
+
+### Refactor of statusline script using lib-foundation:
+
+- Add `_safe_path` at top (PATH poisoning defense for `git`, `curl`, `jq`, `date`, `stat` calls)
+- Replace ad-hoc token logging with `_args_have_sensitive_flag` pattern for curl calls
+- Fix `/tmp` cache dir permissions: `mkdir -m 700` instead of bare `mkdir`
+- Source: download to `scripts/etc/examples/statusline.sh` for reference during refactor
+
+---
+
 ## Known Constraints
 
 | Item | Notes |
