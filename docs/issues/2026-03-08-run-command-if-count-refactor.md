@@ -76,3 +76,6 @@ for `_run_command`'s internal structure (though its public signature is unchange
   HOME="$HOME" TMPDIR="$TMPDIR" bash --norc --noprofile -c 'bats scripts/tests/lib/*.bats'`.
 - PR #5 (`feat/run-command-refactor-v0.3.0` → `main`) open in lib-foundation; awaiting review
   + downstream subtree sync.
+- Follow-up (commit `c50e294`): replaced `local -n` with `_RCRS_RUNNER` global for bash 3.2
+  compatibility; reran `AGENT_AUDIT_MAX_IF=8 bash scripts/lib/agent_rigor.sh scripts/lib/system.sh`
+  and the full env-isolated BATS suite — all still PASS.
