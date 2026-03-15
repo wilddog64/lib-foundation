@@ -78,7 +78,7 @@ These function signatures must not change without coordinating across all consum
 ## Open Items
 
 - [ ] **Add `.github/copilot-instructions.md`** — first commit on next branch (v0.2.1 or v0.3.0); encode bash 3.2+ compat, `_run_command --prefer-sudo`, `env -i` BATS invocation, key contracts
-- [x] **`_run_command` if-count refactor** — Codex task assigned. Spec: `docs/plans/v0.3.0-run-command-if-count-refactor.md`. Extract `_run_command_resolve_sudo`, reduce both to < 8 if-blocks, add BATS coverage.
+- [x] **`_run_command` if-count refactor** — PR #5 (`feat/run-command-refactor-v0.3.0`). Commit `b7b5411` adds `_run_command_resolve_sudo`, reduces if-count <8, and adds `scripts/tests/lib/system.bats` per spec `docs/plans/v0.3.0-run-command-if-count-refactor.md`.
 - [ ] BATS test suite for lib functions (broader — future)
 - [ ] Add `rigor-cli` as consumer
 - [ ] Add `shopping-carts` as consumer

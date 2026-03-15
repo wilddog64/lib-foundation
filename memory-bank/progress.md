@@ -3,7 +3,7 @@
 ## Overall Status
 
 **v0.2.0 SHIPPED** — `agent_rigor.sh` merged, tag `v0.2.0`. Synced into k3d-manager.
-**v0.3.0 ACTIVE** — `_run_command` if-count refactor. Branch `feat/run-command-refactor-v0.3.0` cut 2026-03-15. Codex task assigned: `docs/plans/v0.3.0-run-command-if-count-refactor.md`.
+**v0.3.0 ACTIVE** — `_run_command` if-count refactor. Branch `feat/run-command-refactor-v0.3.0` cut 2026-03-15. Commit `b7b5411` + PR #5 implement `_run_command_resolve_sudo`, drop if-count below 8, add BATS coverage per `docs/plans/v0.3.0-run-command-if-count-refactor.md`.
 
 ---
 
