@@ -39,6 +39,62 @@ function _command_exist() {
     command -v "$1" &> /dev/null
 }
 
+# _run_command_resolve_sudo <runner_nameref> <prog> <prefer_sudo> <require_sudo> <interactive_sudo> [probe_args...]
+#
+# Resolves the runner array (plain prog, sudo -n prog, or sudo prog) and assigns
+# it to the variable named by <runner_nameref>.
+#
+# Returns 127 if --require-sudo is set but sudo is unavailable.
+function _run_command_resolve_sudo() {
+  local -n _rcrs_runner="$1"
+  local prog="$2"
+  local prefer_sudo="$3"
+  local require_sudo="$4"
+  local interactive_sudo="$5"
+  shift 5
+  local -a probe_args=("$@")
+
+  local -a sudo_flags=()
+  if (( interactive_sudo == 0 )); then
+    sudo_flags=(-n)
+  fi
+
+  if (( require_sudo )); then
+    if (( interactive_sudo )) || sudo -n true >/dev/null 2>&1; then
+      _rcrs_runner=(sudo "${sudo_flags[@]}" "$prog")
+    else
+      echo "sudo non-interactive not available" >&2
+      return 127
+    fi
+    return 0
+  fi
+
+  if (( ${#probe_args[@]} )); then
+    if "$prog" "${probe_args[@]}" >/dev/null 2>&1; then
+      _rcrs_runner=("$prog")
+    elif (( interactive_sudo )) && sudo "${sudo_flags[@]}" "$prog" "${probe_args[@]}" >/dev/null 2>&1; then
+      _rcrs_runner=(sudo "${sudo_flags[@]}" "$prog")
+    elif sudo -n "$prog" "${probe_args[@]}" >/dev/null 2>&1; then
+      _rcrs_runner=(sudo -n "$prog")
+    elif (( prefer_sudo && interactive_sudo )); then
+      _rcrs_runner=(sudo "${sudo_flags[@]}" "$prog")
+    elif (( prefer_sudo )) && sudo -n true >/dev/null 2>&1; then
+      _rcrs_runner=(sudo -n "$prog")
+    else
+      _rcrs_runner=("$prog")
+    fi
+    return 0
+  fi
+
+  if (( prefer_sudo && interactive_sudo )); then
+    _rcrs_runner=(sudo "${sudo_flags[@]}" "$prog")
+  elif (( prefer_sudo )) && sudo -n true >/dev/null 2>&1; then
+    _rcrs_runner=(sudo -n "$prog")
+  else
+    _rcrs_runner=("$prog")
+  fi
+}
+
 # _run_command [--quiet] [--prefer-sudo|--require-sudo] [--probe '<subcmd>'] -- <prog> [args...]
 # - --quiet         : suppress wrapper error message (still returns real exit code)
 # - --prefer-sudo   : use sudo -n if available, otherwise run as user
@@ -81,44 +137,27 @@ function _run_command() {
   fi
 
   # Decide runner: user vs sudo -n vs sudo (interactive)
-  local runner
-  local sudo_flags=()
-  if (( interactive_sudo == 0 )); then
-    sudo_flags=(-n)  # Non-interactive sudo
-  fi
-
-  if (( require_sudo )); then
-    if (( interactive_sudo )) || sudo -n true >/dev/null 2>&1; then
-      runner=(sudo "${sudo_flags[@]}" "$prog")
-    else
-      (( quiet )) || echo "sudo non-interactive not available" >&2
-      exit 127
-    fi
+  local -a runner=()
+  if (( quiet )); then
+    _run_command_resolve_sudo runner "$prog" \
+      "$prefer_sudo" "$require_sudo" "$interactive_sudo" \
+      "${probe_args[@]}" 2>/dev/null || {
+        if (( soft )); then
+          return 127
+        else
+          exit 127
+        fi
+      }
   else
-    if (( ${#probe_args[@]} )); then
-      # Try user first; if probe fails, try sudo
-      if "$prog" "${probe_args[@]}" >/dev/null 2>&1; then
-        runner=("$prog")
-      elif (( interactive_sudo )) && sudo "${sudo_flags[@]}" "$prog" "${probe_args[@]}" >/dev/null 2>&1; then
-        runner=(sudo "${sudo_flags[@]}" "$prog")
-      elif sudo -n "$prog" "${probe_args[@]}" >/dev/null 2>&1; then
-        runner=(sudo -n "$prog")
-      elif (( prefer_sudo )) && ((interactive_sudo)) ; then
-        runner=(sudo "${sudo_flags[@]}" "$prog")
-      elif (( prefer_sudo )) && sudo -n true >/dev/null 2>&1; then
-        runner=(sudo -n "$prog")
-      else
-        runner=("$prog")
-      fi
-    else
-      if (( prefer_sudo )) && (( interactive_sudo )); then
-        runner=(sudo "${sudo_flags[@]}" "$prog")
-      elif (( prefer_sudo )) && sudo -n true >/dev/null 2>&1; then
-        runner=(sudo -n "$prog")
-      else
-        runner=("$prog")
-      fi
-    fi
+    _run_command_resolve_sudo runner "$prog" \
+      "$prefer_sudo" "$require_sudo" "$interactive_sudo" \
+      "${probe_args[@]}" || {
+        if (( soft )); then
+          return 127
+        else
+          exit 127
+        fi
+      }
   fi
 
   # Execute and preserve exit code
