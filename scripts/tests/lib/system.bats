@@ -10,24 +10,27 @@ setup() {
 bats_require_minimum_version 1.5.0
 
 @test "_run_command_resolve_sudo: no sudo flags → plain runner" {
-  local -a runner=()
-  _run_command_resolve_sudo runner "echo" 0 0 0
-  [ "${runner[0]}" = "echo" ]
-  [ "${#runner[@]}" -eq 1 ]
+  _RCRS_RUNNER=()
+  _run_command_resolve_sudo "echo" 0 0 0
+  [ "${_RCRS_RUNNER[0]}" = "echo" ]
+  [ "${#_RCRS_RUNNER[@]}" -eq 1 ]
+  unset _RCRS_RUNNER
 }
 
 @test "_run_command_resolve_sudo: require_sudo unavailable → returns 127" {
   function sudo() { return 1; }
   export -f sudo
-  local -a runner=()
-  run -127 _run_command_resolve_sudo runner "echo" 0 1 0
+  _RCRS_RUNNER=()
+  run -127 _run_command_resolve_sudo "echo" 0 1 0
   unset -f sudo
+  unset _RCRS_RUNNER
 }
 
 @test "_run_command_resolve_sudo: probe succeeds as user → plain runner" {
-  local -a runner=()
-  _run_command_resolve_sudo runner "true" 1 0 0 "--version"
-  [ "${runner[0]}" = "true" ]
+  _RCRS_RUNNER=()
+  _run_command_resolve_sudo "true" 1 0 0 "--version"
+  [ "${_RCRS_RUNNER[0]}" = "true" ]
+  unset _RCRS_RUNNER
 }
 
 @test "_run_command: missing program → exits 127" {

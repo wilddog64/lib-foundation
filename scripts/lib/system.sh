@@ -39,19 +39,19 @@ function _command_exist() {
     command -v "$1" &> /dev/null
 }
 
-# _run_command_resolve_sudo <runner_nameref> <prog> <prefer_sudo> <require_sudo> <interactive_sudo> [probe_args...]
+# _run_command_resolve_sudo <prog> <prefer_sudo> <require_sudo> <interactive_sudo> [probe_args...]
 #
-# Resolves the runner array (plain prog, sudo -n prog, or sudo prog) and assigns
-# it to the variable named by <runner_nameref>.
+# Resolves the runner array (plain prog, sudo -n prog, or sudo prog) and stores
+# it in the global _RCRS_RUNNER. Caller must initialize _RCRS_RUNNER before
+# calling and unset it after reading.
 #
 # Returns 127 if --require-sudo is set but sudo is unavailable.
 function _run_command_resolve_sudo() {
-  local -n _rcrs_runner="$1"
-  local prog="$2"
-  local prefer_sudo="$3"
-  local require_sudo="$4"
-  local interactive_sudo="$5"
-  shift 5
+  local prog="$1"
+  local prefer_sudo="$2"
+  local require_sudo="$3"
+  local interactive_sudo="$4"
+  shift 4
   local -a probe_args=("$@")
 
   local -a sudo_flags=()
@@ -61,7 +61,7 @@ function _run_command_resolve_sudo() {
 
   if (( require_sudo )); then
     if (( interactive_sudo )) || sudo -n true >/dev/null 2>&1; then
-      _rcrs_runner=(sudo "${sudo_flags[@]}" "$prog")
+      _RCRS_RUNNER=(sudo "${sudo_flags[@]}" "$prog")
     else
       echo "sudo non-interactive not available" >&2
       return 127
@@ -71,27 +71,27 @@ function _run_command_resolve_sudo() {
 
   if (( ${#probe_args[@]} )); then
     if "$prog" "${probe_args[@]}" >/dev/null 2>&1; then
-      _rcrs_runner=("$prog")
+      _RCRS_RUNNER=("$prog")
     elif (( interactive_sudo )) && sudo "${sudo_flags[@]}" "$prog" "${probe_args[@]}" >/dev/null 2>&1; then
-      _rcrs_runner=(sudo "${sudo_flags[@]}" "$prog")
+      _RCRS_RUNNER=(sudo "${sudo_flags[@]}" "$prog")
     elif sudo -n "$prog" "${probe_args[@]}" >/dev/null 2>&1; then
-      _rcrs_runner=(sudo -n "$prog")
+      _RCRS_RUNNER=(sudo -n "$prog")
     elif (( prefer_sudo && interactive_sudo )); then
-      _rcrs_runner=(sudo "${sudo_flags[@]}" "$prog")
+      _RCRS_RUNNER=(sudo "${sudo_flags[@]}" "$prog")
     elif (( prefer_sudo )) && sudo -n true >/dev/null 2>&1; then
-      _rcrs_runner=(sudo -n "$prog")
+      _RCRS_RUNNER=(sudo -n "$prog")
     else
-      _rcrs_runner=("$prog")
+      _RCRS_RUNNER=("$prog")
     fi
     return 0
   fi
 
   if (( prefer_sudo && interactive_sudo )); then
-    _rcrs_runner=(sudo "${sudo_flags[@]}" "$prog")
+    _RCRS_RUNNER=(sudo "${sudo_flags[@]}" "$prog")
   elif (( prefer_sudo )) && sudo -n true >/dev/null 2>&1; then
-    _rcrs_runner=(sudo -n "$prog")
+    _RCRS_RUNNER=(sudo -n "$prog")
   else
-    _rcrs_runner=("$prog")
+    _RCRS_RUNNER=("$prog")
   fi
 }
 
@@ -137,9 +137,9 @@ function _run_command() {
   fi
 
   # Decide runner: user vs sudo -n vs sudo (interactive)
-  local -a runner=()
+  _RCRS_RUNNER=()
   if (( quiet )); then
-    _run_command_resolve_sudo runner "$prog" \
+    _run_command_resolve_sudo "$prog" \
       "$prefer_sudo" "$require_sudo" "$interactive_sudo" \
       "${probe_args[@]}" 2>/dev/null || {
         if (( soft )); then
@@ -149,7 +149,7 @@ function _run_command() {
         fi
       }
   else
-    _run_command_resolve_sudo runner "$prog" \
+    _run_command_resolve_sudo "$prog" \
       "$prefer_sudo" "$require_sudo" "$interactive_sudo" \
       "${probe_args[@]}" || {
         if (( soft )); then
@@ -159,6 +159,8 @@ function _run_command() {
         fi
       }
   fi
+  local -a runner=("${_RCRS_RUNNER[@]}")
+  unset _RCRS_RUNNER
 
   # Execute and preserve exit code
   "${runner[@]}" "$@"
