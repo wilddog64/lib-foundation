@@ -1,9 +1,9 @@
 # Active Context — lib-foundation
 
-## Current State: `feat/agent-rigor-v0.2.0` (as of 2026-03-08)
+## Current State: `feat/run-command-refactor-v0.3.0` (as of 2026-03-15)
 
-**v0.1.2 SHIPPED** — PR #3 merged, tag `v0.1.2` pushed. Colima support dropped.
-**v0.2.0 active** — branch `feat/agent-rigor-v0.2.0` cut from main.
+**v0.2.0 SHIPPED** — `agent_rigor.sh` merged, tag `v0.2.0`. Synced into k3d-manager.
+**v0.3.0 active** — branch `feat/run-command-refactor-v0.3.0` cut from main 2026-03-15.
 
 ---
 
@@ -78,7 +78,7 @@ These function signatures must not change without coordinating across all consum
 ## Open Items
 
 - [ ] **Add `.github/copilot-instructions.md`** — first commit on next branch (v0.2.1 or v0.3.0); encode bash 3.2+ compat, `_run_command --prefer-sudo`, `env -i` BATS invocation, key contracts
-- [ ] **`_run_command` if-count refactor** — 12 if-blocks exceeds `_agent_audit` threshold (default 8); extract sudo resolution + trace suppression into focused helpers. Consumers workaround with `AGENT_AUDIT_MAX_IF=15`. See `docs/issues/2026-03-08-run-command-if-count-refactor.md`.
+- [x] **`_run_command` if-count refactor** — Codex task assigned. Spec: `docs/plans/v0.3.0-run-command-if-count-refactor.md`. Extract `_run_command_resolve_sudo`, reduce both to < 8 if-blocks, add BATS coverage.
 - [ ] BATS test suite for lib functions (broader — future)
 - [ ] Add `rigor-cli` as consumer
 - [ ] Add `shopping-carts` as consumer
