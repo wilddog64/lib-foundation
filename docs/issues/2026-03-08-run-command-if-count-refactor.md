@@ -62,3 +62,17 @@ for `_run_command`'s internal structure (though its public signature is unchange
 | Repo | Workaround |
 |------|-----------|
 | `k3d-manager` | `AGENT_AUDIT_MAX_IF=15` in `~/.zsh/envrc/k3d-manager.envrc` |
+
+---
+
+## Resolution — 2026-03-15
+
+- Extracted `_run_command_resolve_sudo` helper (commit `b7b5411`) per
+  `docs/plans/v0.3.0-run-command-if-count-refactor.md`.
+- `_run_command` now delegates to the helper and both functions pass
+  `AGENT_AUDIT_MAX_IF=8 bash scripts/lib/agent_rigor.sh scripts/lib/system.sh`.
+- Added `scripts/tests/lib/system.bats` with coverage for the helper and quiet-mode
+  behavior; BATS passes via `env -i PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+  HOME="$HOME" TMPDIR="$TMPDIR" bash --norc --noprofile -c 'bats scripts/tests/lib/*.bats'`.
+- PR #5 (`feat/run-command-refactor-v0.3.0` → `main`) open in lib-foundation; awaiting review
+  + downstream subtree sync.
