@@ -2,7 +2,7 @@
 
 ## Current State: `feat/v0.3.2` (as of 2026-03-16)
 
-**v0.3.1 SHIPPED** — PR #6 merged (38a91a8), tag + release pending.
+**v0.3.1 SHIPPED** — PR #6 merged (38a91a8), tagged, GitHub release created.
 **feat/v0.3.2 ACTIVE** — branch cut from main 2026-03-16.
 
 ---

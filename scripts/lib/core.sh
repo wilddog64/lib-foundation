@@ -641,7 +641,7 @@ function create_k3s_cluster() {
 function _deploy_cluster_prompt_provider() {
    local choice="" provider=""
    while true; do
-      printf 'Select cluster provider [k3d/k3s] (default: k3d): '
+      printf 'Select cluster provider [k3d/k3s] (default: k3d): ' >&2
       IFS= read -r choice || choice=""
       choice="$(printf '%s' "$choice" | tr '[:upper:]' '[:lower:]')"
       if [[ -z "$choice" ]]; then
@@ -660,6 +660,8 @@ function _deploy_cluster_prompt_provider() {
    done
    printf '%s' "$provider"
 }
+
+_DCRS_PROVIDER=""
 
 function _deploy_cluster_resolve_provider() {
    local platform="$1" provider_cli="$2" force_k3s="$3"
@@ -687,7 +689,7 @@ function _deploy_cluster_resolve_provider() {
       fi
    fi
 
-   printf '%s' "$provider"
+   _DCRS_PROVIDER="$provider"
 }
 
 function deploy_cluster() {
@@ -764,7 +766,8 @@ EOF
    fi
 
    local provider=""
-   provider="$(_deploy_cluster_resolve_provider "$platform" "$provider_cli" "$force_k3s")"
+   _deploy_cluster_resolve_provider "$platform" "$provider_cli" "$force_k3s"
+   provider="$_DCRS_PROVIDER"
 
    if [[ "$platform" == "mac" && "$provider" == "k3s" ]]; then
       _err "k3s is not supported on macOS; please use k3d instead."
@@ -797,8 +800,6 @@ EOF
    _info "Using cluster provider: $provider"
    _cluster_provider_call deploy_cluster "${positional[@]}"
 }
-
-
 
 function deploy_k3d_cluster() {
    deploy_cluster "$@"
