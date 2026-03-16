@@ -11,7 +11,7 @@ Use the rules below to shape all code suggestions and PR reviews.
 
 - **Core libraries**: `scripts/lib/system.sh`, `scripts/lib/core.sh`, `scripts/lib/agent_rigor.sh`
 - **Privilege escalation**: always via `_run_command --prefer-sudo` or `--require-sudo` — never bare `sudo`
-- **OS detection**: always via `_detect_platform` — returns `debian | rhel | arch | darwin | unknown`
+- **OS detection**: always via `_detect_platform` — returns `mac | wsl | debian | redhat | linux`
 - **Unit tests**: `scripts/tests/lib/` — always run with `env -i` clean environment
 - **Consumers** pull this repo via `git subtree` — breaking changes require cross-consumer coordination
 
