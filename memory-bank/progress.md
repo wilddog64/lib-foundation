@@ -36,6 +36,11 @@
 
 - [x] **k3d-manager subtree pull** — v0.3.2 pulled into k3d-manager-v0.9.3 (commit `e4d2eed`)
 - [ ] Consumer integration: `rigor-cli`, `shopping-carts`
+  - `rigor-cli` — **separate repo**, lib-foundation as git subtree (same pattern as k3d-manager)
+    - CLI dispatcher: `rigor-cli checkpoint|audit|lint`
+    - Wraps `_agent_checkpoint`, `_agent_audit`, `_agent_lint` as callable commands
+    - Any repo can adopt without sourcing lib-foundation directly
+    - Planned milestone after v0.3.3 ships
 - [ ] **README releases table fix** — split into: first 3 releases in main table, rest in a separate table below (same convention as k3d-manager). Do as first commit on feat/v0.3.3.
 - [x] **API reference** — commit `9b224bb` adds `docs/api/functions.md` documenting system/core/agent_rigor helpers and globals per `docs/plans/v0.3.3-api-reference.md`.
 
