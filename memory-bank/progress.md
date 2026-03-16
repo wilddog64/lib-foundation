@@ -2,8 +2,8 @@
 
 ## Overall Status
 
-**v0.3.0 SHIPPED** — PR #5 merged (2104d76), tagged v0.3.0, GitHub release created 2026-03-15.
-**feat/v0.3.1 ACTIVE** — branch cut from main 2026-03-15.
+**v0.3.1 SHIPPED** — PR #6 merged (38a91a8), tag + release pending.
+**feat/v0.3.2 ACTIVE** — branch cut from main 2026-03-16.
 
 ---
 
@@ -18,18 +18,22 @@
 - [x] `_run_command` if-count refactor — `_run_command_resolve_sudo` extracted, both functions < 8 if-blocks (v0.3.0)
 - [x] Bash 3.2 compat — replaced `local -n` nameref with `_RCRS_RUNNER` global temp (v0.3.0)
 - [x] `scripts/tests/lib/system.bats` — 6 tests (v0.3.0)
-- [x] README releases table added (feat/v0.3.1)
+- [x] Route bare `sudo` in all install helpers through `_run_command --interactive-sudo` (v0.3.1)
+- [x] Fix `_ensure_cargo` WSL redhat branch — was using `apt-get`, now uses `dnf` (v0.3.1)
+- [x] `AGENTS.md`, `GEMINI.md`, `CLAUDE.md` overhaul — agent session rules, bash 3.2 compat, privilege model (v0.3.1)
+- [x] `.github/copilot-instructions.md` — bash 3.2 P1 rules, `--interactive-sudo` pattern, if-count threshold (v0.3.1)
+- [x] README releases table + Contents table (agent_rigor.sh added) (v0.3.1)
 
 ---
 
 ## What Is Pending
 
-- [x] `.github/copilot-instructions.md` — commit `95d3074` (feat/v0.3.1); bash 3.2 P1 rules, `_run_command --prefer-sudo` pattern, if-count threshold, OWASP checks, skip list
-- [x] Route bare `sudo` in install helpers — commit `0d3d6f1` (feat/v0.3.1) updates Kubernetes, Helm, Docker installers (Debian + RedHat) and `_ensure_cargo` to call `_run_command --prefer-sudo --`. Doc: `docs/issues/2026-03-15-route-bare-sudo.md`.
+- [ ] Tag v0.3.1 + create GitHub release
+- [ ] Add v0.3.1 entry to README releases table (on feat/v0.3.2 — convention)
 - [ ] Sync `deploy_cluster` fixes from k3d-manager (CLUSTER_NAME, provider helpers, duplicate guard)
 - [ ] Broader BATS coverage for remaining lib functions
 - [ ] Consumer integration: `rigor-cli`, `shopping-carts`
-- [ ] **k3d-manager subtree pull** — pull v0.3.0 into k3d-manager-v0.9.3
+- [ ] **k3d-manager subtree pull** — pull v0.3.1 into k3d-manager-v0.9.3
 
 ---
 
@@ -41,3 +45,4 @@
 | Contract stability | `_run_command`, `_detect_platform`, `_cluster_provider` — signature changes require all-consumer coordination |
 | Clean env testing | BATS must run with `env -i` — ambient `SCRIPT_DIR` causes false passes |
 | bash 3.2 compat | No `local -n`, no `declare -A`, no `mapfile` in lib code |
+| `--interactive-sudo` for installs | Install helpers use `--interactive-sudo`; `--prefer-sudo` is for non-interactive contexts only |
