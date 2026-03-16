@@ -37,7 +37,7 @@
 - [x] **k3d-manager subtree pull** — v0.3.2 pulled into k3d-manager-v0.9.3 (commit `e4d2eed`)
 - [ ] Consumer integration: `rigor-cli`, `shopping-carts`
 - [ ] **README releases table fix** — split into: first 3 releases in main table, rest in a separate table below (same convention as k3d-manager). Do as first commit on feat/v0.3.3.
-- [ ] **API reference** — `docs/api/functions.md`; spec at `docs/plans/v0.3.3-api-reference.md`; assigned to Codex
+- [x] **API reference** — commit `9b224bb` adds `docs/api/functions.md` documenting system/core/agent_rigor helpers and globals per `docs/plans/v0.3.3-api-reference.md`.
 
 ---
 

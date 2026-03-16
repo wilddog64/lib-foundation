@@ -29,6 +29,7 @@ Consumed by downstream repos via git subtree pull.
 
 ## Open Items
 
+- [x] **API reference doc** — `docs/api/functions.md` merged on feat/v0.3.3 (`9b224bb`)
 - [ ] **k3d-manager subtree pull** — pull v0.3.2 into k3d-manager-v0.9.3
 - [ ] Add `rigor-cli` as consumer
 - [ ] Add `shopping-carts` as consumer
