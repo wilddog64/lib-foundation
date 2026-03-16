@@ -28,8 +28,8 @@
 
 ## What Is Pending
 
-- [ ] Tag v0.3.1 + create GitHub release
-- [ ] Add v0.3.1 entry to README releases table (on feat/v0.3.2 — convention)
+- [x] Tag v0.3.1 + GitHub release created — https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.1
+- [x] Add v0.3.1 entry to README releases table — commit `2294bf7` on feat/v0.3.2
 - [ ] Sync `deploy_cluster` fixes from k3d-manager (CLUSTER_NAME, provider helpers, duplicate guard)
 - [ ] Broader BATS coverage for remaining lib functions
 - [ ] Consumer integration: `rigor-cli`, `shopping-carts`

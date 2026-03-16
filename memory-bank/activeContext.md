@@ -29,8 +29,8 @@ Consumed by downstream repos via git subtree pull.
 
 ## Open Items
 
-- [ ] **Tag v0.3.1 + create GitHub release** — PR #6 merged but tag not yet created
-- [ ] **Add v0.3.1 entry to README releases table** — goes on feat/v0.3.2 (convention)
+- [x] **Tag v0.3.1 + GitHub release** — https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.1
+- [x] **Add v0.3.1 entry to README releases table** — commit `2294bf7` on feat/v0.3.2
 - [ ] BATS test suite — broader coverage for remaining lib functions
 - [ ] Add `rigor-cli` as consumer
 - [ ] Add `shopping-carts` as consumer
