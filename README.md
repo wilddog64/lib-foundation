@@ -76,7 +76,7 @@ shellcheck scripts/lib/core.sh scripts/lib/system.sh
 
 | Version | Date | Highlights |
 |---|---|---|
-| [v0.3.1](https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.1) | 2026-03-15 | Route bare `sudo` in all install helpers through `_run_command --prefer-sudo` (Debian/RedHat: kubectl, helm, docker, cargo) |
+| [v0.3.1](https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.1) | 2026-03-16 | Route bare `sudo` in install helpers through `_run_command --interactive-sudo`; AGENTS.md, GEMINI.md, CLAUDE.md overhaul; copilot-instructions.md |
 | [v0.3.0](https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.0) | 2026-03-15 | `_run_command` if-count refactor, `_run_command_resolve_sudo` helper, bash 3.2 compat, BATS coverage |
 | [v0.2.0](https://github.com/wilddog64/lib-foundation/releases/tag/v0.2.0) | 2026-03-08 | `agent_rigor.sh` — `_agent_checkpoint`, `_agent_audit`, `_agent_lint`, pre-commit hook |
 | [v0.1.2](https://github.com/wilddog64/lib-foundation/releases/tag/v0.1.2) | 2026-03-07 | Drop Colima support |
