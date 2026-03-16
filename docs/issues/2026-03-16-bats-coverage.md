@@ -36,4 +36,4 @@ Total suite count is now 36 (system 8 + core 17 + agent_rigor 11).
 
 ## Status
 
-Fixed on `feat/v0.3.2` (commit `e4d734d`).
+Fixed on `feat/v0.3.2` (commit `5cb8a5a`).
