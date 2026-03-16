@@ -46,31 +46,71 @@ SCRIPT
 # ── _detect_platform ────────────────────────────────────────────────────────
 
 @test "_detect_platform: returns 'mac' on macOS" {
-  run bash -c 'source "$1"; _is_mac(){ return 0; }; _is_wsl(){ return 1; }; _is_debian_family(){ return 1; }; _is_redhat_family(){ return 1; }; _is_linux(){ return 1; }; _detect_platform' _ "${BATS_TEST_DIRNAME}/../../lib/system.sh"
+  run bash -c '
+    source "$1"
+    _is_mac()          { return 0; }
+    _is_wsl()          { return 1; }
+    _is_debian_family(){ return 1; }
+    _is_redhat_family(){ return 1; }
+    _is_linux()        { return 1; }
+    _detect_platform
+  ' _ "${BATS_TEST_DIRNAME}/../../lib/system.sh"
   [ "$status" -eq 0 ]
   [ "$output" = "mac" ]
 }
 
 @test "_detect_platform: returns 'wsl' on WSL" {
-  run bash -c 'source "$1"; _is_mac(){ return 1; }; _is_wsl(){ return 0; }; _is_debian_family(){ return 1; }; _is_redhat_family(){ return 1; }; _is_linux(){ return 1; }; _detect_platform' _ "${BATS_TEST_DIRNAME}/../../lib/system.sh"
+  run bash -c '
+    source "$1"
+    _is_mac()          { return 1; }
+    _is_wsl()          { return 0; }
+    _is_debian_family(){ return 1; }
+    _is_redhat_family(){ return 1; }
+    _is_linux()        { return 1; }
+    _detect_platform
+  ' _ "${BATS_TEST_DIRNAME}/../../lib/system.sh"
   [ "$status" -eq 0 ]
   [ "$output" = "wsl" ]
 }
 
 @test "_detect_platform: returns 'debian' on Debian/Ubuntu" {
-  run bash -c 'source "$1"; _is_mac(){ return 1; }; _is_wsl(){ return 1; }; _is_debian_family(){ return 0; }; _is_redhat_family(){ return 1; }; _is_linux(){ return 1; }; _detect_platform' _ "${BATS_TEST_DIRNAME}/../../lib/system.sh"
+  run bash -c '
+    source "$1"
+    _is_mac()          { return 1; }
+    _is_wsl()          { return 1; }
+    _is_debian_family(){ return 0; }
+    _is_redhat_family(){ return 1; }
+    _is_linux()        { return 1; }
+    _detect_platform
+  ' _ "${BATS_TEST_DIRNAME}/../../lib/system.sh"
   [ "$status" -eq 0 ]
   [ "$output" = "debian" ]
 }
 
 @test "_detect_platform: returns 'redhat' on RHEL/Fedora" {
-  run bash -c 'source "$1"; _is_mac(){ return 1; }; _is_wsl(){ return 1; }; _is_debian_family(){ return 1; }; _is_redhat_family(){ return 0; }; _is_linux(){ return 1; }; _detect_platform' _ "${BATS_TEST_DIRNAME}/../../lib/system.sh"
+  run bash -c '
+    source "$1"
+    _is_mac()          { return 1; }
+    _is_wsl()          { return 1; }
+    _is_debian_family(){ return 1; }
+    _is_redhat_family(){ return 0; }
+    _is_linux()        { return 1; }
+    _detect_platform
+  ' _ "${BATS_TEST_DIRNAME}/../../lib/system.sh"
   [ "$status" -eq 0 ]
   [ "$output" = "redhat" ]
 }
 
 @test "_detect_platform: returns 'linux' on generic Linux" {
-  run bash -c 'source "$1"; _is_mac(){ return 1; }; _is_wsl(){ return 1; }; _is_debian_family(){ return 1; }; _is_redhat_family(){ return 1; }; _is_linux(){ return 0; }; _detect_platform' _ "${BATS_TEST_DIRNAME}/../../lib/system.sh"
+  run bash -c '
+    source "$1"
+    _is_mac()          { return 1; }
+    _is_wsl()          { return 1; }
+    _is_debian_family(){ return 1; }
+    _is_redhat_family(){ return 1; }
+    _is_linux()        { return 0; }
+    _detect_platform
+  ' _ "${BATS_TEST_DIRNAME}/../../lib/system.sh"
   [ "$status" -eq 0 ]
   [ "$output" = "linux" ]
 }
@@ -105,47 +145,41 @@ SCRIPT
 
 @test "_deploy_cluster_resolve_provider: CLI flag takes precedence" {
   source "${BATS_TEST_DIRNAME}/../../lib/core.sh"
-  CLUSTER_PROVIDER=k3s run _deploy_cluster_resolve_provider "linux" "k3d" 0
-  [ "$status" -eq 0 ]
-  [ "$output" = "k3d" ]
+  CLUSTER_PROVIDER=k3s _deploy_cluster_resolve_provider "linux" "k3d" 0
+  [ "$_DCRS_PROVIDER" = "k3d" ]
 }
 
 @test "_deploy_cluster_resolve_provider: force_k3s flag sets k3s" {
   source "${BATS_TEST_DIRNAME}/../../lib/core.sh"
-  run _deploy_cluster_resolve_provider "linux" "" 1
-  [ "$status" -eq 0 ]
-  [ "$output" = "k3s" ]
+  _deploy_cluster_resolve_provider "linux" "" 1
+  [ "$_DCRS_PROVIDER" = "k3s" ]
 }
 
 @test "_deploy_cluster_resolve_provider: env override used when no CLI flag" {
   source "${BATS_TEST_DIRNAME}/../../lib/core.sh"
-  CLUSTER_PROVIDER=orbstack run _deploy_cluster_resolve_provider "linux" "" 0
-  [ "$status" -eq 0 ]
-  [ "$output" = "orbstack" ]
+  CLUSTER_PROVIDER=orbstack _deploy_cluster_resolve_provider "linux" "" 0
+  [ "$_DCRS_PROVIDER" = "orbstack" ]
 }
 
 @test "_deploy_cluster_resolve_provider: K3D_MANAGER_PROVIDER override" {
   source "${BATS_TEST_DIRNAME}/../../lib/core.sh"
   unset CLUSTER_PROVIDER
-  K3D_MANAGER_PROVIDER=k3d run _deploy_cluster_resolve_provider "linux" "" 0
-  [ "$status" -eq 0 ]
-  [ "$output" = "k3d" ]
+  K3D_MANAGER_PROVIDER=k3d _deploy_cluster_resolve_provider "linux" "" 0
+  [ "$_DCRS_PROVIDER" = "k3d" ]
 }
 
 @test "_deploy_cluster_resolve_provider: K3DMGR_PROVIDER override" {
   source "${BATS_TEST_DIRNAME}/../../lib/core.sh"
   unset CLUSTER_PROVIDER K3D_MANAGER_PROVIDER
-  K3DMGR_PROVIDER=k3s run _deploy_cluster_resolve_provider "linux" "" 0
-  [ "$status" -eq 0 ]
-  [ "$output" = "k3s" ]
+  K3DMGR_PROVIDER=k3s _deploy_cluster_resolve_provider "linux" "" 0
+  [ "$_DCRS_PROVIDER" = "k3s" ]
 }
 
 @test "_deploy_cluster_resolve_provider: mac platform defaults to k3d" {
   source "${BATS_TEST_DIRNAME}/../../lib/core.sh"
   unset CLUSTER_PROVIDER K3D_MANAGER_PROVIDER K3DMGR_PROVIDER K3D_MANAGER_CLUSTER_PROVIDER
-  run _deploy_cluster_resolve_provider "mac" "" 0
-  [ "$status" -eq 0 ]
-  [ "$output" = "k3d" ]
+  _deploy_cluster_resolve_provider "mac" "" 0
+  [ "$_DCRS_PROVIDER" = "k3d" ]
 }
 
 @test "_deploy_cluster_resolve_provider: non-interactive non-mac defaults to k3d" {
@@ -154,6 +188,7 @@ SCRIPT
     unset CLUSTER_PROVIDER K3D_MANAGER_PROVIDER K3DMGR_PROVIDER K3D_MANAGER_CLUSTER_PROVIDER
     _info(){ :; }
     _deploy_cluster_resolve_provider 'linux' '' 0
+    printf '%s' \"\$_DCRS_PROVIDER\"
   "
   [ "$status" -eq 0 ]
   [ "$output" = "k3d" ]
