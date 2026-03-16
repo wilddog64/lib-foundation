@@ -29,12 +29,21 @@
 
 ## What Is Pending
 
-### v0.3.4 — active (no spec yet)
+### v0.3.4 — active
 
-- [ ] `rigor-cli` — separate repo, lib-foundation as git subtree (same pattern as k3d-manager)
-  - CLI dispatcher: `rigor-cli checkpoint|audit|lint`
-  - Wraps `_agent_checkpoint`, `_agent_audit`, `_agent_lint` as callable commands
-  - Planned milestone after v0.3.4 spec is defined
+- [ ] **Fix `docs/api/functions.md`** — 12 Copilot findings from PR #8 (merged); all doc accuracy issues requiring reading actual function bodies. Assigned to Codex.
+  - Remove `_DETECTED_PLATFORM` global — does not exist; `_detect_platform` exits via `_err` on unsupported, no caching
+  - `_detect_platform` returns `mac|wsl|debian|redhat|linux` only — no `unknown`
+  - `_deploy_cluster_resolve_provider` — sets `_DCRS_PROVIDER` global, does not print/return
+  - `_agent_lint` — AI-based (calls `AGENT_LINT_AI_FUNC`), not shellcheck; gated by `AGENT_LINT_GATE_VAR`
+  - `_safe_path` — validates existing PATH for unsafe entries, does not construct a new PATH
+  - `_curl` — ensures curl exists + adds `--max-time` default; does not enforce `_safe_path`
+  - `_cluster_provider` — actual precedence: `K3D_MANAGER_PROVIDER` → `K3DMGR_PROVIDER` → `CLUSTER_PROVIDER`
+  - `_agent_audit` — no path args; audits staged diffs for BATS removal, if-count, bare sudo; no kubectl credential check
+  - Sourcing example paths — wrong; update to reflect actual `scripts/lib/` layout and subtree consumer path
+  - `create_cluster` — missing `--dry-run/-n`, `--help`, positional ports `[http_port] [https_port]`
+  - Same `_DETECTED_PLATFORM` / `unknown` errors in `docs/plans/v0.3.3-api-reference.md` — fix there too
+- [ ] `rigor-cli` — separate repo (planned, no spec yet)
 - [ ] Consumer integration: `shopping-carts`
 
 ---

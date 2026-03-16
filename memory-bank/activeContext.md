@@ -30,8 +30,9 @@ API reference: `docs/api/functions.md`
 
 ## Open Items
 
+- [ ] **Fix `docs/api/functions.md`** — 12 Copilot findings from PR #8; Codex task on feat/v0.3.4. Must read each function body before writing description. Key fixes: remove `_DETECTED_PLATFORM` global, fix `_detect_platform` return values, `_deploy_cluster_resolve_provider` sets global not print, `_agent_lint` is AI-based not shellcheck, `_cluster_provider` precedence order wrong, `_agent_audit` scope wrong, sourcing paths wrong, `create_cluster` signature incomplete.
 - [ ] **k3d-manager subtree pull** — pull v0.3.3 into k3d-manager (after v0.9.3 smoke test)
-- [ ] `rigor-cli` — separate repo, lib-foundation as git subtree (same pattern as k3d-manager); CLI: `checkpoint|audit|lint`
+- [ ] `rigor-cli` — separate repo, lib-foundation as git subtree; CLI: `checkpoint|audit|lint`
 - [ ] `shopping-carts` as consumer (future)
 
 ---
