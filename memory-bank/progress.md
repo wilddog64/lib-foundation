@@ -34,7 +34,7 @@
 
 ## What Is Pending
 
-- [ ] **k3d-manager subtree pull** — pull v0.3.2 into k3d-manager-v0.9.3
+- [x] **k3d-manager subtree pull** — v0.3.2 pulled into k3d-manager-v0.9.3 (commit `e4d2eed`)
 - [ ] Consumer integration: `rigor-cli`, `shopping-carts`
 
 ---
