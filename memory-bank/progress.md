@@ -30,7 +30,7 @@
 
 - [x] Tag v0.3.1 + GitHub release created — https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.1
 - [x] Add v0.3.1 entry to README releases table — commit `2294bf7` on feat/v0.3.2
-- [ ] Sync `deploy_cluster` fixes from k3d-manager — spec: `docs/plans/v0.3.2-sync-deploy-cluster.md`; assigned to Codex
+- [x] Sync `deploy_cluster` fixes from k3d-manager — commit `0501c7a` adds prompt/resolution helpers, CLUSTER_NAME propagation, and removes duplicate mac+k3s guard per `docs/plans/v0.3.2-sync-deploy-cluster.md`.
 - [ ] Expand BATS coverage — spec: `docs/plans/v0.3.2-bats-coverage.md`; assigned to Codex (after deploy_cluster sync)
 - [ ] Consumer integration: `rigor-cli`, `shopping-carts`
 - [ ] **k3d-manager subtree pull** — pull v0.3.2 into k3d-manager-v0.9.3 after v0.3.2 ships
