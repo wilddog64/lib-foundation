@@ -31,12 +31,11 @@ Consumed by downstream repos via git subtree pull.
 
 - [x] **Tag v0.3.1 + GitHub release** — https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.1
 - [x] **Add v0.3.1 entry to README releases table** — commit `2294bf7` on feat/v0.3.2
-- [ ] BATS test suite — broader coverage for remaining lib functions
+- [ ] **Sync deploy_cluster fixes from k3d-manager** — spec: `docs/plans/v0.3.2-sync-deploy-cluster.md`; assigned to Codex
+- [ ] **Expand BATS coverage** — spec: `docs/plans/v0.3.2-bats-coverage.md`; assigned to Codex (depends on deploy_cluster sync)
+- [ ] **k3d-manager subtree pull** — pull v0.3.2 into k3d-manager-v0.9.3 after v0.3.2 ships
 - [ ] Add `rigor-cli` as consumer
 - [ ] Add `shopping-carts` as consumer
-- [ ] **Sync deploy_cluster fixes from k3d-manager** — CLUSTER_NAME propagation + provider helper extraction
-- [ ] **Remove duplicate mac+k3s guard in `deploy_cluster`** — dead code, already removed in k3d-manager subtree
-- [ ] **k3d-manager subtree pull** — pull v0.3.1 into `scripts/lib/foundation/` on k3d-manager-v0.9.3
 
 ---
 
