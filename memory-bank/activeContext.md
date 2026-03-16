@@ -35,7 +35,7 @@ Consumed by downstream repos via git subtree pull.
 - [ ] Add `shopping-carts` as consumer
 - [ ] **Sync deploy_cluster fixes from k3d-manager** — CLUSTER_NAME propagation + provider helper extraction
 - [ ] **Remove duplicate mac+k3s guard in `deploy_cluster`** — dead code, already removed in k3d-manager subtree
-- [ ] **Route bare `sudo` in `_install_debian_helm` / `_install_debian_docker`** through `_run_command`
+- [x] **Route bare `sudo` in install functions** — commit `0d3d6f1` on `feat/v0.3.1` routes all listed helpers (plus `_ensure_cargo`) through `_run_command --prefer-sudo --` per `docs/plans/v0.3.1-route-bare-sudo.md`.
 - [ ] **k3d-manager subtree pull** — pull v0.3.0 into `scripts/lib/foundation/` on k3d-manager-v0.9.3
 
 ---
