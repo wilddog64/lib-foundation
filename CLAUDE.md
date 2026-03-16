@@ -44,7 +44,7 @@ _run_command --quiet -- <cmd>               # suppress stderr, return exit code
 _run_command --soft -- <cmd>                # return 127 instead of exit on failure
 ```
 
-**`_detect_platform` (system.sh)** — returns `debian | rhel | arch | darwin | unknown`
+**`_detect_platform` (system.sh)** — returns `mac | wsl | debian | redhat | linux`
 
 **`_cluster_provider` (core.sh)** — reads `CLUSTER_PROVIDER` / `K3D_MANAGER_PROVIDER` / `K3DMGR_PROVIDER`
 
