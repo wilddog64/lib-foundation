@@ -24,7 +24,7 @@
 
 ## What Is Pending
 
-- [ ] `.github/copilot-instructions.md` — bash 3.2+ compat, `_run_command` usage, `env -i` BATS, key contracts
+- [x] `.github/copilot-instructions.md` — commit `95d3074` (feat/v0.3.1); bash 3.2 P1 rules, `_run_command --prefer-sudo` pattern, if-count threshold, OWASP checks, skip list
 - [x] Route bare `sudo` in install helpers — commit `0d3d6f1` (feat/v0.3.1) updates Kubernetes, Helm, Docker installers (Debian + RedHat) and `_ensure_cargo` to call `_run_command --prefer-sudo --`. Doc: `docs/issues/2026-03-15-route-bare-sudo.md`.
 - [ ] Sync `deploy_cluster` fixes from k3d-manager (CLUSTER_NAME, provider helpers, duplicate guard)
 - [ ] Broader BATS coverage for remaining lib functions

@@ -29,7 +29,7 @@ Consumed by downstream repos via git subtree pull.
 
 ## Open Items
 
-- [ ] **Add `.github/copilot-instructions.md`** — encode bash 3.2+ compat, `_run_command --prefer-sudo`, `env -i` BATS invocation, key contracts
+- [x] **Add `.github/copilot-instructions.md`** — commit `95d3074` on `feat/v0.3.1`; encodes bash 3.2 compat P1 rules, `_run_command --prefer-sudo`, if-count threshold, OWASP checks, skip list
 - [ ] BATS test suite — broader coverage for remaining lib functions
 - [ ] Add `rigor-cli` as consumer
 - [ ] Add `shopping-carts` as consumer
