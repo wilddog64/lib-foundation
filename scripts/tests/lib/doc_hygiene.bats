@@ -177,6 +177,18 @@ EOF
    [ "$status" -eq 0 ]
 }
 
+@test "bare http:// inside indented fenced code block does not trigger Check 2" {
+   cat > "$TEST_DIR/test.md" <<'EOF'
+- item
+
+   ```bash
+   url: http://internal.example.com
+   ```
+EOF
+   run _doc_hygiene_check "$TEST_DIR/test.md"
+   [ "$status" -eq 0 ]
+}
+
 # ---------------------------------------------------------------------------
 # Check 4 — hardcoded internal CoreDNS names in YAML (non-blocking)
 # ---------------------------------------------------------------------------

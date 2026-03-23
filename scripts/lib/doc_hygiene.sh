@@ -11,10 +11,20 @@
 # Read stdin, replace content inside fenced code blocks (``` or ~~~) with blank
 # lines. Preserves line count so grep -n line numbers remain accurate.
 _dh_strip_fences() {
-  awk 'BEGIN{f=0}
-       /^[`~]{3}/{f=!f; print ""; next}
-       f{print ""}
-       !f{print}'
+  awk 'BEGIN{in_fence=0; fence_char=""}
+       {
+         if ($0 ~ /^[[:space:]]*[`~]{3}/) {
+           i = 1
+           while (i <= length($0) && substr($0, i, 1) ~ /[ \t]/) i++
+           c = substr($0, i, 1)
+           if (!in_fence) {
+             in_fence = 1; fence_char = c; print ""; next
+           } else if (c == fence_char) {
+             in_fence = 0; fence_char = ""; print ""; next
+           }
+         }
+         if (in_fence) { print "" } else { print }
+       }'
 }
 
 # _dh_grep FILE PATTERN [--strip-fences]
