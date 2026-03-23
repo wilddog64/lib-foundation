@@ -114,17 +114,21 @@ EOF
 # ---------------------------------------------------------------------------
 
 @test "violation in staged content is caught even when working tree is clean" {
-   # Stage a file with a placeholder URL
-   echo "See [repo](https://github.com/user/myrepo)" > "$TEST_DIR/staged.md"
    git -C "$TEST_DIR" init -q
    git -C "$TEST_DIR" config user.email "test@test.com"
    git -C "$TEST_DIR" config user.name "Test"
+   # Stage a file with a placeholder URL
+   echo "See [repo](https://github.com/user/myrepo)" > "$TEST_DIR/staged.md"
    git -C "$TEST_DIR" add staged.md
    # Fix the working-tree copy AFTER staging — staged content still has violation
    echo "See [repo](https://github.com/wilddog64/myrepo)" > "$TEST_DIR/staged.md"
-   # Call with explicit path (working-tree mode) — should PASS (working tree is clean)
-   run _doc_hygiene_check "$TEST_DIR/staged.md"
-   [ "$status" -eq 0 ]
+   # Run with no args from inside the repo — staged mode, should FAIL (index has violation)
+   local prev_dir="$PWD"
+   cd "$TEST_DIR"
+   run _doc_hygiene_check
+   cd "$prev_dir"
+   [ "$status" -eq 1 ]
+   [[ "$output" == *"placeholder URL"* ]]
 }
 
 @test "explicit file path uses working-tree content not index" {

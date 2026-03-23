@@ -24,7 +24,7 @@ _dh_grep() {
 _doc_hygiene_check() {
   local files=("$@")
   local status=0
-  _DHC_STAGED=0
+  local _DHC_STAGED=0
 
    # If no files supplied, derive from git staged set
    if [[ ${#files[@]} -eq 0 ]]; then
@@ -37,7 +37,11 @@ _doc_hygiene_check() {
 
    local file
    for file in "${files[@]}"; do
-      [[ -f "$file" ]] || continue
+      if [[ "${_DHC_STAGED:-0}" -eq 1 ]]; then
+         git cat-file -e :"$file" 2>/dev/null || continue
+      else
+         [[ -f "$file" ]] || continue
+      fi
 
       # ------------------------------------------------------------------
       # Check 1: placeholder GitHub org URLs (github.com/user/)
