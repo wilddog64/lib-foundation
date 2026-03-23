@@ -48,6 +48,7 @@
 
 - [x] **Check 2 code-fence exclusion** — commit `7751068` adds `_dh_strip_fences`, `_dh_grep --strip-fences`, and 3 BATS covering fenced + tilde blocks (`docs/plans/v0.3.6-doc-hygiene-codefence-exclusion.md`).
 - [x] **CoreDNS Check 4** — commit `c352c1b` adds warn-only `<svc>.<ns>.svc(.cluster.local)` detection and 4 BATS per `docs/plans/v0.3.5-doc-hygiene-coredns-check.md`.
+- [ ] **Indented fence fix** — Codex assigned; fix `_dh_strip_fences` for indented fenced blocks + 1 BATS test; spec `docs/plans/v0.3.6-doc-hygiene-indented-fence-fix.md`.
 - [ ] `rigor-cli` — separate repo (planned, no spec yet)
 - [ ] Consumer integration: `shopping-carts`
 
