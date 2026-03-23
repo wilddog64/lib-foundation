@@ -4,7 +4,7 @@
 
 **v0.3.4 SHIPPED** — PR #11 merged to main (`dbfafe9`), tagged v0.3.4, GitHub release created 2026-03-22.
 **v0.3.5 SHIPPED** — PR #10 squash-merged to main (`2f895a99`) 2026-03-23. No tag (no CHANGELOG entry). `enforce_admins` restored.
-**feat/v0.3.5 ACTIVE** — retro written `docs/retro/2026-03-23-v0.3.5-retrospective.md`. Next work on `feat/v0.3.6`.
+**feat/v0.3.5 DONE** — retro written `docs/retro/2026-03-23-v0.3.5-retrospective.md`. Next work on `feat/v0.3.6`.
 
 ---
 
