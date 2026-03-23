@@ -48,8 +48,8 @@ _agent_audit() {
    if [[ -r "$allowlist_file" ]]; then
       while IFS= read -r line; do
          line=${line%%#*}
-         line="${line#${line%%[![:space:]]*}}"
-         line="${line%${line##*[![:space:]]}}"
+         line="${line#"${line%%[![:space:]]*}"}"
+         line="${line%"${line##*[![:space:]]}"}"
          [[ -z "$line" ]] && continue
          if_allowlist+=$'\n'
          if_allowlist+="$line"
