@@ -1,9 +1,10 @@
 # Active Context — lib-foundation
 
-## Current State: `feat/v0.3.4` (as of 2026-03-16)
+## Current State: `feat/v0.3.6` (as of 2026-03-23)
 
-**v0.3.3 SHIPPED** — PR #8 squash-merged (b9f1fda), tagged, GitHub release created 2026-03-16.
-**feat/v0.3.4 ACTIVE** — branch cut from main 2026-03-16. PR #11 open (in review). Doc fixes + upstream lib sync (`system.sh` TTY fix, `agent_rigor.sh` allowlist + staged-only audit).
+**v0.3.4 SHIPPED** — PR #11 merged to main (`dbfafe9`), tagged v0.3.4, GitHub release created 2026-03-22.
+**v0.3.5 SHIPPED** — PR #10 squash-merged to main (`2f895a99`) 2026-03-23. No tag (no CHANGELOG entry). `enforce_admins` restored.
+**feat/v0.3.5 ACTIVE** — retro written `docs/retro/2026-03-23-v0.3.5-retrospective.md`. Next work on `feat/v0.3.6`.
 
 ---
 
@@ -24,7 +25,9 @@ API reference: `docs/api/functions.md`
 | Version | Status | Notes |
 |---|---|---|
 | v0.1.0–v0.3.3 | released | See `docs/releases.md` |
-| v0.3.4 | **in review** | PR #11 open — doc fixes + upstream lib sync; pending merge |
+| v0.3.4 | **SHIPPED** | PR #11 merged (`dbfafe9`) — doc fixes + upstream lib sync; tagged + released 2026-03-22 |
+| v0.3.5 | **SHIPPED** | PR #10 merged (`2f895a99`) — doc-hygiene hook; 2026-03-23 |
+| v0.3.6 | **active** | Check 2 code-fence exclusion + CoreDNS Check 4 |
 
 ---
 
@@ -33,8 +36,9 @@ API reference: `docs/api/functions.md`
 - [x] **PR #10 doc-hygiene hook** — staged-only `_agent_audit` BATS test added in commit `bdd60e7`; spec `docs/plans/v0.3.5-agent-audit-staged-only-test.md`. Branch: `feat/doc-hygiene-hook`.
 - [x] **Doc hygiene staged-content read** — commit `d00bccb` implements `_dh_grep` index reader per `docs/plans/v0.3.5-doc-hygiene-staged-content-read.md`; branch pushed `feat/doc-hygiene-hook`.
 - [x] **Doc hygiene staged-mode follow-ups** — commit `aeb1396` localizes `_DHC_STAGED`, gates staged file existence via `git cat-file`, and replaces staged-mode BATS per `docs/plans/v0.3.5-doc-hygiene-copilot-pr10-round2.md`.
-- [ ] **k3d-manager subtree pull** — pull v0.3.4 into k3d-manager (after PR #10 merges)
-- [ ] **v0.3.6: Check 2 code-fence exclusion** — `_doc_hygiene_check` Check 2 (`http://` detection) greps entire file including fenced code blocks; staging a plan doc with `http://` in code examples triggers a false positive. Fix: strip fenced-code-block content before running Check 2. Spec to be written on `feat/v0.3.6` after PR #10 merges.
+- [ ] **k3d-manager subtree pull** — pull v0.3.5 into k3d-manager (PR #10 now merged)
+- [ ] **v0.3.6: Check 2 code-fence exclusion** — `_doc_hygiene_check` Check 2 (`http://` detection) greps entire file including fenced code blocks; staging a plan doc with `http://` in code examples triggers a false positive. Fix: strip fenced-code-block content before running Check 2. Spec to be written on `feat/v0.3.6`.
+- [ ] **v0.3.6: CoreDNS Check 4** — warn on hardcoded `*.svc.cluster.local` in YAML; spec ready at `docs/plans/v0.3.5-doc-hygiene-coredns-check.md`.
 - [ ] `rigor-cli` — separate repo, lib-foundation as git subtree; CLI: `checkpoint|audit|lint`
 - [ ] `shopping-carts` as consumer (future)
 
