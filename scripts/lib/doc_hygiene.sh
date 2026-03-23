@@ -7,17 +7,48 @@
 #
 # Exit codes: 0 = pass, 1 = violations found
 
-# _dh_grep FILE PATTERN
+# _dh_strip_fences
+# Read stdin, replace content inside fenced code blocks (``` or ~~~) with blank
+# lines. Preserves line count so grep -n line numbers remain accurate.
+_dh_strip_fences() {
+  awk 'BEGIN{in_fence=0; fence_char=""}
+       {
+         if ($0 ~ /^[[:space:]]*[`~]{3}/) {
+           i = 1
+           while (i <= length($0) && substr($0, i, 1) ~ /[ \t]/) i++
+           c = substr($0, i, 1)
+           if (!in_fence) {
+             in_fence = 1; fence_char = c; print ""; next
+           } else if (c == fence_char) {
+             in_fence = 0; fence_char = ""; print ""; next
+           }
+         }
+         if (in_fence) { print "" } else { print }
+       }'
+}
+
+# _dh_grep FILE PATTERN [--strip-fences]
 # Grep FILE for PATTERN. When _DHC_STAGED=1, read content from the git index
 # (staged content) rather than the working-tree file.
+# When --strip-fences is passed, fenced code block content is replaced with
+# blank lines before grepping (line numbers remain accurate).
 # Outputs matching lines with line numbers (grep -n format).
 _dh_grep() {
   local file="$1"
   local pattern="$2"
+  local strip="${3:-}"
   if [[ "${_DHC_STAGED:-0}" -eq 1 ]]; then
-    git show :"$file" 2>/dev/null | grep -nE -- "$pattern" || true
+    if [[ "$strip" == "--strip-fences" ]]; then
+      git show :"$file" 2>/dev/null | _dh_strip_fences | grep -nE -- "$pattern" || true
+    else
+      git show :"$file" 2>/dev/null | grep -nE -- "$pattern" || true
+    fi
   else
-    grep -nE -- "$pattern" -- "$file" 2>/dev/null || true
+    if [[ "$strip" == "--strip-fences" ]]; then
+      _dh_strip_fences < "$file" 2>/dev/null | grep -nE -- "$pattern" || true
+    else
+      grep -nE -- "$pattern" -- "$file" 2>/dev/null || true
+    fi
   fi
 }
 
@@ -62,7 +93,7 @@ _doc_hygiene_check() {
       # ------------------------------------------------------------------
       if [[ "$file" == *.md ]]; then
          local http_hits
-         http_hits="$(_dh_grep "$file" '(^|[^[:alnum:]_:])http://[^)[:space:]]+')"
+         http_hits="$(_dh_grep "$file" '(^|[^[:alnum:]_:])http://[^)[:space:]]+' --strip-fences)"
          if [[ -n "$http_hits" ]]; then
             _warn "doc-hygiene: bare http:// link (use https://) in ${file}:"
             while IFS= read -r hit; do
@@ -86,6 +117,21 @@ _doc_hygiene_check() {
             while IFS= read -r hit; do
                _warn "  ${hit}"
             done <<<"$ip_hits"
+            # Non-blocking — warn only, do not set status=1
+         fi
+
+         # ------------------------------------------------------------------
+         # Check 4: hardcoded internal CoreDNS names in YAML (non-blocking warning)
+         # Matches: <name>.<namespace>.svc.cluster.local or <name>.<namespace>.svc
+         # These only resolve inside the originating cluster — breaks cross-cluster refs
+         # ------------------------------------------------------------------
+         local dns_hits
+         dns_hits="$(_dh_grep "$file" '[a-z0-9-]+\.[a-z0-9-]+\.svc(\.cluster\.local)?')"
+         if [[ -n "$dns_hits" ]]; then
+            _warn "doc-hygiene: hardcoded internal CoreDNS name in ${file} (breaks cross-cluster — use service discovery or env config):"
+            while IFS= read -r hit; do
+               _warn "  ${hit}"
+            done <<<"$dns_hits"
             # Non-blocking — warn only, do not set status=1
          fi
       fi

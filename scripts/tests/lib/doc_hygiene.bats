@@ -136,3 +136,87 @@ EOF
    run _doc_hygiene_check "$TEST_DIR/clean.md"
    [ "$status" -eq 0 ]
 }
+
+# ---------------------------------------------------------------------------
+# Check 2 — code-fence exclusion
+# ---------------------------------------------------------------------------
+
+@test "bare http:// inside fenced code block does not trigger Check 2" {
+   cat > "$TEST_DIR/test.md" <<'EOF'
+# Example
+
+```
+url: http://internal.example.com
+```
+EOF
+   run _doc_hygiene_check "$TEST_DIR/test.md"
+   [ "$status" -eq 0 ]
+}
+
+@test "bare http:// outside fenced code block still triggers Check 2" {
+   cat > "$TEST_DIR/test.md" <<'EOF'
+Visit http://example.com for details.
+
+```
+echo ok
+```
+EOF
+   run _doc_hygiene_check "$TEST_DIR/test.md"
+   [ "$status" -eq 1 ]
+}
+
+@test "bare http:// inside tilde fenced block does not trigger Check 2" {
+   cat > "$TEST_DIR/test.md" <<'EOF'
+# Example
+
+~~~bash
+url: http://internal.example.com
+~~~
+EOF
+   run _doc_hygiene_check "$TEST_DIR/test.md"
+   [ "$status" -eq 0 ]
+}
+
+@test "bare http:// inside indented fenced code block does not trigger Check 2" {
+   cat > "$TEST_DIR/test.md" <<'EOF'
+- item
+
+   ```bash
+   url: http://internal.example.com
+   ```
+EOF
+   run _doc_hygiene_check "$TEST_DIR/test.md"
+   [ "$status" -eq 0 ]
+}
+
+# ---------------------------------------------------------------------------
+# Check 4 — hardcoded internal CoreDNS names in YAML (non-blocking)
+# ---------------------------------------------------------------------------
+
+@test "FQDN svc.cluster.local in YAML warns but passes" {
+   printf 'url: https://my-service.default.svc.cluster.local:8080\n' > "$TEST_DIR/test.yaml"
+   run _doc_hygiene_check "$TEST_DIR/test.yaml"
+   [ "$status" -eq 0 ]
+   [[ "$output" == *"hardcoded internal CoreDNS name"* ]]
+}
+
+@test "short svc name in YAML warns but passes" {
+   printf 'host: my-service.default.svc\n' > "$TEST_DIR/test.yaml"
+   run _doc_hygiene_check "$TEST_DIR/test.yaml"
+   [ "$status" -eq 0 ]
+   [[ "$output" == *"hardcoded internal CoreDNS name"* ]]
+}
+
+@test "public DNS name in YAML does not warn" {
+   printf 'host: api.example.com\n' > "$TEST_DIR/test.yaml"
+   run _doc_hygiene_check "$TEST_DIR/test.yaml"
+   [ "$status" -eq 0 ]
+   [[ "$output" != *"hardcoded internal CoreDNS name"* ]]
+}
+
+@test "CoreDNS check does not apply to markdown" {
+   printf 'See my-service.default.svc.cluster.local for details.\n' > "$TEST_DIR/test.md"
+   run _doc_hygiene_check "$TEST_DIR/test.md"
+   [ "$status" -eq 0 ]
+   [[ "$output" != *"hardcoded internal CoreDNS name"* ]]
+}
