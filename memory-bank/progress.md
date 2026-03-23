@@ -31,7 +31,7 @@
 
 ### v0.3.4 — active
 
-- [ ] **Fix `docs/api/functions.md`** — 12 Copilot findings from PR #8 (merged); all doc accuracy issues requiring reading actual function bodies. Assigned to Codex.
+- [ ] **Fix `docs/api/functions.md`** — 12 Copilot findings from PR #8 (merged); spec `docs/plans/v0.3.4-api-doc-fixes.md` (`048040f`). **Assigned to Codex 2026-03-22.**
   - Remove `_DETECTED_PLATFORM` global — does not exist; `_detect_platform` exits via `_err` on unsupported, no caching
   - `_detect_platform` returns `mac|wsl|debian|redhat|linux` only — no `unknown`
   - `_deploy_cluster_resolve_provider` — sets `_DCRS_PROVIDER` global, does not print/return

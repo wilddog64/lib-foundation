@@ -3,7 +3,7 @@
 ## Current State: `feat/v0.3.4` (as of 2026-03-16)
 
 **v0.3.3 SHIPPED** — PR #8 squash-merged (b9f1fda), tagged, GitHub release created 2026-03-16.
-**feat/v0.3.4 ACTIVE** — branch cut from main 2026-03-16. No spec yet.
+**feat/v0.3.4 ACTIVE** — branch cut from main 2026-03-16. Spec written + pushed (`048040f`). Codex assigned to fix 12 doc accuracy issues.
 
 ---
 
@@ -30,7 +30,7 @@ API reference: `docs/api/functions.md`
 
 ## Open Items
 
-- [ ] **Fix `docs/api/functions.md`** — 12 Copilot findings from PR #8; Codex task on feat/v0.3.4. Must read each function body before writing description. Key fixes: remove `_DETECTED_PLATFORM` global, fix `_detect_platform` return values, `_deploy_cluster_resolve_provider` sets global not print, `_agent_lint` is AI-based not shellcheck, `_cluster_provider` precedence order wrong, `_agent_audit` scope wrong, sourcing paths wrong, `create_cluster` signature incomplete.
+- [ ] **Fix `docs/api/functions.md`** — 12 Copilot findings from PR #8; spec at `docs/plans/v0.3.4-api-doc-fixes.md` (`048040f`). **Assigned to Codex 2026-03-22.** Exact old/new blocks in spec — docs-only, no `.sh` changes.
 - [ ] **k3d-manager subtree pull** — pull v0.3.3 into k3d-manager (after v0.9.3 smoke test)
 - [ ] `rigor-cli` — separate repo, lib-foundation as git subtree; CLI: `checkpoint|audit|lint`
 - [ ] `shopping-carts` as consumer (future)
