@@ -24,7 +24,7 @@ API reference: `docs/api/functions.md`
 | Version | Status | Notes |
 |---|---|---|
 | v0.1.0–v0.3.3 | released | See `docs/releases.md` |
-| v0.3.4 | **active** | cut 2026-03-16 — no spec yet |
+| v0.3.4 | **MERGED** | docs/api/functions.md + docs/plans/v0.3.3-api-reference.md fixed (commit `7bb60c2`) |
 
 ---
 
