@@ -42,8 +42,8 @@ function _command_exist() {
 # _run_command_resolve_sudo <prog> <prefer_sudo> <require_sudo> <interactive_sudo> [probe_args...]
 #
 # Resolves the runner array (plain prog, sudo -n prog, or sudo prog) and stores
-# it in the global _RCRS_RUNNER. Caller must initialize _RCRS_RUNNER before
-# calling and unset it after reading.
+# it in the global _RCRS_RUNNER. _RCRS_RUNNER is reset unconditionally on entry;
+# caller reads it after this returns and may unset it when done.
 #
 # Returns 127 if --require-sudo is set but sudo is unavailable.
 function _run_command_resolve_sudo() {
@@ -53,6 +53,8 @@ function _run_command_resolve_sudo() {
   local interactive_sudo="$4"
   shift 4
   local -a probe_args=("$@")
+
+  _RCRS_RUNNER=()
 
   local -a sudo_flags=()
   if (( interactive_sudo == 0 )); then
@@ -64,6 +66,7 @@ function _run_command_resolve_sudo() {
       _RCRS_RUNNER=(sudo "${sudo_flags[@]}" "$prog")
     else
       echo "sudo non-interactive not available" >&2
+      _RCRS_RUNNER=()
       return 127
     fi
     return 0
@@ -138,26 +141,23 @@ function _run_command() {
 
   # Decide runner: user vs sudo -n vs sudo (interactive)
   _RCRS_RUNNER=()
+  local resolver_rc=0
   if (( quiet )); then
     _run_command_resolve_sudo "$prog" \
       "$prefer_sudo" "$require_sudo" "$interactive_sudo" \
-      "${probe_args[@]}" 2>/dev/null || {
-        if (( soft )); then
-          return 127
-        else
-          exit 127
-        fi
-      }
+      "${probe_args[@]}" 2>/dev/null || resolver_rc=$?
   else
     _run_command_resolve_sudo "$prog" \
       "$prefer_sudo" "$require_sudo" "$interactive_sudo" \
-      "${probe_args[@]}" || {
-        if (( soft )); then
-          return 127
-        else
-          exit 127
-        fi
-      }
+      "${probe_args[@]}" || resolver_rc=$?
+  fi
+
+  if (( resolver_rc != 0 )); then
+    if (( soft )); then
+      return 127
+    else
+      exit 127
+    fi
   fi
   local -a runner=("${_RCRS_RUNNER[@]}")
   unset _RCRS_RUNNER
