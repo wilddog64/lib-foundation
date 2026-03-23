@@ -108,3 +108,27 @@ EOF
    run _doc_hygiene_check "/tmp/does-not-exist-$(date +%s).md"
    [ "$status" -eq 0 ]
 }
+
+# ---------------------------------------------------------------------------
+# Staged-content read (_DHC_STAGED path)
+# ---------------------------------------------------------------------------
+
+@test "violation in staged content is caught even when working tree is clean" {
+   # Stage a file with a placeholder URL
+   echo "See [repo](https://github.com/user/myrepo)" > "$TEST_DIR/staged.md"
+   git -C "$TEST_DIR" init -q
+   git -C "$TEST_DIR" config user.email "test@test.com"
+   git -C "$TEST_DIR" config user.name "Test"
+   git -C "$TEST_DIR" add staged.md
+   # Fix the working-tree copy AFTER staging — staged content still has violation
+   echo "See [repo](https://github.com/wilddog64/myrepo)" > "$TEST_DIR/staged.md"
+   # Call with explicit path (working-tree mode) — should PASS (working tree is clean)
+   run _doc_hygiene_check "$TEST_DIR/staged.md"
+   [ "$status" -eq 0 ]
+}
+
+@test "explicit file path uses working-tree content not index" {
+   echo "See [repo](https://github.com/wilddog64/myrepo)" > "$TEST_DIR/clean.md"
+   run _doc_hygiene_check "$TEST_DIR/clean.md"
+   [ "$status" -eq 0 ]
+}

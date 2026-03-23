@@ -7,9 +7,24 @@
 #
 # Exit codes: 0 = pass, 1 = violations found
 
+# _dh_grep FILE PATTERN
+# Grep FILE for PATTERN. When _DHC_STAGED=1, read content from the git index
+# (staged content) rather than the working-tree file.
+# Outputs matching lines with line numbers (grep -n format).
+_dh_grep() {
+  local file="$1"
+  local pattern="$2"
+  if [[ "${_DHC_STAGED:-0}" -eq 1 ]]; then
+    git show :"$file" 2>/dev/null | grep -nE -- "$pattern" || true
+  else
+    grep -nE -- "$pattern" -- "$file" 2>/dev/null || true
+  fi
+}
+
 _doc_hygiene_check() {
-   local files=("$@")
-   local status=0
+  local files=("$@")
+  local status=0
+  _DHC_STAGED=0
 
    # If no files supplied, derive from git staged set
    if [[ ${#files[@]} -eq 0 ]]; then
@@ -17,6 +32,7 @@ _doc_hygiene_check() {
       staged="$(git diff --cached --name-only --diff-filter=ACM -- '*.md' '*.yaml' '*.yml' 2>/dev/null || true)"
       [[ -z "$staged" ]] && return 0
       IFS=$'\n' read -r -d '' -a files <<<"$staged" || true
+      _DHC_STAGED=1
    fi
 
    local file
@@ -27,7 +43,7 @@ _doc_hygiene_check() {
       # Check 1: placeholder GitHub org URLs (github.com/user/)
       # ------------------------------------------------------------------
       local placeholder_hits
-      placeholder_hits="$(grep -nE -- 'github\.com/user/' -- "$file" 2>/dev/null || true)"
+      placeholder_hits="$(_dh_grep "$file" 'github\.com/user/')"
       if [[ -n "$placeholder_hits" ]]; then
          _warn "doc-hygiene: placeholder URL 'github.com/user/' in ${file}:"
          while IFS= read -r hit; do
@@ -42,7 +58,7 @@ _doc_hygiene_check() {
       # ------------------------------------------------------------------
       if [[ "$file" == *.md ]]; then
          local http_hits
-         http_hits="$(grep -nE -- '(^|[^[:alnum:]_:])http://[^)[:space:]]+' -- "$file" 2>/dev/null || true)"
+         http_hits="$(_dh_grep "$file" '(^|[^[:alnum:]_:])http://[^)[:space:]]+')"
          if [[ -n "$http_hits" ]]; then
             _warn "doc-hygiene: bare http:// link (use https://) in ${file}:"
             while IFS= read -r hit; do
@@ -59,9 +75,8 @@ _doc_hygiene_check() {
       # ------------------------------------------------------------------
       if [[ "$file" == *.yaml || "$file" == *.yml ]]; then
          local ip_hits
-         ip_hits="$(grep -nE -- \
-            '(^|[^0-9])(10\.[0-9]+\.[0-9]+\.[0-9]+|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]+\.[0-9]+|192\.168\.[0-9]+\.[0-9]+)([^0-9]|$)' \
-            -- "$file" 2>/dev/null || true)"
+         ip_hits="$(_dh_grep "$file" \
+            '(^|[^0-9])(10\.[0-9]+\.[0-9]+\.[0-9]+|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]+\.[0-9]+|192\.168\.[0-9]+\.[0-9]+)([^0-9]|$)')"
          if [[ -n "$ip_hits" ]]; then
             _warn "doc-hygiene: hardcoded private IP in ${file} (consider using DNS name):"
             while IFS= read -r hit; do
