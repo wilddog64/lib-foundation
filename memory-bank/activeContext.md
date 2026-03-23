@@ -30,7 +30,7 @@ API reference: `docs/api/functions.md`
 
 ## Open Items
 
-- [ ] **PR #10 doc-hygiene hook** — Copilot threads resolved; staged-only BATS test spec written (`608e521`). **Assigned to Codex 2026-03-22.** Spec: `docs/plans/v0.3.5-agent-audit-staged-only-test.md`. Branch: `feat/doc-hygiene-hook`.
+- [x] **PR #10 doc-hygiene hook** — staged-only `_agent_audit` BATS test added in commit `bdd60e7`; spec `docs/plans/v0.3.5-agent-audit-staged-only-test.md`. Branch: `feat/doc-hygiene-hook`.
 - [ ] **k3d-manager subtree pull** — pull v0.3.4 into k3d-manager (after PR #10 merges)
 - [ ] `rigor-cli` — separate repo, lib-foundation as git subtree; CLI: `checkpoint|audit|lint`
 - [ ] `shopping-carts` as consumer (future)
