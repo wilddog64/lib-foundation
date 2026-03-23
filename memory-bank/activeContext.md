@@ -30,8 +30,8 @@ API reference: `docs/api/functions.md`
 
 ## Open Items
 
-- [ ] **Fix `docs/api/functions.md`** — 12 Copilot findings from PR #8; spec at `docs/plans/v0.3.4-api-doc-fixes.md` (`048040f`). **Assigned to Codex 2026-03-22.** Exact old/new blocks in spec — docs-only, no `.sh` changes.
-- [ ] **k3d-manager subtree pull** — pull v0.3.3 into k3d-manager (after v0.9.3 smoke test)
+- [ ] **PR #10 doc-hygiene hook** — Copilot threads resolved; staged-only BATS test spec written (`608e521`). **Assigned to Codex 2026-03-22.** Spec: `docs/plans/v0.3.5-agent-audit-staged-only-test.md`. Branch: `feat/doc-hygiene-hook`.
+- [ ] **k3d-manager subtree pull** — pull v0.3.4 into k3d-manager (after PR #10 merges)
 - [ ] `rigor-cli` — separate repo, lib-foundation as git subtree; CLI: `checkpoint|audit|lint`
 - [ ] `shopping-carts` as consumer (future)
 
