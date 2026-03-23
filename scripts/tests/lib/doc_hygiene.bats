@@ -136,3 +136,43 @@ EOF
    run _doc_hygiene_check "$TEST_DIR/clean.md"
    [ "$status" -eq 0 ]
 }
+
+# ---------------------------------------------------------------------------
+# Check 2 — code-fence exclusion
+# ---------------------------------------------------------------------------
+
+@test "bare http:// inside fenced code block does not trigger Check 2" {
+   cat > "$TEST_DIR/test.md" <<'EOF'
+# Example
+
+```
+url: http://internal.example.com
+```
+EOF
+   run _doc_hygiene_check "$TEST_DIR/test.md"
+   [ "$status" -eq 0 ]
+}
+
+@test "bare http:// outside fenced code block still triggers Check 2" {
+   cat > "$TEST_DIR/test.md" <<'EOF'
+Visit http://example.com for details.
+
+```
+echo ok
+```
+EOF
+   run _doc_hygiene_check "$TEST_DIR/test.md"
+   [ "$status" -eq 1 ]
+}
+
+@test "bare http:// inside tilde fenced block does not trigger Check 2" {
+   cat > "$TEST_DIR/test.md" <<'EOF'
+# Example
+
+~~~bash
+url: http://internal.example.com
+~~~
+EOF
+   run _doc_hygiene_check "$TEST_DIR/test.md"
+   [ "$status" -eq 0 ]
+}

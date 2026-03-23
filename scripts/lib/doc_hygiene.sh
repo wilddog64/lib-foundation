@@ -7,17 +7,38 @@
 #
 # Exit codes: 0 = pass, 1 = violations found
 
-# _dh_grep FILE PATTERN
+# _dh_strip_fences
+# Read stdin, replace content inside fenced code blocks (``` or ~~~) with blank
+# lines. Preserves line count so grep -n line numbers remain accurate.
+_dh_strip_fences() {
+  awk 'BEGIN{f=0}
+       /^[`~]{3}/{f=!f; print ""; next}
+       f{print ""}
+       !f{print}'
+}
+
+# _dh_grep FILE PATTERN [--strip-fences]
 # Grep FILE for PATTERN. When _DHC_STAGED=1, read content from the git index
 # (staged content) rather than the working-tree file.
+# When --strip-fences is passed, fenced code block content is replaced with
+# blank lines before grepping (line numbers remain accurate).
 # Outputs matching lines with line numbers (grep -n format).
 _dh_grep() {
   local file="$1"
   local pattern="$2"
+  local strip="${3:-}"
   if [[ "${_DHC_STAGED:-0}" -eq 1 ]]; then
-    git show :"$file" 2>/dev/null | grep -nE -- "$pattern" || true
+    if [[ "$strip" == "--strip-fences" ]]; then
+      git show :"$file" 2>/dev/null | _dh_strip_fences | grep -nE -- "$pattern" || true
+    else
+      git show :"$file" 2>/dev/null | grep -nE -- "$pattern" || true
+    fi
   else
-    grep -nE -- "$pattern" -- "$file" 2>/dev/null || true
+    if [[ "$strip" == "--strip-fences" ]]; then
+      _dh_strip_fences < "$file" 2>/dev/null | grep -nE -- "$pattern" || true
+    else
+      grep -nE -- "$pattern" -- "$file" 2>/dev/null || true
+    fi
   fi
 }
 
@@ -62,7 +83,7 @@ _doc_hygiene_check() {
       # ------------------------------------------------------------------
       if [[ "$file" == *.md ]]; then
          local http_hits
-         http_hits="$(_dh_grep "$file" '(^|[^[:alnum:]_:])http://[^)[:space:]]+')"
+         http_hits="$(_dh_grep "$file" '(^|[^[:alnum:]_:])http://[^)[:space:]]+' --strip-fences)"
          if [[ -n "$http_hits" ]]; then
             _warn "doc-hygiene: bare http:// link (use https://) in ${file}:"
             while IFS= read -r hit; do
