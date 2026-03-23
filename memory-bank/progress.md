@@ -46,7 +46,7 @@
 
 ### v0.3.6 — active
 
-- [ ] **Check 2 code-fence exclusion** — `_doc_hygiene_check` Check 2 greps entire file including fenced code blocks; fix: strip fenced content before running Check 2. Spec to be written on `feat/v0.3.6`.
+- [x] **Check 2 code-fence exclusion** — commit `7751068` adds `_dh_strip_fences`, `_dh_grep --strip-fences`, and 3 BATS covering fenced + tilde blocks (`docs/plans/v0.3.6-doc-hygiene-codefence-exclusion.md`).
 - [ ] **CoreDNS Check 4** — warn on hardcoded `*.svc.cluster.local` in YAML; spec `docs/plans/v0.3.5-doc-hygiene-coredns-check.md` ready, implement on `feat/v0.3.6`.
 - [ ] `rigor-cli` — separate repo (planned, no spec yet)
 - [ ] Consumer integration: `shopping-carts`
