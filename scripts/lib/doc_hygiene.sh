@@ -109,6 +109,21 @@ _doc_hygiene_check() {
             done <<<"$ip_hits"
             # Non-blocking — warn only, do not set status=1
          fi
+
+         # ------------------------------------------------------------------
+         # Check 4: hardcoded internal CoreDNS names in YAML (non-blocking warning)
+         # Matches: <name>.<namespace>.svc.cluster.local or <name>.<namespace>.svc
+         # These only resolve inside the originating cluster — breaks cross-cluster refs
+         # ------------------------------------------------------------------
+         local dns_hits
+         dns_hits="$(_dh_grep "$file" '[a-z0-9-]+\.[a-z0-9-]+\.svc(\.cluster\.local)?')"
+         if [[ -n "$dns_hits" ]]; then
+            _warn "doc-hygiene: hardcoded internal CoreDNS name in ${file} (breaks cross-cluster — use service discovery or env config):"
+            while IFS= read -r hit; do
+               _warn "  ${hit}"
+            done <<<"$dns_hits"
+            # Non-blocking — warn only, do not set status=1
+         fi
       fi
    done
 

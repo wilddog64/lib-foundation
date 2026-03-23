@@ -176,3 +176,35 @@ EOF
    run _doc_hygiene_check "$TEST_DIR/test.md"
    [ "$status" -eq 0 ]
 }
+
+# ---------------------------------------------------------------------------
+# Check 4 — hardcoded internal CoreDNS names in YAML (non-blocking)
+# ---------------------------------------------------------------------------
+
+@test "FQDN svc.cluster.local in YAML warns but passes" {
+   printf 'url: https://my-service.default.svc.cluster.local:8080\n' > "$TEST_DIR/test.yaml"
+   run _doc_hygiene_check "$TEST_DIR/test.yaml"
+   [ "$status" -eq 0 ]
+   [[ "$output" == *"hardcoded internal CoreDNS name"* ]]
+}
+
+@test "short svc name in YAML warns but passes" {
+   printf 'host: my-service.default.svc\n' > "$TEST_DIR/test.yaml"
+   run _doc_hygiene_check "$TEST_DIR/test.yaml"
+   [ "$status" -eq 0 ]
+   [[ "$output" == *"hardcoded internal CoreDNS name"* ]]
+}
+
+@test "public DNS name in YAML does not warn" {
+   printf 'host: api.example.com\n' > "$TEST_DIR/test.yaml"
+   run _doc_hygiene_check "$TEST_DIR/test.yaml"
+   [ "$status" -eq 0 ]
+   [[ "$output" != *"hardcoded internal CoreDNS name"* ]]
+}
+
+@test "CoreDNS check does not apply to markdown" {
+   printf 'See my-service.default.svc.cluster.local for details.\n' > "$TEST_DIR/test.md"
+   run _doc_hygiene_check "$TEST_DIR/test.md"
+   [ "$status" -eq 0 ]
+   [[ "$output" != *"hardcoded internal CoreDNS name"* ]]
+}
