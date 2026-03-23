@@ -105,7 +105,7 @@ source "$(dirname "$0")/lib/agent_rigor.sh"
 |---|---|---|
 | `deploy_cluster [--provider k3d\|k3s\|orbstack] [--force-k3s] [cluster_name]` | Provider-aware cluster bootstrap including Istio and provider exports; resolves provider interactively or via env. |
 | `destroy_cluster [cluster_name]` | Destroy the active provider cluster. |
-| `create_cluster [cluster_name]` | Bootstrap provider-specific infrastructure and then call `deploy_cluster`. Requires the provider CLI to be installed. |
+| `create_cluster [cluster_name] [http_port=8000] [https_port=8443] [--dry-run\|-n] [-h\|--help]` | Create infrastructure for the active provider. `--dry-run` resolves the provider and prints intent without creating. |
 | `create_k3d_cluster` / `create_k3s_cluster` | Create provider-specific clusters. |
 | `destroy_k3d_cluster` / `destroy_k3s_cluster` | Destroy provider-specific clusters. |
 | `deploy_k3d_cluster` / `deploy_k3s_cluster` | Deploy full cluster stacks for k3d/k3s. |
@@ -118,7 +118,7 @@ source "$(dirname "$0")/lib/agent_rigor.sh"
 | Function | Description |
 |---|---|
 | `_cluster_provider` | Resolves the active provider in precedence order: `K3D_MANAGER_PROVIDER` → `K3DMGR_PROVIDER` → `CLUSTER_PROVIDER` → auto-detected (`k3d` binary → `k3s` binary → `k3d` default). Normalizes to lowercase; exits via `_err` on unsupported values. |
-| `_deploy_cluster_resolve_provider <platform> <provider_cli> <force_k3s>` | Sets `_DCRS_PROVIDER` based on CLI overrides, env overrides, or mac defaults; does not return. |
+| `_deploy_cluster_resolve_provider <platform> <provider_cli> <force_k3s>` | Sets the `_DCRS_PROVIDER` global to the resolved provider: CLI flag → `--force-k3s` → env overrides → mac/interactive/k3d default. Does not print or return a value. |
 | `_deploy_cluster_prompt_provider` | Interactive prompt for provider selection (TTY only). |
 | `_resolve_script_dir` | Portable symlink-aware `SCRIPT_DIR` helper. |
 | `_ensure_path_exists <dir>` | Ensure a directory exists, creating it with sudo if required. |
