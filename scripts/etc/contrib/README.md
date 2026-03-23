@@ -1,4 +1,4 @@
-# examples/
+# contrib/
 
 Reference implementations for optional developer tooling.
 
@@ -19,7 +19,7 @@ Displays live session and usage information in the Claude Code terminal status b
 
 1. Copy the script to a stable location:
    ```bash
-   cp scripts/etc/examples/statusline.sh ~/.claude/statusline.sh
+   cp scripts/etc/contrib/statusline.sh ~/.claude/statusline.sh
    chmod +x ~/.claude/statusline.sh
    ```
 
