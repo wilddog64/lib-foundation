@@ -3,7 +3,7 @@
 ## Current State: `feat/v0.3.4` (as of 2026-03-16)
 
 **v0.3.3 SHIPPED** — PR #8 squash-merged (b9f1fda), tagged, GitHub release created 2026-03-16.
-**feat/v0.3.4 ACTIVE** — branch cut from main 2026-03-16. Spec written + pushed (`048040f`). Codex assigned to fix 12 doc accuracy issues.
+**feat/v0.3.4 ACTIVE** — branch cut from main 2026-03-16. Spec written + pushed (`048040f`). Docs-only fix complete — ready for downstream subtree pulls.
 
 ---
 
