@@ -2,6 +2,7 @@
 
 | Version | Date | Highlights |
 |---|---|---|
+| [v0.3.6](https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.6) | 2026-03-23 | `doc_hygiene.sh`: exclude fenced code blocks from Check 2 (`_dh_strip_fences`); add Check 4 — warn on hardcoded internal CoreDNS names in YAML (21 BATS) |
 | [v0.3.4](https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.4) | 2026-03-22 | Fix 12 Copilot PR #8 doc accuracy findings in `docs/api/functions.md` and `docs/plans/v0.3.3-api-reference.md` — correct descriptions for `_detect_platform`, `_safe_path`, `_curl`, `_cluster_provider`, `_agent_audit`, `_agent_lint`, `create_cluster`; remove nonexistent `_DETECTED_PLATFORM` global |
 | [v0.3.3](https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.3) | 2026-03-16 | API reference (`docs/api/functions.md`); README releases table split; `docs/releases.md` full history |
 | [v0.3.2](https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.2) | 2026-03-16 | Sync `deploy_cluster` helpers from k3d-manager (`_deploy_cluster_prompt_provider`, `_deploy_cluster_resolve_provider`, `CLUSTER_NAME` propagation, remove duplicate mac+k3s guard); TTY fix (`_DCRS_PROVIDER` global replaces command substitution); BATS expanded to 36 tests |
