@@ -37,10 +37,28 @@ _agent_checkpoint() {
    _err "Checkpoint commit failed; resolve git errors and retry"
 }
 
+# _agent_audit
+#
+# Audits staged diffs for safety violations. Requires SCRIPT_DIR to be set by
+# the sourcing script (system.sh sets it); override via AGENT_AUDIT_IF_ALLOWLIST_FILE.
 _agent_audit() {
    if ! command -v git >/dev/null 2>&1; then
       _warn "git not available; skipping agent audit"
       return 0
+   fi
+
+   local allowlist_file="${AGENT_AUDIT_IF_ALLOWLIST_FILE:-${SCRIPT_DIR}/etc/agent/if-count-allowlist}"
+   local if_allowlist=""
+   if [[ -r "$allowlist_file" ]]; then
+      local line
+      while IFS= read -r line; do
+         line=${line%%#*}
+         line="${line#"${line%%[![:space:]]*}"}"
+         line="${line%"${line##*[![:space:]]}"}"
+         [[ -z "$line" ]] && continue
+         if_allowlist+=$'\n'
+         if_allowlist+="$line"
+      done < "$allowlist_file"
    fi
 
    local status=0
@@ -62,7 +80,9 @@ _agent_audit() {
    fi
 
    local changed_sh
-   changed_sh="$(git diff --cached --name-only -- '*.sh' 2>/dev/null || true)"
+   changed_sh="$(
+      git diff --cached --name-only -- '*.sh' 2>/dev/null || true
+   )"
    if [[ -n "$changed_sh" ]]; then
       local max_if="${AGENT_AUDIT_MAX_IF:-8}"
       local file
@@ -72,9 +92,12 @@ _agent_audit() {
          local offenders_lines=""
          while IFS= read -r line; do
             if [[ $line =~ ^[[:space:]]*function[[:space:]]+ ]]; then
-               if [[ -n "$current_func" && $if_count -gt $max_if ]]; then
+            if [[ -n "$current_func" && $if_count -gt $max_if ]]; then
+               local allow_key="${file}:${current_func}"
+               if [[ ! $'\n'"$if_allowlist"$'\n' == *$'\n'"$allow_key"$'\n'* ]]; then
                   offenders_lines+="${current_func}:${if_count}"$'\n'
                fi
+            fi
                current_func="${line#*function }"
                current_func="${current_func%%(*}"
                current_func="${current_func//[[:space:]]/}"
@@ -85,7 +108,10 @@ _agent_audit() {
          done < <(git show :"$file" 2>/dev/null || true)
 
          if [[ -n "$current_func" && $if_count -gt $max_if ]]; then
-            offenders_lines+="${current_func}:${if_count}"$'\n'
+            local allow_key="${file}:${current_func}"
+            if [[ ! $'\n'"$if_allowlist"$'\n' == *$'\n'"$allow_key"$'\n'* ]]; then
+               offenders_lines+="${current_func}:${if_count}"$'\n'
+            fi
          fi
 
          offenders_lines="${offenders_lines%$'\n'}"
@@ -102,7 +128,8 @@ _agent_audit() {
       for file in $changed_sh; do
          [[ -f "$file" ]] || continue
          local bare_sudo
-         bare_sudo=$(git diff --cached -- "$file" 2>/dev/null \
+         bare_sudo=$(
+            { git diff --cached -- "$file" 2>/dev/null; git diff -- "$file" 2>/dev/null; } \
             | grep '^+' \
             | sed 's/^+//' \
             | grep -E '\bsudo[[:space:]]' \
@@ -114,6 +141,21 @@ _agent_audit() {
             status=1
          fi
       done
+   fi
+
+   local staged_diff
+   staged_diff="$(git diff --cached 2>/dev/null || true)"
+   if [[ -n "$staged_diff" ]]; then
+      local cred_lines
+      cred_lines=$(grep '^+' <<<"$staged_diff" \
+         | sed 's/^+//' \
+         | grep -E 'kubectl[[:space:]]+exec\b' \
+         | grep -E '\benv[[:space:]]+[A-Z_]+=\S' || true)
+      if [[ -n "$cred_lines" ]]; then
+         _warn "Agent audit: credential pattern detected in kubectl exec command:"
+         _warn "$cred_lines"
+         status=1
+      fi
    fi
 
    return "$status"
