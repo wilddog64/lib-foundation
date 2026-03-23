@@ -30,8 +30,11 @@ API reference: `docs/api/functions.md`
 
 ## Open Items
 
-- [ ] **Fix `docs/api/functions.md`** — 12 Copilot findings from PR #8; spec at `docs/plans/v0.3.4-api-doc-fixes.md` (`048040f`). **Assigned to Codex 2026-03-22.** Exact old/new blocks in spec — docs-only, no `.sh` changes.
-- [ ] **k3d-manager subtree pull** — pull v0.3.3 into k3d-manager (after v0.9.3 smoke test)
+- [x] **PR #10 doc-hygiene hook** — staged-only `_agent_audit` BATS test added in commit `bdd60e7`; spec `docs/plans/v0.3.5-agent-audit-staged-only-test.md`. Branch: `feat/doc-hygiene-hook`.
+- [x] **Doc hygiene staged-content read** — commit `d00bccb` implements `_dh_grep` index reader per `docs/plans/v0.3.5-doc-hygiene-staged-content-read.md`; branch pushed `feat/doc-hygiene-hook`.
+- [x] **Doc hygiene staged-mode follow-ups** — commit `aeb1396` localizes `_DHC_STAGED`, gates staged file existence via `git cat-file`, and replaces staged-mode BATS per `docs/plans/v0.3.5-doc-hygiene-copilot-pr10-round2.md`.
+- [ ] **k3d-manager subtree pull** — pull v0.3.4 into k3d-manager (after PR #10 merges)
+- [ ] **v0.3.6: Check 2 code-fence exclusion** — `_doc_hygiene_check` Check 2 (`http://` detection) greps entire file including fenced code blocks; staging a plan doc with `http://` in code examples triggers a false positive. Fix: strip fenced-code-block content before running Check 2. Spec to be written on `feat/v0.3.6` after PR #10 merges.
 - [ ] `rigor-cli` — separate repo, lib-foundation as git subtree; CLI: `checkpoint|audit|lint`
 - [ ] `shopping-carts` as consumer (future)
 
