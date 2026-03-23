@@ -3,7 +3,7 @@
 ## Current State: `feat/v0.3.4` (as of 2026-03-16)
 
 **v0.3.3 SHIPPED** — PR #8 squash-merged (b9f1fda), tagged, GitHub release created 2026-03-16.
-**feat/v0.3.4 ACTIVE** — branch cut from main 2026-03-16. Spec written + pushed (`048040f`). Docs-only fix complete — ready for downstream subtree pulls.
+**feat/v0.3.4 ACTIVE** — branch cut from main 2026-03-16. PR #11 open (in review). Doc fixes + upstream lib sync (`system.sh` TTY fix, `agent_rigor.sh` allowlist + staged-only audit).
 
 ---
 
@@ -24,7 +24,7 @@ API reference: `docs/api/functions.md`
 | Version | Status | Notes |
 |---|---|---|
 | v0.1.0–v0.3.3 | released | See `docs/releases.md` |
-| v0.3.4 | **MERGED** | docs/api/functions.md + docs/plans/v0.3.3-api-reference.md fixed (commit `7bb60c2`) |
+| v0.3.4 | **in review** | PR #11 open — doc fixes + upstream lib sync; pending merge |
 
 ---
 
