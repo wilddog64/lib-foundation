@@ -35,6 +35,8 @@
 - [x] **Upstream lib sync** — `system.sh` TTY fix (`_run_command_resolve_sudo` + remove `_run_command_has_tty`); `agent_rigor.sh` if-count allowlist + staged-only audit; `statusline.sh` cost display fix.
 - [x] **PR #11 Copilot review** — 8 findings addressed in `08cfbc8`, all threads resolved.
 - [x] **PR #10 doc-hygiene hook + staged-only test** — staged-only `_agent_audit` BATS test added in commit `bdd60e7` per `docs/plans/v0.3.5-agent-audit-staged-only-test.md`. 
+- [x] **Doc hygiene staged-content read** — commit `d00bccb` adds `_dh_grep` index reader + new BATS (spec `docs/plans/v0.3.5-doc-hygiene-staged-content-read.md`).
+- [x] **Doc hygiene staged-mode follow-ups** — commit `aeb1396` localizes `_DHC_STAGED`, adds staged `git cat-file` guard, and replaces staged-mode BATS per `docs/plans/v0.3.5-doc-hygiene-copilot-pr10-round2.md`.
 - [ ] `rigor-cli` — separate repo (planned, no spec yet)
 - [ ] Consumer integration: `shopping-carts`
 
