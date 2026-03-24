@@ -8,7 +8,8 @@
 **v0.3.6 SHIPPED** — PR #12 merged to main (`d8b4c48`) 2026-03-23. Tagged v0.3.6, released.
 **v0.3.7 SHIPPED** — PR #13 merged to main (`071c270`) 2026-03-24. Tagged v0.3.7 retroactively, GitHub release created.
 **v0.3.8 SHIPPED** — PR #14 merged to main (`a669a63`) 2026-03-24. Tagged v0.3.8 retroactively, GitHub release created.
-**v0.3.9 ACTIVE** — branch `feat/v0.3.9` cut from main `a669a63`.
+**v0.3.9 SHIPPED** — PR #15 merged to main (`fb09921`) 2026-03-24. No tag (docs-only, no version bump).
+**v0.3.10 ACTIVE** — branch `feat/v0.3.10` cut from main `fb09921`.
 
 ---
 
