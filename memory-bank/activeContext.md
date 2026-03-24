@@ -5,7 +5,7 @@
 **v0.3.4 SHIPPED** — PR #11 merged to main (`dbfafe9`), tagged v0.3.4, GitHub release created 2026-03-22.
 **v0.3.5 SHIPPED** — PR #10 squash-merged to main (`2f895a99`) 2026-03-23. No tag (no CHANGELOG entry). `enforce_admins` restored.
 **v0.3.6 SHIPPED** — PR #12 merged to main (`d8b4c48`) 2026-03-23. Tagged v0.3.6, GitHub release created. `enforce_admins` restored.
-**v0.3.7 SHIPPED** — PR #13 merged to main (`071c270`) 2026-03-24. Tagged v0.3.7, released. system.sh if-count cleanup.
+**v0.3.7 SHIPPED** — PR #13 merged to main (`071c270`) 2026-03-24. No tag (CHANGE.md [Unreleased]). system.sh if-count cleanup.
 **feat/v0.3.8 ACTIVE** — branch cut from main `071c270`. Tab indentation check in `_agent_audit` + BATS tests (commit `e431b1d`).
 
 ---
@@ -30,7 +30,7 @@ API reference: `docs/api/functions.md`
 | v0.3.4 | **SHIPPED** | PR #11 merged (`dbfafe9`) — doc fixes + upstream lib sync; tagged + released 2026-03-22 |
 | v0.3.5 | **SHIPPED** | PR #10 merged (`2f895a99`) — doc-hygiene hook; 2026-03-23 |
 | v0.3.6 | **SHIPPED** | PR #12 merged (`d8b4c48`) — code-fence exclusion + CoreDNS Check 4; 2026-03-23 |
-| v0.3.7 | **SHIPPED** | PR #13 merged (`071c270`) — system.sh if-count cleanup; 2026-03-24 |
+| v0.3.7 | **SHIPPED** | PR #13 merged (`071c270`) — system.sh if-count cleanup; 2026-03-24; no tag |
 | v0.3.8 | **ACTIVE** | Tab indentation enforcement in `_agent_audit`; commit `e431b1d` |
 
 ---

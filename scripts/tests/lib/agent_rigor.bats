@@ -198,6 +198,15 @@ SCRIPT
   [[ "$output" == *"tab indentation"* ]]
 }
 
+@test "_agent_audit flags mixed space+tab indentation in staged .sh file" {
+  mkdir -p scripts
+  printf 'function mixed() {\n  \techo "mixed"\n}\n' > scripts/mixed.sh
+  git add scripts/mixed.sh
+  run _agent_audit
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"tab indentation"* ]]
+}
+
 @test "_agent_audit passes with 2-space indentation" {
   mkdir -p scripts
   printf 'function spaced() {\n  echo "spaces"\n}\n' > scripts/spaced.sh
