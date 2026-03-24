@@ -1,6 +1,6 @@
 # Changes - lib-foundation
 
-## [Unreleased] v0.3.8 — _agent_audit tab indentation enforcement
+## [v0.3.8] — _agent_audit tab indentation enforcement
 
 ### Added
 - `scripts/lib/agent_rigor.sh`: tab indentation check in `_agent_audit` — staged `.sh` files containing tab-indented lines now fail the pre-commit hook; enforces 2-space style across all shell scripts.
