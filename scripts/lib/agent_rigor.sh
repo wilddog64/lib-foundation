@@ -148,7 +148,7 @@ _agent_audit() {
       for file in $changed_sh; do
          [[ -f "$file" ]] || continue
          local tab_lines
-         tab_lines=$(git show :"$file" 2>/dev/null | grep -n $'^\t' || true)
+         tab_lines=$(git show :"$file" 2>/dev/null | grep -n $'^ *\t' || true)
          if [[ -n "$tab_lines" ]]; then
             _warn "Agent audit: tab indentation in $file — use 2-space indentation:"
             _warn "$tab_lines"
