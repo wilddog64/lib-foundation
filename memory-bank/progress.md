@@ -11,6 +11,10 @@
 **v0.3.9 SHIPPED** — PR #15 merged to main (`fb09921`) 2026-03-24. No tag (docs-only, no version bump).
 **v0.3.10 ACTIVE** — branch `feat/v0.3.10` cut from main `fb09921`.
 
+## v0.3.10 — In Progress
+
+- [x] `.clinerules` `_detect_platform` contract fix — commit `efb22e9` per `docs/plans/v0.3.10-clinerules-detect-platform.md`
+
 ---
 
 ## What Is Complete
