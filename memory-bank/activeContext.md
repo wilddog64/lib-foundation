@@ -48,7 +48,7 @@ API reference: `docs/api/functions.md`
 - [x] **v0.3.6: Check 2 code-fence exclusion** — commit `7751068` adds `_dh_strip_fences`, optional `_dh_grep --strip-fences`, and 3 BATS tests per `docs/plans/v0.3.6-doc-hygiene-codefence-exclusion.md`.
 - [x] **v0.3.6: CoreDNS Check 4** — commit `c352c1b` adds YAML-only warn on `<svc>.<ns>.svc(.cluster.local)` + 4 BATS tests per `docs/plans/v0.3.5-doc-hygiene-coredns-check.md`.
 - [x] **v0.3.6: indented fence fix** — commit `02e7418` updates `_dh_strip_fences` to handle indented fences + adds indented BATS per `docs/plans/v0.3.6-doc-hygiene-indented-fence-fix.md`.
-- [x] `rigor-cli` — repo bootstrapped in commit `a1c034f` (branch feat/init) per `docs/plans/v0.3.10-rigor-cli-init.md` — bin/rigor dispatcher + CI + tests
+- [x] `rigor-cli` — repo bootstrapped (commit `a1c034f`), bash 3.2 fix (`8ae57bc`), gist installer (`310fd16`); specs `docs/plans/v0.3.10-rigor-cli-init.md`, `docs/plans/v0.1.1-mapfile-compat.md`, `docs/plans/v0.1.1-gist-install-script.md`.
 - [ ] `shopping-carts` as consumer (future)
 
 ---
