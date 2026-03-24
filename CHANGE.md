@@ -1,5 +1,12 @@
 # Changes - lib-foundation
 
+## [Unreleased] — v0.3.10
+
+### Fixed
+- `.clinerules`: correct `_detect_platform` return values — `mac | wsl | debian | redhat | linux` (was `debian | rhel | arch | darwin | unknown`)
+
+---
+
 ## [v0.3.8] — _agent_audit tab indentation enforcement
 
 ### Added
