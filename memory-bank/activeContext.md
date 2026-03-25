@@ -9,6 +9,7 @@
 **v0.3.8 SHIPPED** — PR #14 merged to main (`a669a63`) 2026-03-24. Tagged v0.3.8 retroactively, GitHub release created. Tab indentation enforcement in `_agent_audit`.
 **v0.3.9 SHIPPED** — PR #15 merged to main (`fb09921`) 2026-03-24. No tag (docs-only, no version bump). Release history backfill + memory-bank reconciliation. `enforce_admins` restored.
 **feat/v0.3.10 ACTIVE** — branch cut from main `fb09921` 2026-03-24. `_detect_platform` contract corrected in `.clinerules` (`efb22e9`). `enforce_admins` restored.
+**feat/v0.3.12 ACTIVE** — branch cut from `2625683` 2026-03-25. Spec: `docs/plans/v0.3.12-ensure-antigravity.md` — Antigravity IDE install + MCP config helpers.
 
 ---
 

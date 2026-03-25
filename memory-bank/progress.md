@@ -15,7 +15,7 @@
 
 ## v0.3.12 — Active
 
-_(no items yet — next: subtree pull into rigor-cli v0.1.2)_
+- [ ] **`_ensure_antigravity_ide` + MCP helpers** — spec `docs/plans/v0.3.12-ensure-antigravity.md`; adds `_ensure_antigravity_ide`, `_ensure_antigravity_mcp_playwright`, `_antigravity_browser_ready` to `scripts/lib/system.sh`
 
 ---
 
