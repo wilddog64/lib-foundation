@@ -1,5 +1,13 @@
 # Changes - lib-foundation
 
+## [Unreleased] — v0.3.12
+
+### Added
+- `_ensure_antigravity_ide()` — install Antigravity IDE via brew (macOS), apt-get (Debian), or dnf (RedHat)
+- `_ensure_antigravity_mcp_playwright()` — inject Playwright MCP entry into Antigravity `mcp_config.json` (requires `jq`; idempotent)
+- `_antigravity_browser_ready()` — verify Antigravity remote debugging port 9222 is listening; configurable timeout
+- `_antigravity_mcp_config_path()` — resolve Antigravity `mcp_config.json` path for macOS/Linux
+
 ## [v0.3.11] — 2026-03-25
 
 ### Added
