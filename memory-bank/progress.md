@@ -9,15 +9,13 @@
 **v0.3.7 SHIPPED** — PR #13 merged to main (`071c270`) 2026-03-24. Tagged v0.3.7 retroactively, GitHub release created.
 **v0.3.8 SHIPPED** — PR #14 merged to main (`a669a63`) 2026-03-24. Tagged v0.3.8 retroactively, GitHub release created.
 **v0.3.9 SHIPPED** — PR #15 merged to main (`fb09921`) 2026-03-24. No tag (docs-only, no version bump).
-**v0.3.10 ACTIVE** — branch `feat/v0.3.10` cut from main `fb09921`.
+**v0.3.10 SHIPPED** — PR #16 merged to main (`c5662c9`) 2026-03-24. No tag (docs-only, `.clinerules` fix).
+**v0.3.11 SHIPPED** — PR #17 merged to main (`2625683`) 2026-03-25. Tagged v0.3.11, GitHub release created. `enforce_admins` restored.
+**v0.3.12 ACTIVE** — branch `feat/v0.3.12` cut from `2625683`.
 
-## v0.3.10 — In Progress
+## v0.3.12 — Active
 
-- [x] `.clinerules` `_detect_platform` contract fix — commit `efb22e9` per `docs/plans/v0.3.10-clinerules-detect-platform.md`
-
-## v0.3.11 — In Progress
-
-- [x] `_agent_audit` YAML hardcoded-IP check — commit `11e653b` per `docs/plans/v0.3.11-agent-audit-yaml-ip-check.md`
+- [x] **`_ensure_antigravity_ide` + MCP helpers** — commit `ae0e8b9` adds `_ensure_antigravity_ide`, `_ensure_antigravity_mcp_playwright`, `_antigravity_browser_ready` per `docs/plans/v0.3.12-ensure-antigravity.md`
 
 ---
 
