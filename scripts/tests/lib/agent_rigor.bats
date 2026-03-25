@@ -218,6 +218,7 @@ SCRIPT
 @test "_agent_audit: passes when staged yaml has no hardcoded IP" {
   local repo
   repo="$(mktemp -d)"
+  trap 'rm -rf "$repo"' RETURN
   git -C "$repo" init -q
   git -C "$repo" config user.email "test@example.com"
   git -C "$repo" config user.name "Test"
@@ -228,12 +229,12 @@ SCRIPT
     run _agent_audit
     [ "$status" -eq 0 ]
   )
-  rm -rf "$repo"
 }
 
 @test "_agent_audit: fails when staged yaml contains hardcoded IP" {
   local repo
   repo="$(mktemp -d)"
+  trap 'rm -rf "$repo"' RETURN
   git -C "$repo" init -q
   git -C "$repo" config user.email "test@example.com"
   git -C "$repo" config user.name "Test"
@@ -245,7 +246,23 @@ SCRIPT
     [ "$status" -eq 1 ]
     [[ "$output" == *"hardcoded IP"* ]]
   )
-  rm -rf "$repo"
+}
+
+@test "_agent_audit: fails when staged yml contains hardcoded IP" {
+  local repo
+  repo="$(mktemp -d)"
+  trap 'rm -rf "$repo"' RETURN
+  git -C "$repo" init -q
+  git -C "$repo" config user.email "test@example.com"
+  git -C "$repo" config user.name "Test"
+  printf 'host: 10.0.0.1\n' > "$repo/config.yml"
+  git -C "$repo" add config.yml
+  (
+    cd "$repo"
+    run _agent_audit
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"hardcoded IP"* ]]
+  )
 }
 
 @test "_agent_audit ignores unstaged .sh changes" {

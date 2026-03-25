@@ -172,24 +172,17 @@ _agent_audit() {
       fi
    fi
 
-   local changed_yaml
-   changed_yaml="$(
-      git diff --cached --name-only -- '*.yaml' '*.yml' 2>/dev/null || true
-   )"
-   if [[ -n "$changed_yaml" ]]; then
-      local file
-      for file in $changed_yaml; do
-         [[ -f "$file" ]] || continue
-         local ip_lines
-         ip_lines=$(git show :"$file" 2>/dev/null \
-            | grep -En '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' || true)
-         if [[ -n "$ip_lines" ]]; then
-            _warn "Agent audit: hardcoded IP address in $file — use a CoreDNS hostname instead:"
-            _warn "$ip_lines"
-            status=1
-         fi
-      done
-   fi
+   local file
+   while IFS= read -r -d '' file; do
+      local ip_lines
+      ip_lines=$(git show :"$file" 2>/dev/null \
+         | grep -En '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' || true)
+      if [[ -n "$ip_lines" ]]; then
+         _warn "Agent audit: hardcoded IP address in $file — use a CoreDNS hostname instead:"
+         _warn "$ip_lines"
+         status=1
+      fi
+   done < <(git diff --cached --name-only --diff-filter=ACM -z -- '*.yaml' '*.yml' 2>/dev/null || true)
 
    return "$status"
 }
