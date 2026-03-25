@@ -15,6 +15,10 @@
 
 - [x] `.clinerules` `_detect_platform` contract fix — commit `efb22e9` per `docs/plans/v0.3.10-clinerules-detect-platform.md`
 
+## v0.3.11 — Planned
+
+- [ ] `_agent_audit` YAML hardcoded-IP check — spec `docs/plans/v0.3.11-agent-audit-yaml-ip-check.md`; branch `feat/v0.3.11`
+
 ---
 
 ## What Is Complete

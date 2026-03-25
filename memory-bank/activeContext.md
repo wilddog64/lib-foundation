@@ -36,6 +36,7 @@ API reference: `docs/api/functions.md`
 | v0.3.8 | **SHIPPED** | PR #14 merged (`a669a63`) — tab indentation enforcement in `_agent_audit`; 2026-03-24; tagged v0.3.8 retroactively |
 | v0.3.9 | **SHIPPED** | PR #15 merged (`fb09921`) — release history backfill + memory-bank reconciliation; 2026-03-24; no tag (docs-only) |
 | v0.3.10 | **ACTIVE** | branch `feat/v0.3.10` cut from main `fb09921` |
+| v0.3.11 | **PLANNED** | `_agent_audit` YAML hardcoded-IP check; spec `docs/plans/v0.3.11-agent-audit-yaml-ip-check.md` |
 
 ---
 
