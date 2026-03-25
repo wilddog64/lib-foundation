@@ -1,6 +1,6 @@
 # Changes - lib-foundation
 
-## [Unreleased] — v0.3.11
+## [v0.3.11] — 2026-03-25
 
 ### Added
 - `scripts/lib/agent_rigor.sh`: YAML hardcoded-IP check in `_agent_audit` — staged `.yaml`/`.yml` files containing IPv4 addresses now fail the pre-commit hook; warns to use CoreDNS hostname instead.
