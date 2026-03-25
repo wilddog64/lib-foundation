@@ -839,6 +839,7 @@ function _ensure_antigravity_ide() {
    fi
 
    if _is_debian_family && _command_exist apt-get && _sudo_available; then
+      _run_command --interactive-sudo -- apt-get update
       _run_command --prefer-sudo -- apt-get install -y antigravity
       if _command_exist antigravity; then
          return 0
@@ -876,9 +877,11 @@ function _ensure_antigravity_mcp_playwright() {
       return 0
    fi
 
+   local playwright_mcp_version="${PLAYWRIGHT_MCP_VERSION:-0.0.26}"
    local tmp
-   tmp="$(mktemp)"
-   jq '.mcpServers.playwright = {"command":"npx","args":["-y","@playwright/mcp@latest"]}' \
+   tmp="$(mktemp -t antigravity-mcp.XXXXXX)"
+   jq --arg ver "$playwright_mcp_version" \
+      '.mcpServers.playwright = {"command":"npx","args":["-y",("@playwright/mcp@" + $ver)]}' \
       "$config_path" > "$tmp" && mv "$tmp" "$config_path"
 }
 
@@ -887,7 +890,7 @@ function _antigravity_browser_ready() {
    local elapsed=0
 
    while [[ "$elapsed" -lt "$timeout" ]]; do
-      if curl -sf http://localhost:9222/json >/dev/null 2>&1; then
+      if _command_exist curl && _curl -sf http://localhost:9222/json >/dev/null 2>&1; then
          return 0
       fi
       sleep 2
