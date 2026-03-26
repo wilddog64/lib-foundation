@@ -1,10 +1,11 @@
 # Active Context — lib-foundation
 
-## Current State: `feat/v0.3.13` (as of 2026-03-25)
+## Current State: `feat/v0.3.14` (as of 2026-03-25)
 
 **v0.3.11 SHIPPED** — PR #17 merged to main (`2625683`) 2026-03-25. Tagged v0.3.11, GitHub release created. `enforce_admins` restored.
 **v0.3.12 SHIPPED** — PR #18 squash-merged to main (`91340d62`) 2026-03-25. Tagged v0.3.12, GitHub release created. `enforce_admins` restored. Antigravity IDE install + Playwright MCP config helpers.
-**feat/v0.3.13 ACTIVE** — branch cut from `91340d62` 2026-03-25. Retro doc pending.
+**v0.3.13 SHIPPED** — PR #19 squash-merged to main (`e870c6d9`) 2026-03-25. Tagged v0.3.13, GitHub release created. `enforce_admins` restored. Fix `_antigravity_browser_ready` curl probe (`_run_command --soft`).
+**feat/v0.3.14 ACTIVE** — branch cut from `e870c6d9` 2026-03-25.
 
 ---
 
@@ -34,7 +35,8 @@ API reference: `docs/api/functions.md`
 | v0.3.10 | **SHIPPED** | PR #16 merged (`c5662c9`) — `.clinerules` fix; 2026-03-24; no tag (docs-only) |
 | v0.3.11 | **SHIPPED** | PR #17 merged (`2625683`) — YAML IP check in `_agent_audit`; 2026-03-25; tagged v0.3.11 |
 | v0.3.12 | **SHIPPED** | PR #18 merged (`91340d62`) — Antigravity IDE + MCP helpers; 7 BATS; 2026-03-25; tagged v0.3.12 |
-| v0.3.13 | **ACTIVE** | branch `feat/v0.3.13` cut from `91340d62` |
+| v0.3.13 | **SHIPPED** | PR #19 merged (`e870c6d9`) — `_antigravity_browser_ready` curl probe fix; 2026-03-25; tagged v0.3.13 |
+| v0.3.14 | **ACTIVE** | branch `feat/v0.3.14` cut from `e870c6d9` |
 
 ---
 
@@ -70,8 +72,8 @@ API reference: `docs/api/functions.md`
 
 | Repo | Integration | Status |
 |---|---|---|
-| `k3d-manager` | git subtree at `scripts/lib/foundation/` | on v0.3.2; v0.3.3 pull pending |
-| `rigor-cli` | git subtree (planned) | separate repo, future |
+| `k3d-manager` | git subtree at `scripts/lib/foundation/` | subtree pull to v0.3.13 pending |
+| `rigor-cli` | git subtree at `scripts/lib/foundation/` | subtree pull to v0.3.13 pending |
 | `shopping-carts` | git subtree (planned) | future |
 
 ---
