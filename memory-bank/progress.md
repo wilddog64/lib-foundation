@@ -14,6 +14,10 @@
 **v0.3.12 SHIPPED** — PR #18 squash-merged to main (`91340d62`) 2026-03-25. Tagged v0.3.12, GitHub release created. `enforce_admins` restored.
 **v0.3.13 ACTIVE** — branch `feat/v0.3.13` cut from `91340d62`.
 
+## v0.3.13 — Active
+
+- [ ] **`_antigravity_browser_ready` curl probe fix** — replace `_curl` boolean probe with `_run_command --soft -- curl`; spec: `docs/plans/v0.3.13-antigravity-browser-ready-fix.md`; Codex assigned
+
 ## v0.3.12 — Shipped
 
 - [x] **`_ensure_antigravity_ide` + MCP helpers** — Antigravity IDE install + Playwright MCP config helpers; Copilot PR #18 findings addressed in `9f28d88` (apt-get update, mktemp template, PLAYWRIGHT_MCP_VERSION, _curl wrapper, 7 BATS)
