@@ -17,7 +17,13 @@
 
 ## v0.3.14 — Active
 
-_(no items yet)_
+**Dependency:** k3d-manager PR #51 (Copilot) deferred 5 findings here. Fix these before k3d-manager can subtree-pull v0.3.14.
+
+- [ ] **`_ensure_antigravity_ide` binary detection** — `system.sh:839` checks `antigravity` but Homebrew installs `agy`; add `agy`-first detection (mirrors fix already applied to `scripts/plugins/antigravity.sh` in k3d-manager PR #51)
+- [ ] **`_antigravity_browser_ready` curl fast-fail** — `system.sh:901` loops to timeout when curl missing; add `_command_exist curl` guard before loop with clear error (mirrors fix in `_antigravity_launch`)
+- [ ] **`agent_rigor.sh` tab-scan NUL-delimited loop** — `agent_rigor.sh:158` uses `for file in $changed_sh` word-splitting; replace with NUL-delimited loop for filenames with spaces
+- [ ] **`docs/api/functions.md` @latest inaccuracy** — `functions.md:161` says `@playwright/mcp@latest`; update to describe `PLAYWRIGHT_MCP_VERSION` env var with pinned default (mirrors fix in k3d-manager `docs/api/functions.md`)
+- [ ] **`CHANGE.md` version labels** — `CHANGE.md:15` has `[Unreleased]` for shipped v0.3.12 and v0.3.13; version both entries
 
 ## v0.3.13 — Shipped
 
