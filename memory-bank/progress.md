@@ -16,7 +16,7 @@
 
 ## v0.3.13 — Active
 
-- [ ] **`_antigravity_browser_ready` curl probe fix** — replace `_curl` boolean probe with `_run_command --soft -- curl`; spec: `docs/plans/v0.3.13-antigravity-browser-ready-fix.md`; Codex assigned
+- [x] **`_antigravity_browser_ready` curl probe fix** — commit `9350ecd` replaces the `_curl` boolean probe with `_run_command --soft -- curl` per `docs/plans/v0.3.13-antigravity-browser-ready-fix.md`
 
 ## v0.3.12 — Shipped
 
