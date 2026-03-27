@@ -196,7 +196,7 @@ bats_require_minimum_version 1.5.0
 
 @test "_antigravity_browser_ready: fails fast when curl missing" {
   _command_exist() { return 1; }
-  _err() { echo "$*"; return 1; }
+  _err() { echo "$*"; exit 1; }
   export -f _command_exist _err
 
   run _antigravity_browser_ready 5
