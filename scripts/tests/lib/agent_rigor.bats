@@ -217,11 +217,12 @@ SCRIPT
 
 @test "_agent_audit: tab scan handles filename with spaces" {
   local file="file with spaces.sh"
-  printf 'function clean() {\n  echo ok\n}\n' > "$file"
+  printf 'function tabbed_spaces() {\n\techo "tab with spaces filename"\n}\n' > "$file"
   git add "$file"
   run _agent_audit
-  [ "$status" -eq 0 ]
-  [[ "$output" != *"word split"* ]]
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"tab indentation"* ]]
+  [[ "$output" == *"$file"* ]]
   git reset HEAD -- "$file" >/dev/null 2>&1
   rm -f "$file"
 }
