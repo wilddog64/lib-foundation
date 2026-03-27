@@ -215,6 +215,17 @@ SCRIPT
   [ "$status" -eq 0 ]
 }
 
+@test "_agent_audit: tab scan handles filename with spaces" {
+  local file="file with spaces.sh"
+  printf 'function clean() {\n  echo ok\n}\n' > "$file"
+  git add "$file"
+  run _agent_audit
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"word split"* ]]
+  git reset HEAD -- "$file" >/dev/null 2>&1
+  rm -f "$file"
+}
+
 @test "_agent_audit: passes when staged yaml has no hardcoded IP" {
   local repo
   repo="$(mktemp -d)"

@@ -145,7 +145,7 @@ _agent_audit() {
 
    if [[ -n "$changed_sh" ]]; then
       local file
-      for file in $changed_sh; do
+      while IFS= read -r -d '' file; do
          [[ -f "$file" ]] || continue
          local tab_lines
          tab_lines=$(git show :"$file" 2>/dev/null | grep -n $'^ *\t' || true)
@@ -154,7 +154,7 @@ _agent_audit() {
             _warn "$tab_lines"
             status=1
          fi
-      done
+      done < <(git diff --cached --name-only -z -- '*.sh' 2>/dev/null || true)
    fi
 
    local staged_diff
