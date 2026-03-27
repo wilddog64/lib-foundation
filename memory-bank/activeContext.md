@@ -53,12 +53,12 @@ API reference: `docs/api/functions.md`
 - [x] `rigor-cli` — repo bootstrapped (commit `a1c034f`), bash 3.2 fix (`8ae57bc`), gist installer (`310fd16`); lib-foundation spec: `docs/plans/v0.3.10-rigor-cli-init.md`; rigor-cli specs tracked in that repo (`plans/v0.1.1-mapfile-compat.md`, `plans/v0.1.1-gist-install-script.md`).
 - [x] **v0.3.12: Antigravity helpers** — commit `ae0e8b9` adds `_ensure_antigravity_ide`, `_ensure_antigravity_mcp_playwright`, `_antigravity_browser_ready` per `docs/plans/v0.3.12-ensure-antigravity.md`.
 - [x] **v0.3.13: antigravity browser probe fix** — commit `9350ecd` switches `_antigravity_browser_ready` to `_run_command --soft -- curl` per `docs/plans/v0.3.13-antigravity-browser-ready-fix.md`.
-- [ ] **v0.3.14: k3d-manager Copilot PR #51 deferred findings** — 5 items to fix upstream:
-  - `scripts/lib/system.sh:839` — `_ensure_antigravity_ide` checks `antigravity` binary but Homebrew installs `agy`; add `agy`-first detection
-  - `scripts/lib/system.sh:901` — `_antigravity_browser_ready` loops to timeout when curl missing — should fail fast with `_command_exist curl` guard
-  - `scripts/lib/agent_rigor.sh:158` — tab-indentation scan uses `for file in $changed_sh` word-splitting; should use NUL-delimited loop
-  - `docs/api/functions.md:161` — `@playwright/mcp@latest` doc inaccuracy; describe `PLAYWRIGHT_MCP_VERSION` pinned default
-  - `CHANGE.md:15` — `[Unreleased]` labels on shipped v0.3.12 and v0.3.13 entries
+- [x] **v0.3.14: k3d-manager Copilot PR #51 deferred findings** — `e52b819` fixes all 5 upstream gaps per `docs/plans/v0.3.14-copilot-pr51-deferred-fixes.md`:
+  - `_ensure_antigravity_ide` now detects `agy` binaries first
+  - `_antigravity_browser_ready` fails fast when `curl` missing
+  - `_agent_audit` tab scan iterates staged files via NUL-delimited loop
+  - `docs/api/functions.md` explains `PLAYWRIGHT_MCP_VERSION` pinned MCP default
+  - `CHANGE.md` versions the v0.3.12/v0.3.13 release notes
 - [ ] `shopping-carts` as consumer (future)
 
 ---
