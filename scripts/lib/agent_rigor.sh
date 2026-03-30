@@ -174,6 +174,17 @@ _agent_audit() {
 
    local file
    while IFS= read -r -d '' file; do
+      if [[ -n "${AGENT_IP_ALLOWLIST:-}" && -r "${AGENT_IP_ALLOWLIST}" ]]; then
+         local skip_file=0
+         while IFS= read -r allow || [[ -n "$allow" ]]; do
+            [[ -z "$allow" || "$allow" =~ ^# ]] && continue
+            if [[ "$file" == "$allow" ]]; then
+               skip_file=1
+               break
+            fi
+         done < "${AGENT_IP_ALLOWLIST}"
+         [[ "$skip_file" -eq 1 ]] && continue
+      fi
       local ip_lines
       ip_lines=$(git show :"$file" 2>/dev/null \
          | grep -En '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' || true)
