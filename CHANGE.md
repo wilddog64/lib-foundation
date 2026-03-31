@@ -1,5 +1,10 @@
 # Changes - lib-foundation
 
+## [Unreleased]
+
+### Fixed
+- `_agent_audit` IP audit loop — supports `AGENT_IP_ALLOWLIST` env var; when set to a readable file, skips IP literal check for paths listed in it (one repo-relative path per line, `#` comments ignored). Consumers set this env var before sourcing `agent_rigor.sh`.
+
 ## [v0.3.14] — 2026-03-27
 
 ### Fixed
