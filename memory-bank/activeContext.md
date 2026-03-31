@@ -1,6 +1,6 @@
 # Active Context — lib-foundation
 
-## Current State: `feat/v0.3.14` (as of 2026-03-25)
+## Current State: `feat/v0.3.15` (as of 2026-03-31)
 
 **v0.3.11 SHIPPED** — PR #17 merged to main (`2625683`) 2026-03-25. Tagged v0.3.11, GitHub release created. `enforce_admins` restored.
 **v0.3.12 SHIPPED** — PR #18 squash-merged to main (`91340d62`) 2026-03-25. Tagged v0.3.12, GitHub release created. `enforce_admins` restored. Antigravity IDE install + Playwright MCP config helpers.

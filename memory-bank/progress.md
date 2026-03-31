@@ -16,7 +16,7 @@
 **v0.3.14 SHIPPED** — PR #20 squash-merged to main (`bbbaf053`) 2026-03-27. Tagged v0.3.14, GitHub release created. `enforce_admins` restored.
 **v0.3.15 ACTIVE** — branch `feat/v0.3.15` cut from `bbbaf053` 2026-03-27.
 
-## v0.3.14 — Active
+## v0.3.14 — Shipped
 
 **Dependency:** k3d-manager PR #51 (Copilot) deferred 5 findings here. Fix these before k3d-manager can subtree-pull v0.3.14.
 
