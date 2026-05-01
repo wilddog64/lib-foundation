@@ -92,6 +92,7 @@ All functions require `K3DM_ENABLE_AI=1`. They exit early (no-op) when the var i
 | `_copilot_scope_prompt <text>` | Prepend a k3d-manager repo scope statement to `<text>` before passing to Copilot. |
 | `_copilot_prompt_guard <text>` | Block prompts containing forbidden fragments (`shell(git push)`, `shell(rm`, `shell(eval`, `shell(sudo`, `shell(curl`, `shell(wget`, `shell(cd`). Calls `_err` on match. |
 | `_copilot_review [--prompt\|-p <text>] [--model <id>] [<flags>...]` | Sandboxed Copilot CLI wrapper. Scopes the prompt, applies the prompt guard, runs from repo root, and passes `--deny-tool` flags for all forbidden shell operations. Returns Copilot's exit code. |
+| `_ai_agent_review [--prompt\|-p <text>] [<flags>...]` | Generic AI dispatch wrapper. Reads `AI_REVIEW_FUNC` (default: `copilot`) to select backend and `AI_REVIEW_MODEL` (default: `gpt-5.4-mini`) for model. Currently supports `copilot` only; additional backends are added as new `case` branches. Passes all args through to the selected backend. |
 
 **`_copilot_review` usage:**
 
@@ -110,6 +111,13 @@ _copilot_review --prompt "Review staged shell changes for injection risks." \
 context="$(kubectl describe pod -n vault vault-0 2>&1)"
 _copilot_review --prompt "Diagnose this pod failure:\n\n${context}"
 ```
+
+**`_ai_agent_review` env vars:**
+
+| Env Var | Default | Description |
+|---|---|---|
+| `AI_REVIEW_FUNC` | `copilot` | AI backend to use. Currently only `copilot` is supported. |
+| `AI_REVIEW_MODEL` | `gpt-5.4-mini` | Model passed to the backend. Override per-call by passing `--model` in args. |
 
 **Using in another project via subtree:**
 
