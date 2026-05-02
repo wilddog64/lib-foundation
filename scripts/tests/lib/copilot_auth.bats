@@ -36,6 +36,14 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
+@test "_copilot_auth_check passes when gh auth status succeeds" {
+  mkdir -p "$BATS_TEST_TMPDIR/bin"
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$BATS_TEST_TMPDIR/bin/gh"
+  chmod +x "$BATS_TEST_TMPDIR/bin/gh"
+  PATH="$BATS_TEST_TMPDIR/bin:$PATH" HOME="$BATS_TEST_TMPDIR" run _copilot_auth_check
+  [ "$status" -eq 0 ]
+}
+
 @test "_copilot_auth_check fails with clear error when no auth available" {
   mkdir -p "$BATS_TEST_TMPDIR/bin"
   printf '#!/usr/bin/env bash\nexit 1\n' > "$BATS_TEST_TMPDIR/bin/gh"
