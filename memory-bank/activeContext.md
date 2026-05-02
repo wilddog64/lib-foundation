@@ -1,6 +1,6 @@
 # Active Context — lib-foundation
 
-## Current State: `feat/v0.3.15` (as of 2026-03-31)
+## Current State: `feat/v0.3.18` (as of 2026-05-02)
 
 **v0.3.11 SHIPPED** — PR #17 merged to main (`2625683`) 2026-03-25. Tagged v0.3.11, GitHub release created. `enforce_admins` restored.
 **v0.3.12 SHIPPED** — PR #18 squash-merged to main (`91340d62`) 2026-03-25. Tagged v0.3.12, GitHub release created. `enforce_admins` restored. Antigravity IDE install + Playwright MCP config helpers.
@@ -41,7 +41,13 @@ API reference: `docs/api/functions.md`
 
 ---
 
-## Open Items
+## v0.3.18 Open Items
+
+- [ ] **Bugfix: `_copilot_auth_check` K3DM_ENABLE_AI gate** — OPEN, assigned to Codex. Spec: `docs/plans/v0.3.18-bugfix-copilot-auth-preflight.md`. Remove `K3DM_ENABLE_AI` gate; check env tokens → `apps.json` → `copilot auth status`; clear error on failure. New `scripts/tests/lib/copilot_auth.bats` (5 tests).
+
+---
+
+## Pre-v0.3.18 Open Items
 
 - [x] **PR #10 doc-hygiene hook** — staged-only `_agent_audit` BATS test added in commit `bdd60e7`; spec `docs/plans/v0.3.5-agent-audit-staged-only-test.md`. Branch: `feat/doc-hygiene-hook`.
 - [x] **Doc hygiene staged-content read** — commit `d00bccb` implements `_dh_grep` index reader per `docs/plans/v0.3.5-doc-hygiene-staged-content-read.md`; branch pushed `feat/doc-hygiene-hook`.
