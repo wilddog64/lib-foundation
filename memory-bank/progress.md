@@ -4,6 +4,7 @@
 
 - [x] **Bugfix: `_copilot_auth_check` K3DM_ENABLE_AI gate** — DONE (`f0e29d9`). Spec: `docs/plans/v0.3.18-bugfix-copilot-auth-preflight.md`. Assigned to Codex.
 - [ ] **Copilot review non-interactive permissions** — OPEN. `docs/issues/2026-05-02-copilot-review-noninteractive-permissions.md`. `_copilot_review` still emits a non-interactive Copilot call without the CLI permission mode the help text describes as required.
+- [ ] **`_copilot_review` malformed `--deny-tool` patterns** — IN PROGRESS. Branch: `fix/copilot-deny-tool-patterns`. Bug: `docs/bugs/2026-05-02-copilot-deny-tool-missing-closing-paren.md`. Four patterns missing `)` cause copilot CLI to exit 1.
 
 ---
 
