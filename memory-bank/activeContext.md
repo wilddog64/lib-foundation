@@ -43,7 +43,7 @@ API reference: `docs/api/functions.md`
 
 ## v0.3.18 Open Items
 
-- [ ] **Bugfix: `_copilot_auth_check` K3DM_ENABLE_AI gate** — OPEN, assigned to Codex. Spec: `docs/plans/v0.3.18-bugfix-copilot-auth-preflight.md`. Remove `K3DM_ENABLE_AI` gate; check env tokens → `apps.json` → `copilot auth status`; clear error on failure. New `scripts/tests/lib/copilot_auth.bats` (5 tests).
+- [x] **Bugfix: `_copilot_auth_check` K3DM_ENABLE_AI gate** — DONE (`f0e29d9`). Spec: `docs/plans/v0.3.18-bugfix-copilot-auth-preflight.md`. Removed `K3DM_ENABLE_AI` gate; checks env tokens → `apps.json` → `copilot auth status`; clear error on failure. New `scripts/tests/lib/copilot_auth.bats` (5 tests).
 
 ---
 
