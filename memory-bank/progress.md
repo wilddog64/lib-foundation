@@ -1,5 +1,11 @@
 # Progress — lib-foundation
 
+## v0.3.18 Track (branch: `feat/v0.3.18`)
+
+- [ ] **Bugfix: `_copilot_auth_check` K3DM_ENABLE_AI gate** — OPEN. Spec: `docs/plans/v0.3.18-bugfix-copilot-auth-preflight.md`. Assigned to Codex.
+
+---
+
 ## Overall Status
 
 **v0.3.3 SHIPPED** — PR #8 squash-merged (b9f1fda), tagged, GitHub release created 2026-03-16.
