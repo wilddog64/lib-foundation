@@ -1598,7 +1598,8 @@ function _copilot_auth_check() {
       return 0
    fi
 
-   if _run_command --soft --quiet -- copilot auth status >/dev/null 2>&1; then
+   # gh CLI auth as final fallback — copilot v1.0.40 uses gh OAuth tokens
+   if _run_command --soft --quiet -- gh auth status >/dev/null 2>&1; then
       return 0
    fi
 
