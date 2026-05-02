@@ -7,6 +7,7 @@
 **v0.3.13 SHIPPED** — PR #19 squash-merged to main (`e870c6d9`) 2026-03-25. Tagged v0.3.13, GitHub release created. `enforce_admins` restored. Fix `_antigravity_browser_ready` curl probe (`_run_command --soft`).
 **v0.3.14 SHIPPED** — PR #20 squash-merged to main (`bbbaf053`) 2026-03-27. Tagged v0.3.14, GitHub release created. `enforce_admins` restored. 5 deferred Copilot PR #51 findings: agy binary detection, curl fast-fail, NUL audit loops, doc fix, CHANGE.md versioning.
 **feat/v0.3.18 ACTIVE** — `_copilot_auth_check` rewrite; PR #25 open.
+**fix/copilot-deny-tool-patterns ACTIVE** — combined `--allow-all-tools` + deny-tool fix; ASSIGNED TO CODEX. Spec: `docs/bugs/2026-05-02-copilot-review-noninteractive-combined-fix.md`.
 
 ---
 
