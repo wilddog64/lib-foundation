@@ -1,6 +1,6 @@
 # Changes - lib-foundation
 
-## [Unreleased]
+## [v0.3.19] — 2026-05-03
 
 ### Fixed
 - `scripts/lib/system.sh`: `_copilot_review` — add `--allow-all-tools` flag and close malformed `--deny-tool` patterns (`shell(sudo`, `shell(eval`, `shell(curl`, `shell(wget` were missing closing `)`) — Copilot CLI exits 1 on malformed patterns, blocking all `_ai_agent_review` callers (`713c18e`)

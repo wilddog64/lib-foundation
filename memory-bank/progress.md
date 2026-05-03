@@ -1,9 +1,9 @@
 # Progress — lib-foundation
 
-## v0.3.18 Track (branch: `feat/v0.3.18`)
+## v0.3.19 Track — SHIPPED (2026-05-03)
 
-- [x] **Bugfix: `_copilot_auth_check` K3DM_ENABLE_AI gate** — DONE (`f0e29d9`). Spec: `docs/plans/v0.3.18-bugfix-copilot-auth-preflight.md`. Assigned to Codex.
-- [x] **`_copilot_review` combined fix: `--allow-all-tools` + malformed `--deny-tool` patterns** — DONE (`713c18e`). Branch: `fix/copilot-deny-tool-patterns`. Combined spec: `docs/bugs/2026-05-02-copilot-review-noninteractive-combined-fix.md`. Supersedes deny-tool-only spec. Fixes both missing `--allow-all-tools` (non-interactive mode) and 4 patterns missing `)`. Commit: `fix(system): add --allow-all-tools and close malformed --deny-tool patterns in _copilot_review`
+- [x] **Bugfix: `_copilot_auth_check` K3DM_ENABLE_AI gate** — DONE (PR #25, `ce9e5dbc`). Spec: `docs/plans/v0.3.18-bugfix-copilot-auth-preflight.md`.
+- [x] **`_copilot_review` combined fix: `--allow-all-tools` + malformed `--deny-tool` patterns** — DONE (PR #26, `45040e22`). Spec: `docs/bugs/2026-05-02-copilot-review-noninteractive-combined-fix.md`. Merge SHA: `45040e22`. Tagged v0.3.19. `enforce_admins` restored. Retro: `docs/retro/2026-05-03-v0.3.19-retrospective.md`.
 
 ---
 
@@ -24,7 +24,7 @@
 **v0.3.15 SHIPPED** — PR #21 merged to main. Tagged v0.3.15.
 **v0.3.16 SHIPPED** — PR #22 merged to main. Tagged v0.3.16.
 **v0.3.17 SHIPPED** — PR #24 merged to main (`108924b9`). Tagged v0.3.17, GitHub release created 2026-05-01.
-**v0.3.18 IN PROGRESS** — branch `feat/v0.3.18`. PR #25 open.
+**v0.3.19 SHIPPED** — PRs #25 + #26 merged to main (`45040e22`). Tagged v0.3.19, GitHub release created 2026-05-03. (v0.3.18 skipped — never tagged.)
 
 ## v0.3.14 — Shipped
 

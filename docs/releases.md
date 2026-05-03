@@ -2,6 +2,7 @@
 
 | Version | Date | Highlights |
 |---|---|---|
+| [v0.3.19](https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.19) | 2026-05-03 | `_copilot_review`: add `--allow-all-tools` + fix 4 malformed `--deny-tool` patterns (missing `)`); `_copilot_auth_check`: remove `K3DM_ENABLE_AI` gate, check env tokens → `apps.json` → `gh auth status`; 8 BATS (`copilot_auth.bats` + `copilot_review.bats`) |
 | [v0.3.17](https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.17) | 2026-05-01 | `_ai_agent_review` dispatch wrapper (`AI_REVIEW_FUNC`/`AI_REVIEW_MODEL`); `_copilot_review` rename; `K3DM_ENABLE_AI` gate removed from backend; `_agent_lint` glob expanded to `.sh`/`.js`/`.md`; 3 BATS |
 | [v0.3.16](https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.16) | 2026-04-05 | `_agent_audit` IP allowlist: `grep -Fqx -- "$file"` prevents dash-prefix paths from being parsed as grep flags; 2 BATS |
 | [v0.3.15](https://github.com/wilddog64/lib-foundation/releases/tag/v0.3.15) | 2026-03-31 | `_agent_audit` IP allowlist — `AGENT_IP_ALLOWLIST` env var skips IP check for listed paths; 2 BATS |
