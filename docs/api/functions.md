@@ -98,7 +98,6 @@ source "$(dirname "$0")/lib/agent_rigor.sh"
 
 ```bash
 source scripts/lib/system.sh
-export K3DM_ENABLE_AI=1
 
 # Basic prompt
 _copilot_review --prompt "Explain the _agent_lint flow in this repo."
@@ -138,12 +137,10 @@ _ai_agent_review --prompt "Your prompt here."
 ```bash
 # In your pre-commit hook, before calling _agent_lint:
 export AGENT_LINT_AI_FUNC="_copilot_review"
-export K3DM_ENABLE_AI="${K3DM_ENABLE_AI:-0}"
+export ENABLE_AGENT_LINT=1
 ```
 
-`_agent_lint` reads `AGENT_LINT_AI_FUNC` and calls it with staged `.sh`, `.js`, and `.md` files. Setting
-`K3DM_ENABLE_AI` to `0` by default makes the AI step opt-in — users set `K3DM_ENABLE_AI=1`
-in their environment to activate it.
+`_agent_lint` reads `AGENT_LINT_AI_FUNC` and calls it with staged `.sh`, `.js`, and `.md` files. The AI step is skipped when `AGENT_LINT_AI_FUNC` is unset or the named function is not defined. The gate variable defaults to `ENABLE_AGENT_LINT`; set `AGENT_LINT_GATE_VAR` to use a different env var name.
 
 ### Utilities
 
