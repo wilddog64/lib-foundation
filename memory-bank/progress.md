@@ -1,5 +1,10 @@
 # Progress — lib-foundation
 
+## v0.3.20 Track (branch: `feat/v0.3.20`)
+
+- [x] **Bugfix: `_run_command_resolve_sudo` TTY fallback** — DONE (`2f46d4be`). Spec: `docs/bugs/2026-05-29-sudo-no-tty-fallback.md`. Adds `sudo -n` fallback when stdin/stdout TTY not available. PR #29 merged to main.
+- [x] **BATS mock sudo flag-stripping** — DONE. Test fix ensures `sudo` mock in `system.bats` properly strips flags before execution (pattern: `while [[ $# -gt 0 && "$1" == -* ]]; do shift; done; "$@"`).
+
 ## v0.3.18 Track (branch: `feat/v0.3.18`)
 
 - [x] **Bugfix: `_copilot_auth_check` K3DM_ENABLE_AI gate** — DONE (`f0e29d9`). Spec: `docs/plans/v0.3.18-bugfix-copilot-auth-preflight.md`. Assigned to Codex.
@@ -25,6 +30,7 @@
 **v0.3.16 SHIPPED** — PR #22 merged to main. Tagged v0.3.16.
 **v0.3.17 SHIPPED** — PR #24 merged to main (`108924b9`). Tagged v0.3.17, GitHub release created 2026-05-01.
 **v0.3.18 IN PROGRESS** — branch `feat/v0.3.18`. PR #25 open.
+**v0.3.20 SHIPPED** — PR #29 merged to main (`2f46d4be`) 2026-05-30. No tag (unreleased, in [Unreleased] section of CHANGE.md). Sudo no-TTY fallback + BATS mock fix.
 
 ## v0.3.14 — Shipped
 
