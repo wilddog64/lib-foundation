@@ -171,6 +171,16 @@ SCRIPT
   [ "$output" = "orbstack" ]
 }
 
+@test "_cluster_provider: noisy consumer hook does not corrupt provider output" {
+  run bash -c '
+    source "$1"
+    _cluster_provider_is_extra_supported() { echo "hook debug noise"; [[ "$1" == "k3s-foo" ]]; }
+    K3D_MANAGER_PROVIDER=k3s-foo _cluster_provider
+  ' _ "${BATS_TEST_DIRNAME}/../../lib/core.sh"
+  [ "$status" -eq 0 ]
+  [ "$output" = "k3s-foo" ]
+}
+
 # ── _deploy_cluster_resolve_provider ─────────────────────────────────────────
 
 @test "_deploy_cluster_resolve_provider: CLI flag takes precedence" {

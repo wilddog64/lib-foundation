@@ -21,7 +21,7 @@ function _cluster_provider() {
          ;;
       *)
          if declare -f _cluster_provider_is_extra_supported >/dev/null 2>&1 \
-            && _cluster_provider_is_extra_supported "$provider"; then
+            && _cluster_provider_is_extra_supported "$provider" >/dev/null; then
             printf '%s' "$provider"
          else
             _err "Unsupported cluster provider: $provider"
@@ -786,7 +786,7 @@ EOF
          ;;
       *)
          if declare -f _cluster_provider_is_extra_supported >/dev/null 2>&1 \
-            && _cluster_provider_is_extra_supported "$provider"; then
+            && _cluster_provider_is_extra_supported "$provider" >/dev/null; then
             :
          else
             _err "Unsupported cluster provider: $provider"
