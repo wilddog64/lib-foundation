@@ -5,6 +5,10 @@
 - [x] **Bugfix: `_run_command_resolve_sudo` TTY fallback** — DONE (`2f46d4be`). Spec: `docs/bugs/2026-05-29-sudo-no-tty-fallback.md`. Adds `sudo -n` fallback when stdin/stdout TTY not available. PR #29 merged to main.
 - [x] **BATS mock sudo flag-stripping** — DONE. Test fix ensures `sudo` mock in `system.bats` properly strips flags before execution (pattern: `while [[ $# -gt 0 && "$1" == -* ]]; do shift; done; "$@"`).
 
+## v0.3.21 Track (branch: `feat/v0.3.21`)
+
+- [x] **Feature: extensible cluster-provider validation via optional consumer hook** — DONE (`f7a9178`). Spec: `docs/bugs/2026-06-12-cluster-provider-extensibility-libfoundation.md`. `scripts/lib/core.sh` now consults optional `_cluster_provider_is_extra_supported` hooks in both `_cluster_provider()` case blocks, `scripts/tests/lib/core.bats` now covers the no-hook, hook-accepts-extra-provider, and base-provider-with-hook contract cases, and `CHANGE.md` records the Unreleased changelog note.
+
 ## v0.3.18 Track (branch: `feat/v0.3.18`)
 
 - [x] **Bugfix: `_copilot_auth_check` K3DM_ENABLE_AI gate** — DONE (`f0e29d9`). Spec: `docs/plans/v0.3.18-bugfix-copilot-auth-preflight.md`. Assigned to Codex.

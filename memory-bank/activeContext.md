@@ -8,7 +8,7 @@
 **v0.3.14 SHIPPED** — PR #20 squash-merged to main (`bbbaf053`) 2026-03-27. Tagged v0.3.14, GitHub release created. `enforce_admins` restored. 5 deferred Copilot PR #51 findings: agy binary detection, curl fast-fail, NUL audit loops, doc fix, CHANGE.md versioning.
 **feat/v0.3.18 ACTIVE** — `_copilot_auth_check` rewrite; PR #25 open.
 **v0.3.20 SHIPPED** — PR #29 merged to main (`2f46d4be`) 2026-05-30. Sudo no-TTY fallback + BATS mock fix. Unreleased (in [Unreleased] section of CHANGE.md).
-**feat/v0.3.21 ACTIVE** — post-merge retrospective written; ready for next spec.
+**feat/v0.3.21 COMPLETE** — commit `f7a9178` merged and pushed to `origin/feat/v0.3.21`; `scripts/lib/core.sh` now consults optional `_cluster_provider_is_extra_supported` hooks in both provider validation case blocks, the contract BATS coverage was extended, and `CHANGE.md` records the change under `[Unreleased]`; next step is the k3d-manager consumer-side registration spec.
 
 ---
 
