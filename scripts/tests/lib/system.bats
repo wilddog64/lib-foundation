@@ -162,6 +162,19 @@ bats_require_minimum_version 1.5.0
   unset -f _command_exist
 }
 
+@test "_ensure_agy_cli: errors when curl is missing" {
+  export HOME="${BATS_TEST_TMPDIR}"
+  _command_exist() { return 1; }
+  _err() { echo "$*"; exit 1; }
+  export -f _command_exist _err
+
+  run _ensure_agy_cli
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"curl is required"* ]]
+
+  unset -f _command_exist _err
+}
+
 @test "_ensure_agy_cli: installs via curl | bash into ~/.local/bin" {
   export HOME="${BATS_TEST_TMPDIR}"
   installed_bin="${HOME}/.local/bin/agy"

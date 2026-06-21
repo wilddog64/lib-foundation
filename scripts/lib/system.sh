@@ -870,9 +870,10 @@ function _ensure_agy_cli() {
    fi
 
    mkdir -p "$(dirname "${agy_bin}")"
-   curl -fsSL https://antigravity.google/cli/install.sh | bash
+   _run_command -- curl -fsSL https://antigravity.google/cli/install.sh | bash
 
    if [[ -x "${agy_bin}" ]]; then
+      hash -r 2>/dev/null || true
       return 0
    fi
 

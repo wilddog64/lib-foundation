@@ -2,7 +2,7 @@
 
 **Repository:** `wilddog64/lib-foundation`
 **Branch:** `feat/ensure-agy-cli`
-**Files:** `scripts/lib/system.sh`, `scripts/tests/lib/ensure_agy_cli.bats` (new)
+**Files:** `scripts/lib/system.sh`, `scripts/tests/lib/system.bats` (tests added to existing suite)
 
 ---
 
@@ -68,7 +68,7 @@ Notes:
 
 ---
 
-## 4. BATS coverage — `scripts/tests/lib/ensure_agy_cli.bats` (new)
+## 4. BATS coverage — `scripts/tests/lib/system.bats` (added to existing suite)
 
 Do **not** hit the network. Mock `_command_exist`, `curl`/`bash`, and `_run_command`.
 
@@ -104,7 +104,7 @@ Do **not** hit the network. Mock `_command_exist`, `curl`/`bash`, and `_run_comm
 | File | Change |
 |------|--------|
 | `scripts/lib/system.sh` | add `_ensure_agy_cli` |
-| `scripts/tests/lib/ensure_agy_cli.bats` | **new** — idempotency + missing-curl cases |
+| `scripts/tests/lib/system.bats` | **extended** — idempotency + install + missing-curl cases |
 | `CHANGE.md` | add `[Unreleased]` → `### Added` entry for `_ensure_agy_cli` |
 
 ---
