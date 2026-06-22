@@ -3,7 +3,7 @@
 ## v0.4.0 Track (branch: `feat/v0.4.0`) — Absorb lib-acg
 
 - [x] **Phase 0: finalize lib-acg standalone** — DONE (2026-06-22). lib-acg PR #46 merged; tagged `v0.1.9` (gravestone release) on `7708ae31`; GitHub release published; `enforce_admins` restored. Migration source SHA = `7708ae31b4cd17c1cf81209f07adc88866301b37`.
-- [ ] **Phase 1: import lib-acg runtime tree as `scripts/lib/acg/`** — ASSIGNED to Codex. Spec: `docs/plans/v0.4.0-phase1-import-acg-module.md` (committed `716379f`). Clean tree-copy + bootstrap/path rewire (`cdp.sh`/`acg.sh`/`gcp.sh`) + independent `acg` CI job + docs. Decisions locked: v0.4.0 / clean tree-copy / `npm ci`.
+- [x] **Phase 1: import lib-acg runtime tree as `scripts/lib/acg/`** — DONE (`0a7b6dd`). Spec: `docs/plans/v0.4.0-phase1-import-acg-module.md` (committed `716379f`). Clean tree-copy + bootstrap/path rewire (`cdp.sh`/`acg.sh`/`gcp.sh`) + independent `acg` CI job + docs. Validation passed with `shellcheck -S warning scripts/lib/acg/*.sh`, `bash -n scripts/lib/acg/*.sh`, `node --check` on the imported JS tree, `bats scripts/tests/lib/`, standalone source-load checks for `scripts/lib/acg/acg.sh` and `scripts/lib/acg/gcp.sh`, and `_agent_audit` with a temporary `AGENT_IP_ALLOWLIST` for `scripts/lib/acg/etc/acg-cluster.yaml` (intentional CIDRs; issue doc `docs/issues/2026-06-22-acg-cluster-cidr-audit-allowlist.md`). Decisions locked: v0.4.0 / clean tree-copy / `npm ci`.
 - [ ] **Phase 2: rewire k3d-manager** — drop old acg subtree, repoint stub, one subtree left. Separate spec on next k3d-manager branch.
 - [ ] **Phase 3: archive lib-acg repo** — README banner + GitHub archive (do not delete).
 

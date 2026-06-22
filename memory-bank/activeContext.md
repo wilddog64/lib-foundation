@@ -2,7 +2,7 @@
 
 ## Current State: `feat/v0.4.0` (as of 2026-06-22)
 
-**feat/v0.4.0 — Phase 1 ASSIGNED to Codex (2026-06-22)** — absorb lib-acg into lib-foundation as optional module `scripts/lib/acg/`. Phase 0 done (lib-acg `v0.1.9` tagged; migration source SHA `7708ae31`). Decisions locked: v0.4.0 / clean tree-copy / `npm ci`. Codex-ready spec: `docs/plans/v0.4.0-phase1-import-acg-module.md` (overview: `v0.4.0-absorb-lib-acg.md`), committed `716379f`. Phase 1 = import runtime tree + rewire `cdp.sh`/`acg.sh`/`gcp.sh` bootstrap+paths + independent `acg` CI job + docs. Phase 2 = rewire k3d-manager; Phase 3 = archive lib-acg. NOT yet implemented.
+**feat/v0.4.0 — Phase 1 COMPLETE (Codex, 2026-06-22)** — absorb lib-acg into lib-foundation as optional module `scripts/lib/acg/`. Phase 0 done (lib-acg `v0.1.9` tagged; migration source SHA `7708ae31`). Decisions locked: v0.4.0 / clean tree-copy / `npm ci`. Codex-ready spec: `docs/plans/v0.4.0-phase1-import-acg-module.md` (overview: `v0.4.0-absorb-lib-acg.md`), committed `716379f`. Phase 1 landed at commit `0a7b6dd` on `origin/feat/v0.4.0`: runtime tree imported under `scripts/lib/acg/`, `cdp.sh`/`acg.sh`/`gcp.sh` bootstraps rewired to `../system.sh` + flattened paths, `package.json` check script extended, `.github/workflows/ci.yaml` gained an independent `acg` job, and `docs/api/acg.md`/README/CLAUDE/copilot instructions/CHANGE.md were updated. Phase 2 = rewire k3d-manager; Phase 3 = archive lib-acg. Validation needed a temporary `AGENT_IP_ALLOWLIST` for `scripts/lib/acg/etc/acg-cluster.yaml` because the imported CloudFormation template intentionally contains CIDRs; see `docs/issues/2026-06-22-acg-cluster-cidr-audit-allowlist.md`.
 
 ## Current State: `feat/v0.3.21` (as of 2026-05-30)
 
