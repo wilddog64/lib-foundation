@@ -13,6 +13,7 @@
 
 ### Added
 - `scripts/lib/acg/`: optional ACG browser-automation module absorbed from lib-acg (source `7708ae31`, v0.1.9). Public API `acg_*` (AWS sandbox lifecycle) and `gcp_*` (GCP credential extraction); Chrome CDP primitives in `cdp.sh`; Playwright scripts under `playwright/`. Sources `../system.sh` for `_run_command` (no vendored foundation). Node deps are opt-in (`npm ci` in `scripts/lib/acg/`); sourcing core stays zero-node. Retires the lib-acg standalone repo + the 3-level subtree chain.
+- acg module: import `playwright.config.js`, hoist `bin/` entry points and a `Makefile` to the repo root (Phase 1 follow-up).
 - `scripts/lib/system.sh`: `_ensure_agy_cli` — install the standalone Antigravity agent CLI (`agy`) into `~/.local/bin` via `_run_command -- curl … | bash`; idempotent (no-op if `agy` on PATH or `~/.local/bin/agy` exists), user-scope (no sudo); refreshes the shell command hash after install. Distinct from `_ensure_antigravity_ide` (the IDE cask). Covered by 3 mocked BATS tests in `scripts/tests/lib/system.bats` (present, install, missing-curl).
 - `scripts/tests/lib/copilot_auth.bats`: 6-test BATS suite covering all auth paths — env token (3 variants), `apps.json`, `gh auth status` fallback, and failure with clear error message (`f0e29d9`)
 - `scripts/tests/lib/agent_rigor.bats`: 2 new tests — `_agent_lint` picks up staged `.js` and `.md` files via `AGENT_LINT_AI_FUNC` mock

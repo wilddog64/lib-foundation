@@ -74,6 +74,7 @@ jobs:
         run: npm test
 
       - name: shellcheck bin scripts
+        working-directory: ${{ github.workspace }}
         run: |
           sudo apt-get install -y shellcheck
           shellcheck -S warning bin/acg-credential-test bin/acg-extend-test
