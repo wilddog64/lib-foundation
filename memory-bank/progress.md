@@ -1,5 +1,12 @@
 # Progress — lib-foundation
 
+## v0.4.0 Track (branch: `feat/v0.4.0`) — Absorb lib-acg
+
+- [x] **Phase 0: finalize lib-acg standalone** — DONE (2026-06-22). lib-acg PR #46 merged; tagged `v0.1.9` (gravestone release) on `7708ae31`; GitHub release published; `enforce_admins` restored. Migration source SHA = `7708ae31b4cd17c1cf81209f07adc88866301b37`.
+- [ ] **Phase 1: import lib-acg runtime tree as `scripts/lib/acg/`** — ASSIGNED to Codex. Spec: `docs/plans/v0.4.0-phase1-import-acg-module.md` (committed `716379f`). Clean tree-copy + bootstrap/path rewire (`cdp.sh`/`acg.sh`/`gcp.sh`) + independent `acg` CI job + docs. Decisions locked: v0.4.0 / clean tree-copy / `npm ci`.
+- [ ] **Phase 2: rewire k3d-manager** — drop old acg subtree, repoint stub, one subtree left. Separate spec on next k3d-manager branch.
+- [ ] **Phase 3: archive lib-acg repo** — README banner + GitHub archive (do not delete).
+
 ## v0.3.20 Track (branch: `feat/v0.3.20`)
 
 - [x] **Bugfix: `_run_command_resolve_sudo` TTY fallback** — DONE (`2f46d4be`). Spec: `docs/bugs/2026-05-29-sudo-no-tty-fallback.md`. Adds `sudo -n` fallback when stdin/stdout TTY not available. PR #29 merged to main.

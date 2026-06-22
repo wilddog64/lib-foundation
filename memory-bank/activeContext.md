@@ -1,5 +1,9 @@
 # Active Context — lib-foundation
 
+## Current State: `feat/v0.4.0` (as of 2026-06-22)
+
+**feat/v0.4.0 — Phase 1 ASSIGNED to Codex (2026-06-22)** — absorb lib-acg into lib-foundation as optional module `scripts/lib/acg/`. Phase 0 done (lib-acg `v0.1.9` tagged; migration source SHA `7708ae31`). Decisions locked: v0.4.0 / clean tree-copy / `npm ci`. Codex-ready spec: `docs/plans/v0.4.0-phase1-import-acg-module.md` (overview: `v0.4.0-absorb-lib-acg.md`), committed `716379f`. Phase 1 = import runtime tree + rewire `cdp.sh`/`acg.sh`/`gcp.sh` bootstrap+paths + independent `acg` CI job + docs. Phase 2 = rewire k3d-manager; Phase 3 = archive lib-acg. NOT yet implemented.
+
 ## Current State: `feat/v0.3.21` (as of 2026-05-30)
 
 **v0.3.11 SHIPPED** — PR #17 merged to main (`2625683`) 2026-03-25. Tagged v0.3.11, GitHub release created. `enforce_admins` restored.
