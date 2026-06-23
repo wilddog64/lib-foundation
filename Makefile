@@ -8,7 +8,7 @@ _ACG_DIR := scripts/lib/acg
 
 help:
 	@printf 'ACG module targets (module lives in $(_ACG_DIR)):\n'
-	@printf '  setup             — npm install + download Playwright Chromium browser\n'
+	@printf '  setup             — npm ci + download Playwright Chromium browser\n'
 	@printf '  check             — node --check all module JS files\n'
 	@printf '  lint              — shellcheck bin/ entry-point scripts\n'
 	@printf '  test              — run fixture-based Playwright tests (no live session needed)\n'
@@ -22,7 +22,7 @@ help:
 	@printf '                      optional: PROVIDER=aws|gcp|az  (default: aws)\n'
 
 setup:
-	cd $(_ACG_DIR) && npm install && npx playwright install chromium
+	cd $(_ACG_DIR) && npm ci && npx playwright install chromium
 
 check:
 	cd $(_ACG_DIR) && npm run check
