@@ -2,24 +2,33 @@
 
 ## [Unreleased]
 
-### Changed
+## [v0.4.0] — 2026-06-22
 
-- Make `_cluster_provider` validation extensible via optional `_cluster_provider_is_extra_supported` consumer hook
-
-### Fixed
-- `scripts/lib/system.sh`: `_run_command_resolve_sudo` — fall back to `sudo -n` when no TTY is present; fixes `sudo: unable to allocate pty: Device not configured` failures when non-interactive shells call `_run_command --interactive-sudo` (e.g., `make up` from a terminal with cached sudo credentials)
-- `scripts/lib/system.sh`: `_copilot_review` — add `--allow-all-tools` flag and close malformed `--deny-tool` patterns (`shell(sudo`, `shell(eval`, `shell(curl`, `shell(wget` were missing closing `)`) — Copilot CLI exits 1 on malformed patterns, blocking all `_ai_agent_review` callers (`713c18e`)
-- `scripts/lib/system.sh`: `_copilot_auth_check` — remove `K3DM_ENABLE_AI` gate; check env tokens (`COPILOT_GITHUB_TOKEN`/`GH_TOKEN`/`GITHUB_TOKEN`), then `~/.config/github-copilot/apps.json`, then `gh auth status`; `_err` on failure with clear message — Copilot v1.0.40 has no `auth status` subcommand (`f0e29d9`, `eede5c3`)
+Absorbs the standalone lib-acg repo as an optional module and retires the 3-level subtree chain (PR #32, merged `aed8c56`).
 
 ### Added
 - `scripts/lib/acg/`: optional ACG browser-automation module absorbed from lib-acg (source `7708ae31`, v0.1.9). Public API `acg_*` (AWS sandbox lifecycle) and `gcp_*` (GCP credential extraction); Chrome CDP primitives in `cdp.sh`; Playwright scripts under `playwright/`. Sources `../system.sh` for `_run_command` (no vendored foundation). Node deps are opt-in (`npm ci` in `scripts/lib/acg/`); sourcing core stays zero-node. Retires the lib-acg standalone repo + the 3-level subtree chain.
 - acg module: import `playwright.config.js`; add a repo-root `Makefile` that `cd`s into `scripts/lib/acg` before invoking the `bin/` entry points. The `bin/` scripts stay module-local (matching the upstream lib-acg layout) so the live browser flow runs with the module as its working directory — a hoisted repo-root `bin/` regressed the Playwright sandbox-delete flow (Phase 1 follow-up).
 - `scripts/lib/system.sh`: `_ensure_agy_cli` — install the standalone Antigravity agent CLI (`agy`) into `~/.local/bin` via `_run_command -- curl … | bash`; idempotent (no-op if `agy` on PATH or `~/.local/bin/agy` exists), user-scope (no sudo); refreshes the shell command hash after install. Distinct from `_ensure_antigravity_ide` (the IDE cask). Covered by 3 mocked BATS tests in `scripts/tests/lib/system.bats` (present, install, missing-curl).
-- `scripts/tests/lib/copilot_auth.bats`: 6-test BATS suite covering all auth paths — env token (3 variants), `apps.json`, `gh auth status` fallback, and failure with clear error message (`f0e29d9`)
-- `scripts/tests/lib/agent_rigor.bats`: 2 new tests — `_agent_lint` picks up staged `.js` and `.md` files via `AGENT_LINT_AI_FUNC` mock
+- `scripts/tests/lib/agent_rigor.bats`: 2 new tests — `_agent_lint` picks up staged `.js` and `.md` files via `AGENT_LINT_AI_FUNC` mock (PR #27, #28)
 
 ### Changed
-- `docs/api/functions.md`: remove stale `export K3DM_ENABLE_AI=1` from `_copilot_review` usage example; fix `_agent_lint` pre-commit hook example to use `ENABLE_AGENT_LINT=1` instead of `K3DM_ENABLE_AI`; correct gate variable description
+- Make `_cluster_provider` validation extensible via optional `_cluster_provider_is_extra_supported` consumer hook (PR #30)
+- `docs/api/functions.md`: remove stale `export K3DM_ENABLE_AI=1` from `_copilot_review` usage example; fix `_agent_lint` pre-commit hook example to use `ENABLE_AGENT_LINT=1` instead of `K3DM_ENABLE_AI`; correct gate variable description (PR #27, #28)
+
+### Fixed
+- `scripts/lib/system.sh`: `_run_command_resolve_sudo` — fall back to `sudo -n` when no TTY is present; fixes `sudo: unable to allocate pty: Device not configured` failures when non-interactive shells call `_run_command --interactive-sudo` (e.g., `make up` from a terminal with cached sudo credentials) (PR #29)
+
+## [v0.3.19] — 2026-05-03
+
+Back-filled (2026-06-22): tag `v0.3.19` (`45040e2`) was cut straight off `[Unreleased]` without a section. Supersedes the never-tagged v0.3.18 (its `_copilot_auth_check` work shipped here).
+
+### Added
+- `scripts/tests/lib/copilot_auth.bats`: 6-test BATS suite covering all auth paths — env token (3 variants), `apps.json`, `gh auth status` fallback, and failure with clear error message (`f0e29d9`)
+
+### Fixed
+- `scripts/lib/system.sh`: `_copilot_review` — add `--allow-all-tools` flag and close malformed `--deny-tool` patterns (`shell(sudo`, `shell(eval`, `shell(curl`, `shell(wget` were missing closing `)`) — Copilot CLI exits 1 on malformed patterns, blocking all `_ai_agent_review` callers (`713c18e`)
+- `scripts/lib/system.sh`: `_copilot_auth_check` — remove `K3DM_ENABLE_AI` gate; check env tokens (`COPILOT_GITHUB_TOKEN`/`GH_TOKEN`/`GITHUB_TOKEN`), then `~/.config/github-copilot/apps.json`, then `gh auth status`; `_err` on failure with clear message — Copilot v1.0.40 has no `auth status` subcommand (`f0e29d9`, `eede5c3`)
 
 ## [v0.3.17] — 2026-05-01
 
