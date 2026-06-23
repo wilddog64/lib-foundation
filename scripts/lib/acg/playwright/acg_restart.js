@@ -4,8 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 
-const CDP_HOST = '127.0.0.1';
-const CDP_PORT = '9222';
+const CDP_HOST = process.env.PLAYWRIGHT_CDP_HOST || '127.0.0.1';
+const CDP_PORT = process.env.PLAYWRIGHT_CDP_PORT || '9222';
 const CDP_URL = `http://${CDP_HOST}:${CDP_PORT}`;
 
 /**

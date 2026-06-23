@@ -3,7 +3,9 @@
 
 const { chromium } = require('playwright');
 
-const CDP_URL = 'http://127.0.0.1:9222';
+const CDP_HOST = process.env.PLAYWRIGHT_CDP_HOST || '127.0.0.1';
+const CDP_PORT = process.env.PLAYWRIGHT_CDP_PORT || '9222';
+const CDP_URL = `http://${CDP_HOST}:${CDP_PORT}`;
 const SANDBOX_URL = 'https://app.pluralsight.com/hands-on/playground/cloud-sandboxes';
 const SIGNIN_URL = 'https://app.pluralsight.com/id/signin';
 const POLL_INTERVAL_MS = 5000;

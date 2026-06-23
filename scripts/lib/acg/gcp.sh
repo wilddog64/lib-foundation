@@ -98,9 +98,21 @@ HELP
     return 1
   fi
 
-  # Load credentials into shell memory (not stdout) and immediately scrub the file
-  # shellcheck source=/dev/null
-  source "${creds_tmp}"
+  # Parse credentials into shell memory WITHOUT executing the file. The values are
+  # browser-extracted external input — sourcing would allow shell injection. Only
+  # known keys are honored; values are assigned literally, never evaluated.
+  local GCP_PROJECT="" GOOGLE_APPLICATION_CREDENTIALS="" GCP_USERNAME="" GCP_PASSWORD=""
+  local _cred_line _cred_key _cred_val
+  while IFS= read -r _cred_line || [[ -n "${_cred_line}" ]]; do
+    _cred_key="${_cred_line%%=*}"
+    _cred_val="${_cred_line#*=}"
+    case "${_cred_key}" in
+      GCP_PROJECT) GCP_PROJECT="${_cred_val}" ;;
+      GOOGLE_APPLICATION_CREDENTIALS) GOOGLE_APPLICATION_CREDENTIALS="${_cred_val}" ;;
+      GCP_USERNAME) GCP_USERNAME="${_cred_val}" ;;
+      GCP_PASSWORD) GCP_PASSWORD="${_cred_val}" ;;
+    esac
+  done < "${creds_tmp}"
   rm -f "${creds_tmp}"
 
   # Map extracted vars to canonical names

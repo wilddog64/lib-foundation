@@ -295,8 +295,8 @@ HELP
     return 1
   fi
 
-  if ! curl -sf http://localhost:9222/json >/dev/null 2>&1; then
-    _info "[acg] Chrome CDP not available on port 9222 — launching Chrome..."
+  if ! curl -sf "http://${PLAYWRIGHT_CDP_HOST:-127.0.0.1}:${_ACG_CHROME_CDP_PORT}/json" >/dev/null 2>&1; then
+    _info "[acg] Chrome CDP not available on port ${_ACG_CHROME_CDP_PORT} — launching Chrome..."
     _browser_launch
     _antigravity_browser_ready 30
   fi

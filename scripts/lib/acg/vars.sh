@@ -1,9 +1,9 @@
 # shellcheck shell=bash
-# scripts/etc/playwright/vars.sh
+# scripts/lib/acg/vars.sh
 #
 # Single source of truth for Playwright automation constants.
-# Sourced by scripts/plugins/acg.sh and scripts/plugins/gcp.sh; also read by
-# scripts/playwright/*.js via argv (not by sourcing — node cannot source bash).
+# Sourced by scripts/lib/acg/acg.sh and scripts/lib/acg/gcp.sh; also read by
+# scripts/lib/acg/playwright/*.js via argv (not by sourcing — node cannot source bash).
 #
 # CRITICAL: PLAYWRIGHT_AUTH_DIR holds the Chrome profile with your Pluralsight
 # session cookies. Deleting it forces manual re-login and can trigger ACG
@@ -17,5 +17,5 @@ export PLAYWRIGHT_CDP_PORT="9222"
 
 # Persistent Chrome profile used for CDP automation (shared with launchd job
 # com.k3d-manager.chrome-cdp). Path must match _ACG_CHROME_CDP_AUTH_DIR in
-# scripts/plugins/acg.sh.
+# scripts/lib/acg/acg.sh.
 export PLAYWRIGHT_AUTH_DIR="${HOME}/.local/share/k3d-manager/profile"

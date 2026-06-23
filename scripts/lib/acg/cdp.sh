@@ -64,15 +64,17 @@ function _cdp_remove_stale_singleton_lock() {
 }
 
 function _browser_launch() {
+  local _cdp_host="${PLAYWRIGHT_CDP_HOST:-127.0.0.1}"
+  local _cdp_port="${PLAYWRIGHT_CDP_PORT:-9222}"
   if ! _command_exist curl; then
     _err "curl is required for Antigravity browser probe — install curl and retry"
   fi
-  if _run_command --soft -- curl -sf http://localhost:9222/json >/dev/null 2>&1; then
+  if _run_command --soft -- curl -sf "http://${_cdp_host}:${_cdp_port}/json" >/dev/null 2>&1; then
     return 0
   fi
   _cdp_stop_chrome_cdp_agent
   _cdp_remove_stale_singleton_lock
-  _info "Chrome not running — launching with --remote-debugging-port=9222..."
+  _info "Chrome not running — launching with --remote-debugging-port=${_cdp_port}..."
   local _cdp_profile_dir="${PLAYWRIGHT_AUTH_DIR:-${HOME}/.local/share/k3d-manager/profile}"
   if [[ "$(uname)" == "Darwin" ]]; then
     local _chrome_app_bin="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
@@ -80,7 +82,7 @@ function _browser_launch() {
       local _chrome_cdp_log="${HOME}/.local/share/k3d-manager/chrome-cdp.log"
       mkdir -p "$(dirname "${_chrome_cdp_log}")"
       "${_chrome_app_bin}" \
-        --remote-debugging-port=9222 \
+        --remote-debugging-port="${_cdp_port}" \
         --password-store=basic \
         --user-data-dir="${_cdp_profile_dir}" \
         --no-first-run \
@@ -88,7 +90,7 @@ function _browser_launch() {
         >>"${_chrome_cdp_log}" 2>&1 &
     else
       open -a "Google Chrome" --args \
-        --remote-debugging-port=9222 \
+        --remote-debugging-port="${_cdp_port}" \
         --password-store=basic \
         --user-data-dir="${_cdp_profile_dir}"
     fi
