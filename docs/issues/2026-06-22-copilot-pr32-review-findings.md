@@ -27,9 +27,13 @@ The `Makefile` is a lib-foundation-authored delegating wrapper (not imported ver
 These were pre-existing in the verbatim lib-acg import (`7708ea31`). The user elected to fold the
 full hardening into PR #32 rather than defer. Spec: `docs/bugs/2026-06-22-acg-cdp-env-and-creds-injection-hardening.md`.
 All 8 changes applied; `npm run check` + `npm test` (10/10) + `shellcheck -S warning` green; defaults
-unchanged (`127.0.0.1:9222`). **Note:** the live GCP-extract and `PLAYWRIGHT_CDP_PORT`-override paths
-were not re-exercised in this session — recommend a `make credential-test PROVIDER=aws` regression
-re-run (touches the CDP probe path) plus a GCP/override smoke before merge.
+unchanged (`127.0.0.1:9222`). **Live re-run (2026-06-22):** `make credential-test PROVIDER=aws`
+PASSED both scenarios (sandbox-exists reuse + sandbox-delete/restart), ending in
+`sts:GetCallerIdentity OK` — the threaded CDP host/port did not regress the live AWS flow. The
+GCP-extract and `PLAYWRIGHT_CDP_PORT`-override paths remain unexercised live (low risk; defaults
+unchanged). Separately, the live run surfaced a pre-existing (non-PR-#32) bug: `acg-credential-test:277`
+calls an undefined `_sts_valid`, forcing a spurious sandbox restart on every happy-path run — tracked
+as a follow-up in `memory-bank/progress.md`.
 
 | # | File:line | Finding | Severity |
 |---|-----------|---------|----------|
