@@ -22,14 +22,14 @@ The `Makefile` is a lib-foundation-authored delegating wrapper (not imported ver
 
 ---
 
-## Deferred — pre-existing imported lib-acg code (hardening backlog)
+## Fixed in PR #32 — hardening commit `cbe203f`
 
-These are legitimate findings, but every one is **byte-identical to lib-acg `7708ea31`** and runs
-in production today. Fixing them inside this absorption PR would (a) deviate from the verbatim import
-the migration depends on, (b) mix hardening into an import PR, and (c) for the runtime browser/CDP
-paths, cannot be live-validated right now (only the AWS credential path was exercised; GCP/Azure and
-CDP-override paths were not). They are deferred to a dedicated **acg hardening pass** after the
-absorption lands.
+These were pre-existing in the verbatim lib-acg import (`7708ea31`). The user elected to fold the
+full hardening into PR #32 rather than defer. Spec: `docs/bugs/2026-06-22-acg-cdp-env-and-creds-injection-hardening.md`.
+All 8 changes applied; `npm run check` + `npm test` (10/10) + `shellcheck -S warning` green; defaults
+unchanged (`127.0.0.1:9222`). **Note:** the live GCP-extract and `PLAYWRIGHT_CDP_PORT`-override paths
+were not re-exercised in this session — recommend a `make credential-test PROVIDER=aws` regression
+re-run (touches the CDP probe path) plus a GCP/override smoke before merge.
 
 | # | File:line | Finding | Severity |
 |---|-----------|---------|----------|
@@ -44,20 +44,26 @@ absorption lands.
 | 11 | `playwright/acg_restart.js:9` | hard-codes CDP host/port instead of honoring env | med (config) |
 | 12 | `acg_session_check.js:6` | CDP URL hard-coded `127.0.0.1:9222`, ignores `PLAYWRIGHT_CDP_HOST/PORT` | med (config) |
 
-### Proposed hardening pass (follow-up, not this PR)
+### How each was fixed (commit `cbe203f`)
 
-- **CDP port/host consistency (#7–#12):** thread `PLAYWRIGHT_CDP_HOST`/`PLAYWRIGHT_CDP_PORT` through
-  every CDP entry point (`cdp.sh`, `acg.sh`, the three JS scripts) so overrides work uniformly.
-  Requires a live CDP-override smoke test before merge.
-- **gcp.sh creds injection (#2) + output.js perms (#1):** replace `source <credsfile>` with a safe
-  key=value parser (no shell evaluation) and harden the creds-file write. Requires a live GCP
-  sandbox to validate the GCP credential path.
+- **CDP port/host consistency (#7–#12):** `PLAYWRIGHT_CDP_HOST`/`PLAYWRIGHT_CDP_PORT` threaded through
+  every CDP entry point (`cdp.sh` `_browser_launch`, `acg.sh` probe, `acg_extend.js`, `acg_restart.js`,
+  `acg_session_check.js`). Defaults unchanged.
+- **gcp.sh creds injection (#2):** `source "${creds_tmp}"` replaced with an allowlisted key=value
+  parser (`GCP_PROJECT`/`GOOGLE_APPLICATION_CREDENTIALS`/`GCP_USERNAME`/`GCP_PASSWORD`) — values
+  assigned literally, never evaluated.
+- **output.js perms (#1):** `fs.chmodSync(credsFile, 0o600)` added after the write so the mode is
+  enforced on pre-existing creds files.
+- **vars.sh stale comments (#3, #4):** updated to the `scripts/lib/acg/...` module paths.
+
+All 12 Copilot threads replied to with the fix SHA and resolved.
 
 ---
 
 ## Process note
 
 The verbatim-import principle and the "address Copilot findings" gate are in tension for an
-absorption PR. Resolution: fix findings on **PR-authored files**, defer findings on **verbatim-imported
-files** to a tracked hardening pass with live validation. This keeps the import faithful and avoids
-re-regressing the live flow.
+absorption PR. Resolution adopted here: fix findings on **PR-authored files** immediately; for
+**verbatim-imported** files, write a spec first (`docs/bugs/`) and — when the user opts in, as they
+did for PR #32 — apply it in-PR with the defaults held constant, so the import stays behavior-faithful
+and the live flow is not re-regressed.
