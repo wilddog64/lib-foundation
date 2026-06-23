@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- `scripts/lib/acg/bin/acg-credential-test`: replace call to the undefined `_sts_valid` (exited 127 → `!` always-true → spurious sandbox restart on every happy-path AWS run) with the canonical inline `AWS_CONFIG_FILE=/dev/null aws sts get-caller-identity` probe. Pre-existing, imported verbatim from lib-acg `7708ae31`.
+
 ## [v0.4.0] — 2026-06-22
 
 Absorbs the standalone lib-acg repo as an optional module and retires the 3-level subtree chain (PR #32, merged `aed8c56`).
