@@ -4,7 +4,7 @@
   "description": "ACG browser automation \u2014 Chrome CDP, Playwright, credential extraction",
   "private": true,
   "scripts": {
-    "check": "node --check acg_session_check.js playwright/*.js playwright/lib/*.js playwright/providers/*.js",
+    "check": "node --check playwright/*.js playwright/lib/*.js playwright/providers/*.js",
     "test": "jest",
     "test:e2e": "npx playwright test"
   },

@@ -31,15 +31,15 @@ test:
 	cd $(_ACG_DIR) && npx playwright test --config playwright.config.js
 
 lint:
-	shellcheck -S warning bin/acg-credential-test bin/acg-extend-test
+	shellcheck -S warning $(_ACG_DIR)/bin/acg-credential-test $(_ACG_DIR)/bin/acg-extend-test
 
 credential-test:
-	bin/acg-credential-test "$(_ACG_URL)" --provider "$(_PROVIDER)"
+	cd $(_ACG_DIR) && bin/acg-credential-test "$(_ACG_URL)" --provider "$(_PROVIDER)"
 
 restart-test:
-	bin/acg-credential-test "$(_ACG_URL)" --provider "$(_PROVIDER)" --force-restart
+	cd $(_ACG_DIR) && bin/acg-credential-test "$(_ACG_URL)" --provider "$(_PROVIDER)" --force-restart
 
 extend-test:
-	bin/acg-extend-test "$(_ACG_URL)" --provider "$(_PROVIDER)"
+	cd $(_ACG_DIR) && bin/acg-extend-test "$(_ACG_URL)" --provider "$(_PROVIDER)"
 
 all: check lint test credential-test restart-test extend-test
