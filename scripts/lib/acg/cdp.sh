@@ -20,7 +20,7 @@ fi
 _CDP_CHROME_CDP_LABEL="${CDP_CHROME_CDP_LABEL:-com.k3d-manager.chrome-cdp}"
 
 function _cdp_profile_in_use() {
-  local _cdp_profile_dir="${PLAYWRIGHT_AUTH_DIR:-${HOME}/.local/share/k3d-manager/profile}"
+  local _cdp_profile_dir="${PLAYWRIGHT_AUTH_DIR:-${HOME}/.local/share/k3d-manager/pw-profile}"
   local _profile_arg="--user-data-dir=${_cdp_profile_dir}"
 
   ps -ax -o command= | awk -v profile="${_profile_arg}" '
@@ -48,7 +48,7 @@ function _cdp_stop_chrome_cdp_agent() {
 }
 
 function _cdp_remove_stale_singleton_lock() {
-  local _cdp_profile_dir="${PLAYWRIGHT_AUTH_DIR:-${HOME}/.local/share/k3d-manager/profile}"
+  local _cdp_profile_dir="${PLAYWRIGHT_AUTH_DIR:-${HOME}/.local/share/k3d-manager/pw-profile}"
   local _singleton_lock="${_cdp_profile_dir}/SingletonLock"
 
   if [[ ! -e "${_singleton_lock}" ]]; then
@@ -76,25 +76,22 @@ function _browser_launch() {
   _cdp_stop_chrome_cdp_agent
   _cdp_remove_stale_singleton_lock
   _info "Chrome not running — launching with --remote-debugging-port=${_cdp_port}..."
-  local _cdp_profile_dir="${PLAYWRIGHT_AUTH_DIR:-${HOME}/.local/share/k3d-manager/profile}"
+  local _cdp_profile_dir="${PLAYWRIGHT_AUTH_DIR:-${HOME}/.local/share/k3d-manager/pw-profile}"
   if [[ "$(uname)" == "Darwin" ]]; then
-    local _chrome_app_bin="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-    if [[ -x "${_chrome_app_bin}" ]]; then
-      local _chrome_cdp_log="${HOME}/.local/share/k3d-manager/chrome-cdp.log"
-      mkdir -p "$(dirname "${_chrome_cdp_log}")"
-      "${_chrome_app_bin}" \
-        --remote-debugging-port="${_cdp_port}" \
-        --password-store=basic \
-        --user-data-dir="${_cdp_profile_dir}" \
-        --no-first-run \
-        --no-default-browser-check \
-        >>"${_chrome_cdp_log}" 2>&1 &
-    else
-      open -a "Google Chrome" --args \
-        --remote-debugging-port="${_cdp_port}" \
-        --password-store=basic \
-        --user-data-dir="${_cdp_profile_dir}"
+    local _pw_chrome_bin
+    _pw_chrome_bin="$(NODE_PATH="${_LIB_ACG_ROOT}/node_modules" node -e 'process.stdout.write(require("playwright").chromium.executablePath())' 2>/dev/null || true)"
+    if [[ -z "${_pw_chrome_bin}" || ! -x "${_pw_chrome_bin}" ]]; then
+      _err "[acg] Playwright-managed Chromium not found — run 'npm install' (or 'npx playwright install chromium') in ${_LIB_ACG_ROOT}"
     fi
+    local _chrome_cdp_log="${HOME}/.local/share/k3d-manager/chrome-cdp.log"
+    mkdir -p "$(dirname "${_chrome_cdp_log}")"
+    "${_pw_chrome_bin}" \
+      --remote-debugging-port="${_cdp_port}" \
+      --password-store=basic \
+      --user-data-dir="${_cdp_profile_dir}" \
+      --no-first-run \
+      --no-default-browser-check \
+      >>"${_chrome_cdp_log}" 2>&1 &
   else
     _err "[acg] _browser_launch is macOS-only — $(uname) is not supported"
   fi
