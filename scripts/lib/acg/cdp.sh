@@ -70,7 +70,8 @@ function _browser_launch() {
     _err "curl is required for Antigravity browser probe — install curl and retry"
   fi
   if _run_command --soft -- curl -sf "http://${_cdp_host}:${_cdp_port}/json" >/dev/null 2>&1; then
-    return 0
+    _cdp_ensure_acg_session
+    return $?
   fi
   _cdp_stop_chrome_cdp_agent
   _cdp_remove_stale_singleton_lock
@@ -98,6 +99,7 @@ function _browser_launch() {
     _err "[acg] _browser_launch is macOS-only — $(uname) is not supported"
   fi
   _antigravity_browser_ready 30
+  _cdp_ensure_acg_session
 }
 
 function _cdp_ensure_acg_session() {

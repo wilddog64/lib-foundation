@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- `scripts/lib/acg/cdp.sh`: wire `_cdp_ensure_acg_session` into `_browser_launch` on both the already-running and freshly-launched Chrome CDP paths, so headless Pluralsight login runs before AWS sandbox credential extraction instead of falling through to stale credentials and `InvalidClientTokenId`.
+
 ## [v0.4.1] — 2026-07-06
 
 Headless Pluralsight auto-login for unattended AWS-sandbox provisioning (PR #33, merged `b7c849c`).
