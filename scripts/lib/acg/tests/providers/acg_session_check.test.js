@@ -57,20 +57,27 @@ describe('acg_session_check', () => {
     process.stdout.isTTY = originalIsTTY;
   });
 
-  test('no creds skips auto-login attempt', async () => {
+  test('no creds skips auto-login and fails fast without polling', async () => {
+    delete process.env.ACG_USERNAME;
+    delete process.env.ACG_PASSWORD;
     process.env.K3DM_NONINTERACTIVE = '1';
 
     await expect(sessionCheck._main()).rejects.toThrow('ACG_SESSION_EXPIRED');
 
     expect(loginLib.loginWithPage).not.toHaveBeenCalled();
+    expect(page.waitForTimeout).not.toHaveBeenCalled();
     expect(browser.close).toHaveBeenCalled();
   });
 
-  test('noninteractive logged-out session fails fast without polling', async () => {
+  test('noninteractive MFA-required session fails fast without polling', async () => {
+    process.env.ACG_USERNAME = 'ci@example.com';
+    process.env.ACG_PASSWORD = 'secret';
     process.env.K3DM_NONINTERACTIVE = '1';
+    loginLib.loginWithPage.mockResolvedValue({ ok: false, reason: 'mfa_required' });
 
     await expect(sessionCheck._main()).rejects.toThrow('ACG_SESSION_EXPIRED');
 
+    expect(loginLib.loginWithPage).toHaveBeenCalled();
     expect(page.waitForTimeout).not.toHaveBeenCalled();
     expect(browser.close).toHaveBeenCalled();
   });

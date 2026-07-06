@@ -65,7 +65,7 @@ async function _main() {
     }
 
     if (process.env.K3DM_NONINTERACTIVE === '1' || !process.stdout.isTTY) {
-      console.error('ACG_SESSION_EXPIRED: Pluralsight session not authenticated and auto-login unavailable — sign in on the host CDP Chrome (:9222) and re-run.');
+      console.error(`ACG_SESSION_EXPIRED: Pluralsight session not authenticated and auto-login unavailable — sign in on the host CDP Chrome (${CDP_URL}) and re-run.`);
       throw new Error('ACG_SESSION_EXPIRED');
     }
 
