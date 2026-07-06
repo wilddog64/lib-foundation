@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [v0.4.1] — 2026-07-06
+
+Headless Pluralsight auto-login for unattended AWS-sandbox provisioning (PR #33, merged `b7c849c`).
+
 ### Added
 - `scripts/lib/acg/`: headless Pluralsight auto-login for unattended provisioning (`bbc87ec`). New `playwright/acg_pluralsight_login.js` drives the sign-in flow over CDP; `playwright/lib/pluralsight_login.js` holds the shared `loginWithPage` helper (selectors + MFA detection) reused by both the login script and `acg_session_check.js`. `cdp.sh` now loads `k3dm-acg-pluralsight` credentials via `_secret_load_data` and passes them to the node scripts as `ACG_USERNAME`/`ACG_PASSWORD` env vars (never on argv), and threads `K3DM_NONINTERACTIVE`. `acg_session_check.js` fails fast (`ACG_LOGIN_NO_CREDS` / no polling) when non-interactive with no creds or an unsolvable MFA prompt, instead of hanging. Browser handles are released with `browser.close()` (not `disconnect()`) for CDP correctness. Covered by new `tests/providers/acg_session_check.test.js` and `tests/providers/pluralsight_login.test.js` (no-creds, non-interactive fast-fail, MFA-refuse branches).
 

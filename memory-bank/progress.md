@@ -12,6 +12,13 @@
 - [ ] **Phase 2: rewire k3d-manager** — drop old acg subtree, repoint stub, one subtree left. Separate spec on next k3d-manager branch.
 - [ ] **Phase 3: archive lib-acg repo** — README banner + GitHub archive (do not delete).
 
+## v0.4.1 Track (next branch: `feat/v0.4.2`) — ACG headless Pluralsight auto-login
+
+- [x] **PR #33 MERGED to main (`b7c849c`, 2026-07-06T02:56Z)** — headless Pluralsight auto-login + non-interactive fast-fail. Codex-implemented per 22-step spec, independently verified (SHAs on origin, scope under `scripts/lib/acg/`, creds via env not argv, `_secret_load_data <service> <key>` order). **TAGGED v0.4.1** (annotated tag at merge; GitHub release published). `feat/v0.4.2` cut from merge SHA; retro `docs/retro/2026-07-06-v0.4.1-retrospective.md`; CHANGE.md stamped `## [v0.4.1]`. No branch protection → no enforce_admins to restore.
+- [x] **Copilot PR #33 round** — 4 findings: #1 hard-coded CDP port in expiry msg (fixed, use `${CDP_URL}`), #2 `close()` vs `disconnect()` (DECLINED — `Browser.disconnect()` absent in Playwright 1.60.0), #3 duplicate no-creds tests → distinct no-creds + MFA-refuse branches (fixed), #4 retro version-history inconsistency (fixed). All 4 threads resolved. Fix `d9405bc`. Triage `docs/issues/2026-07-05-copilot-pr33-review-findings.md`.
+- [ ] **Downstream: k3d-manager subtree-pull v0.4.1** — pull `scripts/lib/foundation/` from `aed8c56` → `b7c849c` (tag v0.4.1) on `k3d-manager-v1.14.0`. Unblocked now the tag exists.
+- [ ] **Follow-up: `gcp_login.js:157` latent no-op `disconnect()`** — swallowed `TypeError`; replace with `close()` in a separate change.
+
 ## v0.3.20 Track (branch: `feat/v0.3.20`)
 
 - [x] **Bugfix: `_run_command_resolve_sudo` TTY fallback** — DONE (`2f46d4be`). Spec: `docs/bugs/2026-05-29-sudo-no-tty-fallback.md`. Adds `sudo -n` fallback when stdin/stdout TTY not available. PR #29 merged to main.
