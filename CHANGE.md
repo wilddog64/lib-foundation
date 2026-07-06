@@ -4,6 +4,7 @@
 
 ### Fixed
 - `scripts/lib/acg/cdp.sh`: wire `_cdp_ensure_acg_session` into `_browser_launch` on both the already-running and freshly-launched Chrome CDP paths, so headless Pluralsight login runs before AWS sandbox credential extraction instead of falling through to stale credentials and `InvalidClientTokenId`.
+- `scripts/lib/acg/bin/acg-credential-test`: run the existing `_cdp_ensure_acg_session` headless Pluralsight gate on the standalone `make credential-test` path, and make `playwright/lib/browser.js` fail clearly when CDP is reachable but exposes no usable context instead of attempting `launchPersistentContext` on the locked live profile.
 
 ## [v0.4.1] — 2026-07-06
 
