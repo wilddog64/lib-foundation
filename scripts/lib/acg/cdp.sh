@@ -66,17 +66,20 @@ function _cdp_remove_stale_singleton_lock() {
 function _browser_launch() {
   local _cdp_host="${PLAYWRIGHT_CDP_HOST:-127.0.0.1}"
   local _cdp_port="${PLAYWRIGHT_CDP_PORT:-9222}"
+  local _cdp_profile_dir="${PLAYWRIGHT_AUTH_DIR:-${HOME}/.local/share/k3d-manager/pw-profile}"
   if ! _command_exist curl; then
     _err "curl is required for Antigravity browser probe — install curl and retry"
   fi
   if _run_command --soft -- curl -sf "http://${_cdp_host}:${_cdp_port}/json" >/dev/null 2>&1; then
+    if ! _cdp_profile_in_use; then
+      _err "[acg] A browser is already listening on :${_cdp_port} but it is not the Playwright-managed Chromium (expected --user-data-dir=${_cdp_profile_dir}). Quit that browser — a stale system Chrome or CDP agent — and re-run. Connecting to a mismatched Chrome breaks CDP: 'Browser.setDownloadBehavior: Browser context management is not supported'."
+    fi
     _cdp_ensure_acg_session
     return $?
   fi
   _cdp_stop_chrome_cdp_agent
   _cdp_remove_stale_singleton_lock
   _info "Chrome not running — launching with --remote-debugging-port=${_cdp_port}..."
-  local _cdp_profile_dir="${PLAYWRIGHT_AUTH_DIR:-${HOME}/.local/share/k3d-manager/pw-profile}"
   if [[ "$(uname)" == "Darwin" ]]; then
     local _pw_chrome_bin
     _pw_chrome_bin="$(NODE_PATH="${_LIB_ACG_ROOT}/node_modules" node -e 'process.stdout.write(require("playwright").chromium.executablePath())' 2>/dev/null || true)"
