@@ -6,6 +6,7 @@
 - `scripts/lib/acg/playwright/lib/pluralsight_login.js`
 - `scripts/lib/acg/acg_session_check.js`
 - `scripts/lib/acg/tests/providers/pluralsight_login.test.js`
+- `scripts/lib/acg/tests/providers/acg_session_check.test.js`
 
 ---
 
@@ -187,6 +188,49 @@ describe('pageLooksLoggedIn render-race hardening', () => {
 });
 ```
 
+### Change 4 — `scripts/lib/acg/tests/providers/acg_session_check.test.js`: add `waitForLoadState` to the mock page
+
+`_main` now calls `page.waitForLoadState('networkidle', …)` after a successful nav. The
+existing `makePage()` mock lacks that method, so the call throws `TypeError` synchronously
+(before the `.catch(() => {})` can attach) and both existing tests crash. Add the missing
+method. `pageLooksLoggedIn` is mocked in this file, so the retry loop never runs here — only
+`_main`'s single `waitForLoadState` call needs to resolve.
+
+**Exact old block (lines 18–27):**
+
+```javascript
+function makePage() {
+  let currentUrl = 'https://signin.example';
+  return {
+    goto: jest.fn(async (url) => {
+      currentUrl = url;
+    }),
+    url: jest.fn(() => currentUrl),
+    waitForTimeout: jest.fn().mockResolvedValue(undefined),
+  };
+}
+```
+
+**Exact new block:**
+
+```javascript
+function makePage() {
+  let currentUrl = 'https://signin.example';
+  return {
+    goto: jest.fn(async (url) => {
+      currentUrl = url;
+    }),
+    url: jest.fn(() => currentUrl),
+    waitForLoadState: jest.fn().mockResolvedValue(undefined),
+    waitForTimeout: jest.fn().mockResolvedValue(undefined),
+  };
+}
+```
+
+The existing two assertions still hold: `page.waitForTimeout` is still never called on the
+no-creds / MFA-required paths (the real retry loop is mocked out), and both paths still reject
+with `ACG_SESSION_EXPIRED`.
+
 ---
 
 ## Files Changed
@@ -196,6 +240,7 @@ describe('pageLooksLoggedIn render-race hardening', () => {
 | `scripts/lib/acg/playwright/lib/pluralsight_login.js` | `pageLooksLoggedIn` retries across a settle window (backward-compatible via optional `attempts`) |
 | `scripts/lib/acg/acg_session_check.js` | Initial probe waits for `networkidle` + retries; nav failure logged not swallowed; post-login re-check retries |
 | `scripts/lib/acg/tests/providers/pluralsight_login.test.js` | Regression test: single-shot false-negative vs. retry success |
+| `scripts/lib/acg/tests/providers/acg_session_check.test.js` | Add `waitForLoadState` to the mock page so `_main`'s new `networkidle` settle does not crash the existing tests |
 
 ---
 
@@ -204,7 +249,7 @@ describe('pageLooksLoggedIn render-race hardening', () => {
 - `node --check scripts/lib/acg/acg_session_check.js` — must pass (NOTE: `npm run check` does
   NOT cover this file; run it explicitly)
 - `npm run check` — must pass (covers `playwright/**/*.js`)
-- `npm test` — jest green, all existing + 2 new tests pass
+- `npm test` — jest green, all existing + 2 new tests pass (the `acg_session_check.test.js` mock fix keeps its 2 existing tests green)
 - Do NOT change any selector in `LOGGED_IN_SELECTORS` — they are correct
 - Do NOT change credential/auto-login gating or the `ACG_SESSION_EXPIRED` non-interactive path
 - No other files touched
@@ -242,6 +287,6 @@ do NOT touch the k3d-manager subtree copy here.
 
 - Do NOT create a PR
 - Do NOT skip pre-commit hooks (`--no-verify`)
-- Do NOT modify any file other than the three listed targets
+- Do NOT modify any file other than the four listed targets
 - Do NOT edit the k3d-manager subtree copy at `scripts/lib/foundation/` — work only in the standalone lib-foundation repo
 - Do NOT commit to `main` — work on `feat/v0.4.3`
