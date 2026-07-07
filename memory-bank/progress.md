@@ -1,5 +1,9 @@
 # Progress — lib-foundation
 
+## v0.4.3 Track (branch: `feat/v0.4.3`) — ACG session-check hardening
+
+- [ ] **SPEC READY (Codex, 2026-07-07) — ACG session check render-race false-negative:** `docs/bugs/2026-07-07-acg-session-check-render-race-false-negative.md`. An already-signed-in reused CDP browser still triggered `ACTION REQUIRED: Please log into Pluralsight` during `make up` because the single-shot `pageLooksLoggedIn` probed the sandbox SPA before it painted (nav uses `domcontentloaded` + swallowed `.catch`). Fix (3 files: `pluralsight_login.js`, `acg_session_check.js`, `tests/providers/pluralsight_login.test.js`) adds a backward-compatible retry loop, a `networkidle` settle + `{attempts:4}` initial probe, and a jest regression test. No selector/credential-gating changes. Commit msg `fix(acg): retry logged-in detection to stop session-check render-race false negative`. Assigned to Codex; awaiting SHA on `origin/feat/v0.4.3`.
+
 ## v0.4.0 Track (next branch: `feat/v0.4.1`) — Absorb lib-acg
 
 - [x] **PR #32 MERGED to main (`aed8c56`, 2026-06-23T01:14Z)** — v0.4.0 acg absorption shipped (9 commits, 44 files). main fast-forwarded; `feat/v0.4.1` cut from the merge SHA; retro `docs/retro/2026-06-22-v0.4.0-retrospective.md`. **TAGGED v0.4.0** (2026-06-22, `647408a` on feat/v0.4.1): CHANGE.md split `[Unreleased]` → `## [v0.4.0]` + back-filled `## [v0.3.19]`; tag at merge `aed8c56`; GitHub release published. Drift resolved — tag v0.3.19 (`45040e2`) had no section; v0.3.18 + v0.3.20 never existed. Standing docs audited: `copilot-instructions.md` current (PR added acg coverage), acg functions live in `docs/api/acg.md` (not `functions.md`), `projectbrief.md` n/a for lib-foundation. No branch protection on main → no enforce_admins to restore.
