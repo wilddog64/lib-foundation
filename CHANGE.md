@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [v0.4.2] — 2026-07-06
+
+Headless CDP auto-login with stale-browser reclaim/reuse on the AWS-sandbox credential-test path (PR #34, merged `ae9fc73`).
+
 ### Fixed
 - `scripts/lib/acg/cdp.sh`: replace the BUG #4 reuse-branch hard error with a Playwright `connectOverCDP` health probe and automatic `:9222` reclaim, so healthy managed browsers are reused and stale, zombie, or version-mismatched listeners are terminated and relaunched instead of requiring a manual `kill`.
 - `scripts/lib/acg/cdp.sh`, `scripts/lib/acg/bin/acg-credential-test`: route `acg-credential-test` through `_browser_launch` so the managed browser self-launches on the credential-test path instead of adopting stale system Chrome. (An interim profile-identity hard-reject of foreign `:9222` listeners was superseded by the reuse/reclaim health probe above.)
