@@ -21,13 +21,24 @@ const MFA_SELECTORS = [
 ];
 
 async function anyVisible(page, selectors, timeoutMs) {
-  for (const selector of selectors) {
-    const locator = page.locator(selector).first();
-    if (await locator.isVisible({ timeout: timeoutMs }).catch(() => false)) {
-      return true;
-    }
+  const checks = selectors.map((selector) =>
+    page.locator(selector).first().isVisible({ timeout: timeoutMs }).catch(() => false),
+  );
+  if (checks.length === 0) {
+    return false;
   }
-  return false;
+  return new Promise((resolve) => {
+    let pending = checks.length;
+    for (const check of checks) {
+      check.then((visible) => {
+        if (visible) {
+          resolve(true);
+        } else if ((pending -= 1) === 0) {
+          resolve(false);
+        }
+      });
+    }
+  });
 }
 
 async function pageLooksLoggedIn(page, options) {
