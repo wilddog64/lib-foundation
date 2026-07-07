@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Fixed
+- `scripts/lib/acg/cdp.sh`: replace the BUG #4 reuse-branch hard error with a Playwright `connectOverCDP` health probe and automatic `:9222` reclaim, so healthy managed browsers are reused and stale, zombie, or version-mismatched listeners are terminated and relaunched instead of requiring a manual `kill`.
 - `scripts/lib/acg/cdp.sh`: reject a foreign browser already listening on `:9222` unless it is the Playwright-managed Chromium using the dedicated `pw-profile`, and route `scripts/lib/acg/bin/acg-credential-test` through `_browser_launch` so the managed browser self-launches on the credential-test path instead of adopting stale system Chrome.
 - `scripts/lib/acg/cdp.sh`: wire `_cdp_ensure_acg_session` into `_browser_launch` on both the already-running and freshly-launched Chrome CDP paths, so headless Pluralsight login runs before AWS sandbox credential extraction instead of falling through to stale credentials and `InvalidClientTokenId`.
 - `scripts/lib/acg/bin/acg-credential-test`: run the existing `_cdp_ensure_acg_session` headless Pluralsight gate on the standalone `make credential-test` path, and make `playwright/lib/browser.js` fail clearly when CDP is reachable but exposes no usable context instead of attempting `launchPersistentContext` on the locked live profile.

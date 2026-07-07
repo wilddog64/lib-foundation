@@ -63,6 +63,49 @@ function _cdp_remove_stale_singleton_lock() {
   rm -f "${_singleton_lock}"
 }
 
+function _cdp_connectable() {
+  local _cdp_host="${PLAYWRIGHT_CDP_HOST:-127.0.0.1}"
+  local _cdp_port="${PLAYWRIGHT_CDP_PORT:-9222}"
+  if ! _command_exist node; then
+    return 1
+  fi
+  if [[ ! -d "${_LIB_ACG_ROOT}/node_modules/playwright" ]]; then
+    return 1
+  fi
+  CDP_HOST="${_cdp_host}" CDP_PORT="${_cdp_port}" \
+  NODE_PATH="${_LIB_ACG_ROOT}/node_modules" \
+    node -e 'const{chromium}=require("playwright");chromium.connectOverCDP(`http://${process.env.CDP_HOST}:${process.env.CDP_PORT}`,{timeout:10000}).then(b=>b.close()).then(()=>process.exit(0)).catch(()=>process.exit(1));' >/dev/null 2>&1
+}
+
+function _cdp_kill_port_listener() {
+  local _cdp_port="${PLAYWRIGHT_CDP_PORT:-9222}"
+  if ! _command_exist lsof; then
+    _warn "[acg] lsof unavailable — cannot reclaim :${_cdp_port} automatically; quit the browser holding it and re-run"
+    return 0
+  fi
+  local _pids
+  _pids="$(lsof -nP -iTCP:"${_cdp_port}" -sTCP:LISTEN -t 2>/dev/null || true)"
+  if [[ -z "${_pids}" ]]; then
+    return 0
+  fi
+  _info "[acg] Reclaiming :${_cdp_port} — terminating the CDP browser holding it (pid(s): ${_pids//$'\n'/ })"
+  # shellcheck disable=SC2086
+  kill ${_pids} 2>/dev/null || true
+  local _w=0
+  while lsof -nP -iTCP:"${_cdp_port}" -sTCP:LISTEN -t >/dev/null 2>&1 && [[ ${_w} -lt 8 ]]; do
+    sleep 1
+    _w=$((_w + 1))
+  done
+  if lsof -nP -iTCP:"${_cdp_port}" -sTCP:LISTEN -t >/dev/null 2>&1; then
+    _pids="$(lsof -nP -iTCP:"${_cdp_port}" -sTCP:LISTEN -t 2>/dev/null || true)"
+    if [[ -n "${_pids}" ]]; then
+      # shellcheck disable=SC2086
+      kill -9 ${_pids} 2>/dev/null || true
+      sleep 1
+    fi
+  fi
+}
+
 function _browser_launch() {
   local _cdp_host="${PLAYWRIGHT_CDP_HOST:-127.0.0.1}"
   local _cdp_port="${PLAYWRIGHT_CDP_PORT:-9222}"
@@ -71,11 +114,13 @@ function _browser_launch() {
     _err "curl is required for Antigravity browser probe — install curl and retry"
   fi
   if _run_command --soft -- curl -sf "http://${_cdp_host}:${_cdp_port}/json" >/dev/null 2>&1; then
-    if ! _cdp_profile_in_use; then
-      _err "[acg] A browser is already listening on :${_cdp_port} but it is not the Playwright-managed Chromium (expected --user-data-dir=${_cdp_profile_dir}). Quit that browser — a stale system Chrome or CDP agent — and re-run. Connecting to a mismatched Chrome breaks CDP: 'Browser.setDownloadBehavior: Browser context management is not supported'."
+    if _cdp_connectable; then
+      _info "[acg] Reusing existing CDP browser on :${_cdp_port}"
+      _cdp_ensure_acg_session
+      return $?
     fi
-    _cdp_ensure_acg_session
-    return $?
+    _info "[acg] A browser is on :${_cdp_port} but Playwright cannot drive it (stale/zombie or version-mismatched) — reclaiming the port and relaunching the managed Chromium."
+    _cdp_kill_port_listener
   fi
   _cdp_stop_chrome_cdp_agent
   _cdp_remove_stale_singleton_lock
