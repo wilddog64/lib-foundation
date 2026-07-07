@@ -72,6 +72,7 @@ function _cdp_connectable() {
   if [[ ! -d "${_LIB_ACG_ROOT}/node_modules/playwright" ]]; then
     return 1
   fi
+  # shellcheck disable=SC2016
   CDP_HOST="${_cdp_host}" CDP_PORT="${_cdp_port}" \
   NODE_PATH="${_LIB_ACG_ROOT}/node_modules" \
     node -e 'const{chromium}=require("playwright");chromium.connectOverCDP(`http://${process.env.CDP_HOST}:${process.env.CDP_PORT}`,{timeout:10000}).then(b=>b.close()).then(()=>process.exit(0)).catch(()=>process.exit(1));' >/dev/null 2>&1
