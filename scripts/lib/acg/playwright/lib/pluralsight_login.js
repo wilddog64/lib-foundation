@@ -30,8 +30,18 @@ async function anyVisible(page, selectors, timeoutMs) {
   return false;
 }
 
-async function pageLooksLoggedIn(page) {
-  return anyVisible(page, LOGGED_IN_SELECTORS, 1500);
+async function pageLooksLoggedIn(page, options) {
+  const { attempts = 1, perSelectorTimeoutMs = 1500, settleMs = 1000 } = options || {};
+  for (let i = 0; i < attempts; i += 1) {
+    if (await anyVisible(page, LOGGED_IN_SELECTORS, perSelectorTimeoutMs)) {
+      return true;
+    }
+    if (i < attempts - 1) {
+      await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(settleMs);
+    }
+  }
+  return false;
 }
 
 async function fillIfVisible(page, selector, value, timeoutMs) {
