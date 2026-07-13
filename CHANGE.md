@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Security
+- `scripts/lib/acg/package-lock.json`: bump the dev-only transitive `js-yaml` from `3.14.2` to `3.15.0` to close Dependabot advisory GHSA-h67p-54hq-rp68 (medium — quadratic-complexity DoS in merge-key handling via repeated aliases). `js-yaml` is pulled in only by the jest/babel test toolchain; `3.15.0` satisfies the existing `^3.13.1` range so `package.json` is unchanged.
+
 ## [v0.4.3] — 2026-07-07
 
 Harden the ACG session-check against a render-timing race that produced false "logged out" negatives when reusing an already-signed-in CDP browser (PR #35, merged `b7d08b3`).
