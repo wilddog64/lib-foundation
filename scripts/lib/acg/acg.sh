@@ -260,6 +260,7 @@ function acg_import_credentials() {
   aws_import_credentials "$@"
 }
 
+# shellcheck disable=SC2120  # [sandbox-url] is optional; acg_restart calls this argless by design
 function acg_get_credentials() {
   if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
     cat <<HELP
@@ -491,6 +492,7 @@ HELP
   local provider="${2:-aws}"
 
   _acg_restart_playwright "${sandbox_url}" "${provider}" || return 1
+  # shellcheck disable=SC2119  # intentional argless call — acg_get_credentials arg is optional
   acg_get_credentials || return 1
   _acg_check_credentials
 }
