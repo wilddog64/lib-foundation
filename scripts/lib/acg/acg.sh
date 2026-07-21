@@ -426,9 +426,8 @@ _acg_extend_playwright() {
   fi
 
   _info "[acg] Extending ACG sandbox TTL at ${sandbox_url}..."
-  local output exit_code
-  output=$(node "$playwright_script" "$sandbox_url" 2>&1)
-  exit_code=$?
+  local output exit_code=0
+  output=$(node "$playwright_script" "$sandbox_url" 2>&1) || exit_code=$?
 
   if [[ $exit_code -ne 0 ]]; then
     _info "[acg] acg_extend failed: ${output}"
@@ -443,7 +442,8 @@ _acg_sweep_stale_artifacts() {
   # a disconnect-style browser.close() never removes. Sweep ones older than 2h so a
   # concurrent run's live artifacts are never touched. Never fails the caller.
   local tmpdir="${TMPDIR:-/tmp}"
-  find "${tmpdir%/}" -maxdepth 1 -name 'playwright-artifacts-*' -type d -mmin +120 \
+  tmpdir="${tmpdir%/}"
+  find "${tmpdir:-/}" -maxdepth 1 -name 'playwright-artifacts-*' -type d -mmin +120 \
     -exec rm -rf {} + 2>/dev/null || true
 }
 
@@ -461,9 +461,8 @@ _acg_restart_playwright() {
   fi
 
   _info "[acg] Restarting ACG ${provider} sandbox at ${sandbox_url}..."
-  local output exit_code
-  output=$(node "$playwright_script" "$sandbox_url" --provider "$provider" 2>&1)
-  exit_code=$?
+  local output exit_code=0
+  output=$(node "$playwright_script" "$sandbox_url" --provider "$provider" 2>&1) || exit_code=$?
 
   if [[ $exit_code -ne 0 ]]; then
     _info "[acg] acg_restart failed: ${output}"
