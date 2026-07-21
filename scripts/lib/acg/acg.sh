@@ -512,9 +512,8 @@ HELP
     _err "[acg] node is required — install Node.js"
     return 1
   fi
-  local output exit_code
-  output=$(node "$playwright_script" "$sandbox_url" --check 2>/dev/null)
-  exit_code=$?
+  local output exit_code=0
+  output=$(node "$playwright_script" "$sandbox_url" --check 2>/dev/null) || exit_code=$?
   if [[ $exit_code -ne 0 ]]; then
     _warn "[acg] acg_check_ttl: node exited $exit_code"
     return 1
