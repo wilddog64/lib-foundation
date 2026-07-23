@@ -1,5 +1,12 @@
 # Changes - lib-foundation
 
+## [v0.4.7] — 2026-07-23
+
+Make the `acg_check_ttl` node exit-code capture `set -e`-safe — the last remaining instance of the non-set-e-safe idiom in `acg.sh` (PR #38, merged `a36cf79`). Documented PR #37 follow-up.
+
+### Fixed
+- `scripts/lib/acg/acg.sh`: `acg_check_ttl` captured the node `--check` exit code with a separate `exit_code=$?` line; under `set -euo pipefail` a non-zero node exit aborted the caller at the assignment, leaving the graceful `node exited N → return 1` path dead. Moved the capture into `output=$(node …) || exit_code=$?`, matching the sibling `_acg_extend_playwright` / `_acg_restart_playwright` wrappers. Happy path unchanged; only the failure path is now reachable (`a36cf79`).
+
 ## [v0.4.6] — 2026-07-21
 
 Restore the `acg_restart` shell entrypoint for the orphaned `acg_restart.js` and stop the ACG browser wrappers from leaking stale `playwright-artifacts-*` temp dirs (PR #37, merged `db336a6f`). Folds in the never-released v0.4.5 `acg_restart` wiring.
