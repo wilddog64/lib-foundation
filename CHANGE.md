@@ -5,7 +5,7 @@
 Bump `brace-expansion` to 1.1.16 to clear the high-severity DoS advisory GHSA-3jxr-9vmj-r5cp (resolves Dependabot alert #3 on the k3d-manager consumer).
 
 ### Security
-- `scripts/lib/acg/package-lock.json`: bump transitive dev dependency `brace-expansion` 1.1.15 → 1.1.16 (GHSA-3jxr-9vmj-r5cp — DoS via exponential-time expansion of consecutive non-expanding `{}` groups; patched in 1.1.16). Leaf patch bump — dependency shape unchanged (`concat-map`/`balanced-match`), integrity hash matches the npm registry. Reaches the k3d-manager consumer via the lib-foundation subtree pull (`efaf31b`).
+- `scripts/lib/acg/package-lock.json`: bump transitive dev dependency `brace-expansion` 1.1.15 → 1.1.16 (GHSA-3jxr-9vmj-r5cp — DoS via exponential-time expansion of consecutive non-expanding `{}` groups; patched in 1.1.16). Leaf patch bump — dependency shape unchanged (`concat-map`/`balanced-match`), integrity hash matches the npm registry. Reaches the k3d-manager consumer via the next lib-foundation release + subtree pull.
 
 ## [v0.4.7] — 2026-07-23
 
