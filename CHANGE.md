@@ -1,5 +1,10 @@
 # Changes - lib-foundation
 
+## [Unreleased]
+
+### Added
+- `_dry_run_active` / `_dry_guard` DRY_RUN guard primitives in `scripts/lib/system.sh`.
+
 ## [v0.4.8] — 2026-07-25
 
 Bump `brace-expansion` to 1.1.16 to clear the high-severity DoS advisory GHSA-3jxr-9vmj-r5cp (resolves Dependabot alert #3 on the k3d-manager consumer).
