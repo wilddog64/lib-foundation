@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [v0.4.11] — 2026-08-20
+
 ### Security
 - Bump `js-yaml` `3.15.0` → `3.15.1` in the ACG lockfile to clear CVE-2026-59870 /
   GHSA-5p4m-2wfm-xmqj (quadratic CPU consumption in `!!omap` resolution). Dev-only transitive
