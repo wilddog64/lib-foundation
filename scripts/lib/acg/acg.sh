@@ -228,7 +228,7 @@ _acg_cf_deploy() {
     --public-key-material "fileb://${_ACG_KEY_PEM%.pem}.pub" >/dev/null 2>&1
 
   local _rendered_template
-  _rendered_template="$(mktemp "${TMPDIR:-/tmp}/acg-cluster.XXXXXX.yaml")"
+  _rendered_template="$(mktemp -t acg-cluster.XXXXXX)" || return 1
   _acg_render_template "${_ACG_AGENT_COUNT}" "${_cfn_template}" "${_rendered_template}" || {
     rm -f -- "${_rendered_template}"
     return 1
@@ -442,10 +442,11 @@ function acg_provision() {
     cat <<'HELP'
 Usage: acg_provision --confirm [--recreate]
 
-Provision a 3-node k3s cluster on ACG AWS sandbox via CloudFormation.
-Creates a VPC + subnet + IGW + SG + key pair + 1 server EC2 + 2 agent EC2
-instances (t3.medium). Updates ~/.ssh/config with Host entries for
-ubuntu (server), ubuntu-1 and ubuntu-2 (agents).
+Provision a k3s cluster on ACG AWS sandbox via CloudFormation.
+Creates a VPC + subnet + IGW + SG + key pair + 1 server EC2 + N agent EC2
+instances (t3.medium), where N is ACG_AGENT_COUNT (default 2). Updates
+~/.ssh/config with Host entries for ubuntu (server) and ubuntu-<i> for each
+agent (ubuntu-1 .. ubuntu-N).
 
 Flags:
   --confirm    Required — prevents accidental provisioning
@@ -454,7 +455,8 @@ Flags:
                TTL has expired.
 
 Config (env overrides):
-  ACG_REGION   AWS region (default: us-west-2)
+  ACG_REGION        AWS region (default: us-west-2)
+  ACG_AGENT_COUNT   Number of agent nodes to provision (default: 2)
 
 Requirements:
   - aws CLI configured (~/.aws/credentials with ACG sandbox creds)

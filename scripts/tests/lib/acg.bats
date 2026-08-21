@@ -85,6 +85,6 @@ setup() {
 }
 
 @test "acg source has no hardcoded first or second agent names" {
-  run grep -nE 'Agent[12]|agent[12]_ip' "${BATS_TEST_DIRNAME}/../../lib/acg/acg.sh"
+  run grep -nE 'Agent[12]([^0-9]|$)|agent[12]_ip' "${BATS_TEST_DIRNAME}/../../lib/acg/acg.sh"
   [ "${status}" -ne 0 ]
 }
