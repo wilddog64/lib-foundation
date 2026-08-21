@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [v0.4.12] — 2026-08-21
+
 ### Added
 - Count-agnostic ACG CloudFormation agent fleet. `ACG_AGENT_COUNT` (default `2`) now generates the
   deployed template: `_acg_render_template` emits `Server` + `Agent{i}Instance` / `Agent{i}PublicIP`
@@ -18,6 +20,14 @@
   `Agent10`), pre-`aws` validation of malformed/zero counts, and a no-hardcoded-`Agent1/2` guard.
 - `Makefile`: `make shellcheck-lib` (all `scripts/lib/*.sh`, default severity) and `make bats`
   (scrubbed-env `scripts/tests/lib/`) local-parity targets mirroring CI; both wired into `make all`.
+
+### Fixed
+- Copilot review hardening (`32ce9c9`): render the deployed template with the portable
+  `mktemp -t acg-cluster.XXXXXX` form (plus `|| return 1`) — the prior mid-string `XXXXXX.yaml`
+  template broke on BSD/macOS `mktemp`; `acg_provision --help` now documents the variable
+  `ACG_AGENT_COUNT` fleet and `ubuntu-<i>` agent hosts instead of a fixed 3-node cluster; the
+  no-hardcoded-agent guard regex is tightened to `Agent[12]([^0-9]|$)` so it no longer false-matches
+  `Agent10`/`Agent12`.
 
 ## [v0.4.11] — 2026-08-20
 
