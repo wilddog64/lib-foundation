@@ -31,7 +31,8 @@ setup() {
 
 @test "acg agent discovery collects every ordered stack output" {
   _run_command() {
-    printf '%s\t%s\t%s\n' 10.0.0.11 10.0.0.12 10.0.0.13
+    printf 'Agent1PublicIP\t%s\nAgent2PublicIP\t%s\nAgent3PublicIP\t%s\n' \
+      10.0.0.11 10.0.0.12 10.0.0.13
   }
   _acg_discover_agent_ips
 
@@ -40,9 +41,24 @@ setup() {
   [ "${_ACG_AGENT_IPS[2]}" = "10.0.0.13" ]
 }
 
+@test "acg agent discovery orders agents numerically, not lexically" {
+  # Deliberately out of order, with Agent10 present to expose a lexical sort
+  # (lexically Agent10 sorts before Agent2 — must not happen here).
+  _run_command() {
+    printf 'Agent2PublicIP\t%s\nAgent10PublicIP\t%s\nAgent1PublicIP\t%s\n' \
+      10.0.0.2 10.0.0.10 10.0.0.1
+  }
+  _acg_discover_agent_ips
+
+  [ "${#_ACG_AGENT_IPS[@]}" -eq 3 ]
+  [ "${_ACG_AGENT_IPS[0]}" = "10.0.0.1" ]
+  [ "${_ACG_AGENT_IPS[1]}" = "10.0.0.2" ]
+  [ "${_ACG_AGENT_IPS[2]}" = "10.0.0.10" ]
+}
+
 @test "acg agent discovery keeps two IPs when the default is used" {
   _run_command() {
-    printf '%s\t%s\n' 10.0.0.11 10.0.0.12
+    printf 'Agent1PublicIP\t%s\nAgent2PublicIP\t%s\n' 10.0.0.11 10.0.0.12
   }
   _acg_discover_agent_ips
 

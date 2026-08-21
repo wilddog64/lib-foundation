@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+### Added
+- Count-agnostic ACG CloudFormation agent fleet. `ACG_AGENT_COUNT` (default `2`) now generates the
+  deployed template: `_acg_render_template` emits `Server` + `Agent{i}Instance` / `Agent{i}PublicIP`
+  for `i in 1..N` by cloning the reference agent block verbatim, so every per-agent property (instance
+  profile, security group, block-device mapping, tags) is preserved by construction. Non-numeric or
+  `< 1` counts fail before any `aws` call; the checked-in two-agent template stays the documented
+  reference (`8148e33`).
+- `_acg_discover_agent_ips`: dynamic, count-agnostic agent-IP discovery over every `Agent*PublicIP`
+  stack output, ordered **numerically** (so `Agent10` follows `Agent2`, not `Agent1`) — replaces the
+  hardcoded `Agent1`/`Agent2` reads.
+
+### Tests / tooling
+- `scripts/tests/lib/acg.bats`: fleet generation, default-2 preservation, numeric ordering (incl.
+  `Agent10`), pre-`aws` validation of malformed/zero counts, and a no-hardcoded-`Agent1/2` guard.
+- `Makefile`: `make shellcheck-lib` (all `scripts/lib/*.sh`, default severity) and `make bats`
+  (scrubbed-env `scripts/tests/lib/`) local-parity targets mirroring CI; both wired into `make all`.
+
 ## [v0.4.11] — 2026-08-20
 
 ### Security

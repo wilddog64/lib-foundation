@@ -189,16 +189,19 @@ _acg_render_template() {
 }
 
 _acg_discover_agent_ips() {
-  local _agent_outputs
+  local _agent_outputs _agent_ip
   _ACG_AGENT_IPS=()
   _agent_outputs=$(_run_command -- aws cloudformation describe-stacks --region "${ACG_REGION}" \
     --stack-name "${_ACG_CF_STACK_NAME}" \
-    --query "Stacks[0].Outputs[?starts_with(OutputKey, \`Agent\`) && ends_with(OutputKey, \`PublicIP\`)] | sort_by(@, &OutputKey)[].OutputValue" \
+    --query "Stacks[0].Outputs[?starts_with(OutputKey, \`Agent\`) && ends_with(OutputKey, \`PublicIP\`)].[OutputKey, OutputValue]" \
     --output text)
   while IFS= read -r _agent_ip; do
     [[ -n "${_agent_ip}" && "${_agent_ip}" != "None" && "${_agent_ip}" != "null" ]] || continue
     _ACG_AGENT_IPS[${#_ACG_AGENT_IPS[@]}]="${_agent_ip}"
-  done < <(printf '%s\n' "${_agent_outputs}" | tr '\t' '\n')
+  done < <(printf '%s\n' "${_agent_outputs}" \
+    | awk 'NF >= 2 { key = $1; sub(/^Agent/, "", key); sub(/PublicIP$/, "", key); print key "\t" $2 }' \
+    | sort -n -k1,1 \
+    | cut -f2)
 }
 
 _acg_cf_deploy() {
