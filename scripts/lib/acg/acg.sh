@@ -113,7 +113,104 @@ PY
   _run_command -- python3 -c "$python_cmd"
 }
 
+_acg_validate_agent_count() {
+  local _agent_count="${ACG_AGENT_COUNT:-2}"
+  if [[ ! "${_agent_count}" =~ ^[1-9][0-9]*$ ]]; then
+    _err "[acg] ACG_AGENT_COUNT must be a positive integer (got: ${_agent_count})"
+    return 1
+  fi
+  _ACG_AGENT_COUNT="${_agent_count}"
+}
+
+_acg_render_template() {
+  local _agent_count="$1" _source="$2" _destination="$3"
+  if (( _agent_count == 2 )); then
+    cp -- "${_source}" "${_destination}"
+    return 0
+  fi
+
+  awk -v agent_count="${_agent_count}" '
+    function emit_instance(number, pos, line) {
+      for (pos = 1; pos <= instance_lines; pos++) {
+        line = instance[pos]
+        gsub(/Agent[0-9]+/, "Agent" number, line)
+        gsub(/k3d-manager-ubuntu-[0-9]+/, "k3d-manager-ubuntu-" number, line)
+        print line
+      }
+    }
+    function emit_output(number, pos, line) {
+      for (pos = 1; pos <= output_lines; pos++) {
+        line = output[pos]
+        gsub(/Agent[0-9]+/, "Agent" number, line)
+        print line
+      }
+    }
+    $0 ~ /^  Agent[0-9]+Instance:$/ && !seen_instance {
+      in_instance = 1
+      seen_instance = 1
+      instance[++instance_lines] = $0
+      next
+    }
+    in_instance && $0 ~ /^  Agent[0-9]+Instance:$/ {
+      for (i = 1; i <= agent_count; i++) emit_instance(i)
+      in_instance = 0
+      skipping_agent2 = 1
+      next
+    }
+    in_instance {
+      instance[++instance_lines] = $0
+      next
+    }
+    skipping_agent2 && $0 == "Outputs:" {
+      print
+      skipping_agent2 = 0
+      next
+    }
+    skipping_agent2 { next }
+    $0 ~ /^  Agent[0-9]+PublicIP:$/ && !seen_output {
+      in_output = 1
+      seen_output = 1
+      output[++output_lines] = $0
+      next
+    }
+    in_output && $0 ~ /^  Agent[0-9]+PublicIP:$/ {
+      for (i = 1; i <= agent_count; i++) emit_output(i)
+      in_output = 0
+      skipping_agent2_output = 1
+      next
+    }
+    in_output {
+      output[++output_lines] = $0
+      next
+    }
+    skipping_agent2_output { next }
+    { print }
+  ' "${_source}" > "${_destination}"
+}
+
+_acg_discover_agent_ips() {
+  local _agent_outputs
+  _ACG_AGENT_IPS=()
+  _agent_outputs=$(_run_command -- aws cloudformation describe-stacks --region "${ACG_REGION}" \
+    --stack-name "${_ACG_CF_STACK_NAME}" \
+    --query "Stacks[0].Outputs[?starts_with(OutputKey, \`Agent\`) && ends_with(OutputKey, \`PublicIP\`)] | sort_by(@, &OutputKey)[].OutputValue" \
+    --output text)
+  while IFS= read -r _agent_ip; do
+    [[ -n "${_agent_ip}" && "${_agent_ip}" != "None" && "${_agent_ip}" != "null" ]] || continue
+    _ACG_AGENT_IPS[${#_ACG_AGENT_IPS[@]}]="${_agent_ip}"
+  done < <(printf '%s\n' "${_agent_outputs}" | tr '\t' '\n')
+}
+
 _acg_cf_deploy() {
+  _acg_validate_agent_count || return 1
+
+  local _cfn_template="${ACG_CLUSTER_TEMPLATE:-${_LIB_ACG_ROOT}/etc/acg-cluster.yaml}"
+  if [[ ! -f "${_cfn_template}" ]]; then
+    _err "[acg] CloudFormation template not found: ${_cfn_template}" \
+         "(set ACG_CLUSTER_TEMPLATE to a valid path)"
+    return 1
+  fi
+
   local ami_id
   ami_id=$(_run_command -- aws ec2 describe-images --region "${ACG_REGION}" --owners "${_ACG_AMI_OWNER}" \
     --filters "Name=name,Values=${_ACG_AMI_FILTER}" "Name=state,Values=available" \
@@ -127,44 +224,47 @@ _acg_cf_deploy() {
   _run_command --soft -- aws ec2 import-key-pair --region "${ACG_REGION}" --key-name "${_ACG_KEY_NAME}" \
     --public-key-material "fileb://${_ACG_KEY_PEM%.pem}.pub" >/dev/null 2>&1
 
-  local _cfn_template="${ACG_CLUSTER_TEMPLATE:-${_LIB_ACG_ROOT}/etc/acg-cluster.yaml}"
-  if [[ ! -f "${_cfn_template}" ]]; then
-    _err "[acg] CloudFormation template not found: ${_cfn_template}" \
-         "(set ACG_CLUSTER_TEMPLATE to a valid path)"
+  local _rendered_template
+  _rendered_template="$(mktemp "${TMPDIR:-/tmp}/acg-cluster.XXXXXX.yaml")"
+  _acg_render_template "${_ACG_AGENT_COUNT}" "${_cfn_template}" "${_rendered_template}" || {
+    rm -f -- "${_rendered_template}"
     return 1
-  fi
+  }
 
-  _info "[acg] Deploying CloudFormation stack ${_ACG_CF_STACK_NAME} (3 nodes in parallel)..."
-  _run_command -- aws cloudformation deploy \
+  _info "[acg] Deploying CloudFormation stack ${_ACG_CF_STACK_NAME} (1 server + ${_ACG_AGENT_COUNT} agents)..."
+  if ! _run_command -- aws cloudformation deploy \
     --region "${ACG_REGION}" \
     --stack-name "${_ACG_CF_STACK_NAME}" \
-    --template-file "${_cfn_template}" \
+    --template-file "${_rendered_template}" \
     --parameter-overrides \
       "KeyName=${_ACG_KEY_NAME}" \
       "AllowedCidr=${ACG_ALLOWED_CIDR}" \
       "InstanceType=${_ACG_INSTANCE_TYPE}" \
       "AmiId=${ami_id}" \
     --capabilities CAPABILITY_NAMED_IAM \
-    --no-fail-on-empty-changeset
+    --no-fail-on-empty-changeset; then
+    rm -f -- "${_rendered_template}"
+    return 1
+  fi
+  rm -f -- "${_rendered_template}"
 
-  local server_ip agent1_ip agent2_ip
+  local server_ip
   server_ip=$(_run_command -- aws cloudformation describe-stacks --region "${ACG_REGION}" \
     --stack-name "${_ACG_CF_STACK_NAME}" \
     --query "Stacks[0].Outputs[?OutputKey==\`ServerPublicIP\`].OutputValue" --output text)
-  agent1_ip=$(_run_command -- aws cloudformation describe-stacks --region "${ACG_REGION}" \
-    --stack-name "${_ACG_CF_STACK_NAME}" \
-    --query "Stacks[0].Outputs[?OutputKey==\`Agent1PublicIP\`].OutputValue" --output text)
-  agent2_ip=$(_run_command -- aws cloudformation describe-stacks --region "${ACG_REGION}" \
-    --stack-name "${_ACG_CF_STACK_NAME}" \
-    --query "Stacks[0].Outputs[?OutputKey==\`Agent2PublicIP\`].OutputValue" --output text)
+  _acg_discover_agent_ips
 
   _acg_update_ssh_config "${server_ip}"
-  _acg_upsert_ssh_host "ubuntu-1" "${agent1_ip}"
-  _acg_upsert_ssh_host "ubuntu-2" "${agent2_ip}"
+  local _agent_index=0
+  for _agent_ip in "${_ACG_AGENT_IPS[@]}"; do
+    _agent_index=$((_agent_index + 1))
+    _acg_upsert_ssh_host "ubuntu-${_agent_index}" "${_agent_ip}"
+  done
 
   _info "[acg] Server:  ${server_ip}"
-  _info "[acg] Agent 1: ${agent1_ip}"
-  _info "[acg] Agent 2: ${agent2_ip}"
+  for _agent_index in "${!_ACG_AGENT_IPS[@]}"; do
+    _info "[acg] Agent $((_agent_index + 1)): ${_ACG_AGENT_IPS[_agent_index]}"
+  done
   _info "[acg] NOTE: install k3s via ./scripts/k3d-manager deploy_app_cluster --confirm"
 }
 
@@ -374,6 +474,7 @@ HELP
     return 1
   fi
 
+  _acg_validate_agent_count || return 1
   _acg_check_credentials || return 1
 
   if [[ $_recreate -eq 1 ]]; then
