@@ -14,7 +14,7 @@ itself, so the alert surfaces only on the consumer that vendors this lockfile vi
 - **Manifest (as seen on consumer):** `scripts/lib/foundation/scripts/lib/acg/package-lock.json`
 - **Source of truth:** `scripts/lib/acg/package-lock.json` (this repo)
 - **Vulnerable range:** `>= 3.0.0, < 3.15.1`
-- **Installed:** `3.15.0`
+- **Installed (pre-fix):** `3.15.0` — bumped to `3.15.1` by this change (see Fix below).
 - **First patched:** `3.15.1`
 - **Scope:** `development`
 - **Summary:** Quadratic CPU consumption in `!!omap` resolution.
