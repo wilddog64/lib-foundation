@@ -22,8 +22,10 @@ foundation_vcluster_fixture() {
 set -e
 out=""
 previous=""
+endopts=0
 for arg in "$@"; do
-  if [[ "${previous}" == "-o" ]]; then out="${arg}"; fi
+  if [[ "${endopts}" -eq 0 && "${arg}" == "--" ]]; then endopts=1; previous=""; continue; fi
+  if [[ "${endopts}" -eq 0 && "${previous}" == "-o" ]]; then out="${arg}"; fi
   previous="${arg}"
 done
 printf '%s\n' "$*" >> "${CURL_LOG}"

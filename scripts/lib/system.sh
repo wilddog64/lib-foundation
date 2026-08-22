@@ -1929,8 +1929,8 @@ function _foundation_vcluster_lock() {
 function _foundation_vcluster_download() {
   local version="$1" asset_name="$2" destination="$3" checksum_file="$4"
   local base_url="https://github.com/loft-sh/vcluster/releases/download/v${version}"
-  _run_command --quiet -- curl -fsSL -- "${base_url}/checksums.txt" -o "${checksum_file}" || return 1
-  _run_command --quiet -- curl -fsSL -- "${base_url}/${asset_name}" -o "${destination}" || return 1
+  _run_command --quiet -- curl -fsSL -o "${checksum_file}" -- "${base_url}/checksums.txt" || return 1
+  _run_command --quiet -- curl -fsSL -o "${destination}" -- "${base_url}/${asset_name}" || return 1
 }
 
 function foundation_ensure_vcluster_cli() {
