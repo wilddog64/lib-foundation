@@ -1968,7 +1968,7 @@ function foundation_ensure_vcluster_cli() {
     printf '%s\n' "${managed_binary}"
     return 0
   fi
-  temp_dir="$(mktemp -d "${TMPDIR:-/tmp}/foundation-vcluster.XXXXXX")" || _err "unable to create vCluster temporary directory"
+  temp_dir="$(mktemp -d "${TMPDIR:-/tmp}/foundation-vcluster.XXXXXX")" || _foundation_vcluster_abort "unable to create vCluster temporary directory"
   local asset_name="vcluster-${platform}-${arch}"
   local checksum_file="${temp_dir}/checksums.txt" asset_file="${temp_dir}/${asset_name}"
   _foundation_vcluster_download "${version}" "${asset_name}" "${asset_file}" "${checksum_file}" || _foundation_vcluster_abort "unable to download vCluster CLI ${version} (${asset_name})"
