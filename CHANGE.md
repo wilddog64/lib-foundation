@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [v0.4.15] — 2026-09-05
+
 ### Added
 - `_install_hermes_agent [repo_root]` / `_uninstall_hermes_agent` (`scripts/lib/system.sh`): install
   and remove the off-hub Hermes read-only monitoring agent as a macOS launchd LaunchAgent (same tier
