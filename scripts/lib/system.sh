@@ -1992,3 +1992,82 @@ function _no_trace() {
   (( wasx )) && set -x
   return $rc
 }
+
+function _hermes_launchd_label() {
+  printf '%s\n' "com.k3d-manager.hermes"
+}
+
+# Install the off-hub Hermes read-only monitoring agent as a macOS launchd
+# LaunchAgent. Read-only by construction: it preflights that the three WS0
+# read-only credentials plus the existing Slack relay already live in the login
+# Keychain and refuses to run if any is missing — it never mints, writes, or
+# deletes a credential, and stands up no privilege at install time.
+# Usage: _install_hermes_agent [repo_root]
+function _install_hermes_agent() {
+  local repo_root="${1:-$(_k3dm_repo_root)}"
+
+  if ! _is_mac; then
+    echo "_install_hermes_agent: off-hub Hermes agent is macOS-launchd only" >&2
+    return 1
+  fi
+
+  local label uid plist_dst tmpl hermes_bin hermes_log
+  label="$(_hermes_launchd_label)"
+  uid="$(id -u)"
+  plist_dst="${HOME}/Library/LaunchAgents/${label}.plist"
+  tmpl="${repo_root}/scripts/etc/launchd/${label}.plist.tmpl"
+  hermes_bin="${repo_root}/bin/k3dm-hermes"
+  hermes_log="${HOME}/Library/Logs/k3dm-hermes.log"
+
+  if [[ ! -r "${tmpl}" ]]; then
+    echo "_install_hermes_agent: launchd template not found: ${tmpl}" >&2
+    return 1
+  fi
+  if [[ ! -x "${hermes_bin}" ]]; then
+    echo "_install_hermes_agent: hermes agent missing or not executable: ${hermes_bin}" >&2
+    return 1
+  fi
+
+  local svc missing=0
+  for svc in k3dm-webhook-token k3dm-hermes-argocd-token k3dm-hermes-gh-token k3dm-slack-webhook; do
+    if ! _run_command --quiet --soft -- security find-generic-password -a k3dm -s "${svc}" >/dev/null 2>&1; then
+      echo "_install_hermes_agent: missing read-only Keychain credential: service '${svc}' account 'k3dm'" >&2
+      missing=1
+    fi
+  done
+  if (( missing )); then
+    echo "_install_hermes_agent: provision the WS0 read-only creds before install; installer does not mint credentials" >&2
+    return 1
+  fi
+
+  mkdir -p -- "${HOME}/Library/LaunchAgents" "${HOME}/Library/Logs"
+
+  local rendered
+  rendered="$(sed \
+    -e "s|{{HERMES_BIN}}|${hermes_bin}|g" \
+    -e "s|{{K3DM_REPO_ROOT}}|${repo_root}|g" \
+    -e "s|{{HERMES_LOG}}|${hermes_log}|g" \
+    "${tmpl}")" || {
+    echo "_install_hermes_agent: failed to render ${tmpl}" >&2
+    return 1
+  }
+  printf '%s\n' "${rendered}" > "${plist_dst}"
+
+  _run_command --quiet --soft -- launchctl bootout "gui/${uid}/${label}" || true
+  _run_command -- launchctl bootstrap "gui/${uid}" "${plist_dst}"
+  echo "_install_hermes_agent: LaunchAgent ${label} installed (bounded StartInterval poll, off-hub)"
+}
+
+# Remove the Hermes LaunchAgent and its rendered plist. Leaves the read-only
+# Keychain credentials intact — they are user-minted and shared, not owned by
+# the agent (unlike the webhook's self-generated token).
+function _uninstall_hermes_agent() {
+  local label uid plist_dst
+  label="$(_hermes_launchd_label)"
+  uid="$(id -u)"
+  plist_dst="${HOME}/Library/LaunchAgents/${label}.plist"
+
+  _run_command --quiet --soft -- launchctl bootout "gui/${uid}/${label}" || true
+  rm -f -- "${plist_dst}"
+  echo "_uninstall_hermes_agent: LaunchAgent ${label} removed (Keychain credentials left intact)"
+}
