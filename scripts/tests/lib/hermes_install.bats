@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# shellcheck shell=bash disable=SC1091,SC2329
+# shellcheck shell=bash disable=SC1091,SC2329,SC2030,SC2031
 
 setup() {
   SYSTEM_LIB="${BATS_TEST_DIRNAME}/../../lib/system.sh"
@@ -48,10 +48,13 @@ done
 exit 0
 EOF
 
-  # launchctl stub — log invocations, always succeed.
+  # launchctl stub — log invocations; fail the subcommand named in LAUNCHCTL_FAIL.
   cat > "${STUB_BIN}/launchctl" <<'EOF'
 #!/usr/bin/env bash
 printf '%s\n' "$*" >> "${LAUNCHCTL_LOG}"
+if [[ -n "${LAUNCHCTL_FAIL:-}" && "${1:-}" == "${LAUNCHCTL_FAIL}" ]]; then
+  exit 1
+fi
 exit 0
 EOF
 
@@ -74,6 +77,30 @@ EOF
   # bootout precedes bootstrap
   grep -q "bootout gui/.*/com.k3d-manager.hermes" "${LAUNCHCTL_LOG}"
   grep -q "bootstrap gui/.* ${HOME}/Library/LaunchAgents/com.k3d-manager.hermes.plist" "${LAUNCHCTL_LOG}"
+}
+
+@test "install: renders paths containing sed-special characters without corruption" {
+  local special="${BATS_TEST_TMPDIR}/re&po|dir"
+  mkdir -p "${special}/bin" "${special}/scripts/etc/launchd"
+  cp "${REPO}/bin/k3dm-hermes" "${special}/bin/k3dm-hermes"
+  cp "${REPO}/scripts/etc/launchd/com.k3d-manager.hermes.plist.tmpl" \
+    "${special}/scripts/etc/launchd/com.k3d-manager.hermes.plist.tmpl"
+
+  run _install_hermes_agent "${special}"
+  [ "$status" -eq 0 ]
+
+  plist="${HOME}/Library/LaunchAgents/com.k3d-manager.hermes.plist"
+  # the literal special path survives substitution intact
+  grep -qF "${special}/bin/k3dm-hermes" "${plist}"
+  run grep -c '{{' "${plist}"
+  [ "$output" -eq 0 ]
+}
+
+@test "install: returns non-zero when launchctl bootstrap fails" {
+  export LAUNCHCTL_FAIL="bootstrap"
+  run _install_hermes_agent "${REPO}"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"bootstrap failed"* ]]
 }
 
 @test "install: preflight fails and installs nothing when a credential is missing" {
@@ -99,6 +126,13 @@ EOF
   run _install_hermes_agent "${REPO}"
   [ "$status" -ne 0 ]
   [[ "$output" == *"template not found"* ]]
+}
+
+@test "uninstall: refuses on non-macOS hosts" {
+  export UNAME_S="Linux"
+  run _uninstall_hermes_agent
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"macOS-launchd only"* ]]
 }
 
 @test "uninstall: boots out the agent and removes the plist" {
