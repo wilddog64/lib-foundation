@@ -45,6 +45,23 @@
   resolved. Neither profile directory is deleted or migrated. See
   `docs/bugs/2026-09-12-chrome-cdp-launchd-agent-wrong-browser-and-dead-profile.md`.
   Installing the agent remains a manual operator step.
+- `scripts/lib/acg/bin/acg-credential-test`: stop treating an unusable CLI as invalid
+  credentials, and stop destroying a working sandbox because of it. The STS probe ran as
+  `aws sts get-caller-identity >/dev/null 2>&1` and keyed only on exit status, so "the aws
+  binary cannot start" was indistinguishable from "STS rejected these credentials" — and
+  only the latter justifies the delete-and-restart it triggered. Observed live on
+  2026-09-12: a Homebrew ABI mismatch (`awscli` 2.36.44 linking `libaws-c-s3.1.0.dylib`
+  against an installed `aws-c-s3` 1.1.0) made the CLI unable to start, so the tool deleted a
+  live ACG sandbox and exited 1 — while the credentials it had extracted were valid,
+  confirmed by a direct SigV4 call to `sts.amazonaws.com`. The restart was also futile by
+  construction, since a CLI that cannot start will not start after a restart either.
+  Now: `aws --version` is preflighted and an unusable CLI exits without restarting; the
+  probe's stderr is retained and surfaced instead of discarded; and a restart happens only
+  for recognized rejection codes (`InvalidClientTokenId`, `ExpiredToken`, `AuthFailure`,
+  `SignatureDoesNotMatch`, `AccessDenied`, `UnrecognizedClientException`) — any other
+  failure, including a network error, reports and exits without destroying anything. The
+  same preflight guards all three Azure validation paths. See
+  `docs/bugs/2026-09-12-acg-sts-probe-conflates-broken-cli-with-invalid-credentials.md`.
 - `scripts/lib/acg/playwright/lib/sandbox.js`: stop waiting 300 seconds on a hostname that
   no longer exists. `handleSignIn` waited for `**id.pluralsight.com**`, but that host does
   not resolve in DNS (`dig` returns nothing; `curl` reports "Could not resolve host") —
