@@ -10,6 +10,7 @@ const LOGGED_IN_SELECTORS = [
   '[aria-label="User menu"]',
   '[aria-label*="account" i]',
   'img[alt*="avatar" i]',
+  '.psPrismAvatar .psPrismMonogram[aria-label]',
   'text=/Cloud Sandboxes/i',
   'text=/Open Sandbox/i',
 ];

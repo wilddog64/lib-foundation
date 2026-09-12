@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Fixed
+- `scripts/lib/acg/playwright/lib/pluralsight_login.js`: add
+  `.psPrismAvatar .psPrismMonogram[aria-label]` to `LOGGED_IN_SELECTORS`. The current
+  Pluralsight UI renders the signed-in identity as a Prism monogram, which none of the
+  existing user-menu / account-label / avatar-image selectors match, so the only
+  identity-based signal was missing and `pageLooksLoggedIn` fell back entirely on the
+  sandbox-page text selectors (`Cloud Sandboxes` / `Open Sandbox`). Carried forward from
+  the retired `wilddog64/lib-acg` PR #47; see
+  `docs/bugs/2026-09-12-acg-logged-in-selectors-missing-prism-monogram.md`. The second half
+  of that legacy change (an unconditional `pageLooksLoggedIn` probe before navigating) is
+  deliberately NOT ported — `acg_session_check.js` here already handles navigation failure
+  via `navigatedToSandbox` and retries.
 ### Security
 - `scripts/lib/acg/playwright/providers/gcp.js`: stop logging the first 30 characters of the
   captured GCP sandbox username — log `[set]`/`[empty]` presence only, matching the

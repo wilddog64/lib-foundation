@@ -1,7 +1,9 @@
 # ACG logged-in selector set is missing the Pluralsight Prism avatar monogram
 
 **Date:** 2026-09-12
-**Status:** OPEN — carried over from the retired `wilddog64/lib-acg` repo
+**Status:** FIX STAGED on `fix/acg-prism-monogram-selector` — awaiting the live
+`make credential-test PROVIDER=aws` gate before PR. Carried over from the retired
+`wilddog64/lib-acg` repo (now archived).
 **Source:** unported change from `lib-acg` PR #47 (`fix/acg-session-profile-selector`,
 commit `7ffdd5f`), opened 2026-07-30 and never merged. Recorded here so the fix is not
 lost when the legacy repo is archived (absorption Phase 3).
@@ -52,6 +54,11 @@ pre-navigation probe would add a redundant path.
 
 `make credential-test PROVIDER=aws` must pass live (serialize-live-sandbox: one agent per
 ACG sandbox) — a selector change cannot be verified by unit tests alone.
+
+**Status 2026-09-12:** offline gates all green on `fix/acg-prism-monogram-selector`
+(`node --check`, shellcheck, 132 BATS, 7 Playwright). The live gate has NOT run: CDP on
+:9222 was not up, and the session needs a one-time manual Pluralsight login
+(see `reference_acg_login_reuses_cdp_session`). No PR until it passes.
 
 ## Already covered, for the record
 
