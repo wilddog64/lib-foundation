@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [v0.4.16] — 2026-09-12
+
 ### Security
 - `scripts/lib/acg/package-lock.json`: bump the dev-only transitive `browserslist` family
   — `browserslist` 4.28.2 → 4.28.9, plus its pinned companions `baseline-browser-mapping`
