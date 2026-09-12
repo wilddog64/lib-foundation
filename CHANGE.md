@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Security
+- `scripts/lib/acg/playwright/providers/gcp.js`: stop logging the first 30 characters of the
+  captured GCP sandbox username — log `[set]`/`[empty]` presence only, matching the
+  convention already used for `password` and by the debug loop at line 17. Originally raised
+  as a k3d-manager Copilot finding (PR #91, 2026-06-05) and deferred there as "lib-acg
+  upstream debt"; that routing died with the lib-acg archive, so the fix lands here.
+
 ## [v0.4.16] — 2026-09-12
 
 ### Security
