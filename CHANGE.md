@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [v0.4.17] — 2026-09-12
+
 ### Fixed
 - `scripts/lib/acg/playwright/lib/pluralsight_login.js`: add
   `.psPrismAvatar .psPrismMonogram[aria-label]` to `LOGGED_IN_SELECTORS`. The current
