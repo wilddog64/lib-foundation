@@ -29,6 +29,18 @@
   CORRECTION section: this change does **not** fix the 2026-09-12 `credential-test` failure,
   whose real cause is tracked in
   `docs/bugs/2026-09-12-acg-signin-wait-targets-dead-id-pluralsight-host.md`.
+- `scripts/lib/acg/playwright/lib/sandbox.js`: stop waiting 300 seconds on a hostname that
+  no longer exists. `handleSignIn` waited for `**id.pluralsight.com**`, but that host does
+  not resolve in DNS (`dig` returns nothing; `curl` reports "Could not resolve host") —
+  Pluralsight moved identity to a path on the main host, `https://app.pluralsight.com/id`.
+  The glob could never match, so every sign-in recovery burned its full 300000ms timeout,
+  twice per run (extraction, then the sandbox-restart path). The wait now uses a predicate
+  built on `urlLooksSignedOut` with a 60s timeout, the sign-in link locator drops the dead
+  host, and the post-login wait additionally requires having LEFT the identity path — it
+  previously matched `app.pluralsight.com/id` itself and so could return while still
+  unauthenticated. This is the actual cause of the failed 2026-09-12
+  `make credential-test PROVIDER=aws` gate. See
+  `docs/bugs/2026-09-12-acg-signin-wait-targets-dead-id-pluralsight-host.md`.
   stop reporting `ACG_SESSION_OK` for a signed-out session. `LOGGED_IN_SELECTORS` listed the
   page-CONTENT markers `text=/Cloud Sandboxes/i` and `text=/Open Sandbox/i`, which also render
   on the signed-OUT view of `SANDBOX_URL`, so `pageLooksLoggedIn` returned true for an expired

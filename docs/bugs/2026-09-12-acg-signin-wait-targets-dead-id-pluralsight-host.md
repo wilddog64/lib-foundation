@@ -137,7 +137,11 @@ down and 9222 is still up afterwards.
 
 ## Definition of done
 
-- [ ] No occurrence of `id.pluralsight.com` remains under `scripts/lib/acg/`.
+- [ ] No occurrence of `id.pluralsight.com` remains in PRODUCTION code:
+      `grep -rn "id\.pluralsight\.com" scripts/lib/acg/ --exclude-dir=tests --exclude-dir=node_modules`
+      prints nothing. The regression-guard test in `sandbox.test.js` legitimately contains
+      the string — it asserts the string's absence from the locator — so it is excluded.
+      Do NOT split the literal to satisfy a grep; scope the grep instead.
 - [ ] `cd scripts/lib/acg && npm run check` clean; `npm test` green including the new cases.
 - [ ] `make lint`, `make shellcheck-lib`, `make bats` green.
 - [ ] Only `sandbox.js` and `sandbox.test.js` modified.
