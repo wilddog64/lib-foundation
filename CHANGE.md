@@ -14,6 +14,19 @@
   of that legacy change (an unconditional `pageLooksLoggedIn` probe before navigating) is
   deliberately NOT ported — `acg_session_check.js` here already handles navigation failure
   via `navigatedToSandbox` and retries.
+- `scripts/lib/acg/playwright/lib/pluralsight_login.js`, `scripts/lib/acg/acg_session_check.js`:
+  stop reporting `ACG_SESSION_OK` for a signed-out session. `LOGGED_IN_SELECTORS` listed the
+  page-CONTENT markers `text=/Cloud Sandboxes/i` and `text=/Open Sandbox/i`, which also render
+  on the signed-OUT view of `SANDBOX_URL`, so `pageLooksLoggedIn` returned true for an expired
+  session — skipping both the `K3DM_NONINTERACTIVE=1` hard fail and the interactive
+  manual-login wait, and surfacing the failure ~10 minutes later as an unrelated
+  `page.waitForURL` timeout during credential extraction. Those two selectors are removed
+  (the Prism monogram above is now the load-bearing positive signal) and a negative gate is
+  added: `SIGNED_OUT_SELECTORS`, `pageLooksSignedOut` and `urlLooksSignedOut` short-circuit
+  `pageLooksLoggedIn` to false without burning the remaining retry attempts. `acg_session_check.js`
+  now warns explicitly when the `k3dm-acg-pluralsight` Keychain item is absent instead of
+  silently skipping unattended login. See
+  `docs/bugs/2026-09-12-acg-session-check-false-green-on-signed-out-page.md`.
 ### Security
 - `scripts/lib/acg/playwright/providers/gcp.js`: stop logging the first 30 characters of the
   captured GCP sandbox username — log `[set]`/`[empty]` presence only, matching the
