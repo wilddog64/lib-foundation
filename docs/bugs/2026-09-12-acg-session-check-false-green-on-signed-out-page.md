@@ -242,3 +242,64 @@ timeouts — which is itself the first observable confirmation that the fix work
 - Do NOT run `make credential-test`, `make restart-test`, `make extend-test`, or any other
   live-sandbox target — one agent owns the ACG sandbox and it is not you.
 - Do NOT print, echo, or log credential values.
+
+---
+
+## CORRECTION 2026-09-12 — the root cause stated above is WRONG
+
+**Status: the stated root cause is disproved. The shipped change (`308bb3c`) is still
+sound, but it is NOT a fix for the observed `credential-test` failure.**
+
+The claim above — that `text=/Cloud Sandboxes/i` matches the signed-OUT view of
+`SANDBOX_URL` and so produces a false `ACG_SESSION_OK` — was asserted from reading source,
+never measured. It is false.
+
+### Evidence
+
+A throwaway Chrome profile (guaranteed signed out) on port 9333, navigated to
+`SANDBOX_URL`:
+
+```
+FINAL URL : https://app.pluralsight.com/id
+TITLE     : Sign In | Pluralsight
+  visible=false count=0   text=/Cloud Sandboxes/i
+  visible=false count=0   text=/Open Sandbox/i
+  visible=false count=0   .psPrismAvatar .psPrismMonogram[aria-label]
+  visible=true  count=2   a[href*="/id/signin"]
+  visible=true  count=1   button:has-text("Sign in")
+  visible=true  count=2   a:has-text("Sign in")
+```
+
+A signed-out `SANDBOX_URL` **redirects** to the sign-in page. `Cloud Sandboxes` and
+`Open Sandbox` have **count 0** — they are not merely invisible, they are absent from the
+DOM. They cannot produce a false green.
+
+Confirmed end-to-end: `acg_session_check.js` at the **pre-fix** commit `a8342e1`, run
+against that signed-out profile, printed `ACG_SESSION_EXPIRED` and exited in **8 seconds**.
+The bug as described does not reproduce because it does not exist.
+
+### What the change at `308bb3c` is actually worth
+
+- The negative gate (`SIGNED_OUT_SELECTORS`, `pageLooksSignedOut`, `urlLooksSignedOut`) is
+  **validated by the measurement above** — all three selectors match the real signed-out
+  page, and the final URL `https://app.pluralsight.com/id` is exactly what
+  `urlLooksSignedOut` recognizes. Keep it: it makes signed-out detection explicit and
+  fail-fast instead of relying on the absence of positive signals.
+- Removing the two content selectors is defensible hygiene — they are page content, not
+  identity — but it fixed no live defect. Do not describe it as a bug fix.
+- The missing-Keychain warning stands on its own merit.
+
+### The real cause of the observed failure
+
+Filed separately as
+`docs/bugs/2026-09-12-acg-signin-wait-targets-dead-id-pluralsight-host.md`:
+`handleSignIn` in `scripts/lib/acg/playwright/lib/sandbox.js:112` waits for
+`**id.pluralsight.com**`, a hostname that **no longer resolves in DNS**. That is the
+300000ms timeout in the failing log, and it is deterministic.
+
+### Process note
+
+The failing run's log was read correctly; the inference from it was not verified before
+being written into a spec and handed to an implementer. A throwaway `--user-data-dir` is a
+guaranteed signed-out profile and costs about one minute — that measurement should have
+come before the spec, not after the commit.

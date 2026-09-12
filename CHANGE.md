@@ -15,6 +15,20 @@
   deliberately NOT ported — `acg_session_check.js` here already handles navigation failure
   via `navigatedToSandbox` and retries.
 - `scripts/lib/acg/playwright/lib/pluralsight_login.js`, `scripts/lib/acg/acg_session_check.js`:
+  make signed-out detection explicit instead of inferring it from the absence of positive
+  signals. Adds `SIGNED_OUT_SELECTORS` plus `pageLooksSignedOut` / `urlLooksSignedOut`, so
+  `pageLooksLoggedIn` short-circuits to false on a recognizably signed-out page without
+  burning its remaining retry attempts. Measured against a throwaway signed-out profile: a
+  signed-out `SANDBOX_URL` redirects to `https://app.pluralsight.com/id`, where all three
+  signed-out selectors match. The page-content markers `text=/Cloud Sandboxes/i` and
+  `text=/Open Sandbox/i` are dropped from `LOGGED_IN_SELECTORS` as hygiene — they describe
+  page content, not identity — leaving the Prism monogram as the identity signal.
+  `acg_session_check.js` now warns explicitly when the `k3dm-acg-pluralsight` Keychain item
+  is absent instead of silently skipping unattended login. See
+  `docs/bugs/2026-09-12-acg-session-check-false-green-on-signed-out-page.md`, including its
+  CORRECTION section: this change does **not** fix the 2026-09-12 `credential-test` failure,
+  whose real cause is tracked in
+  `docs/bugs/2026-09-12-acg-signin-wait-targets-dead-id-pluralsight-host.md`.
   stop reporting `ACG_SESSION_OK` for a signed-out session. `LOGGED_IN_SELECTORS` listed the
   page-CONTENT markers `text=/Cloud Sandboxes/i` and `text=/Open Sandbox/i`, which also render
   on the signed-OUT view of `SANDBOX_URL`, so `pageLooksLoggedIn` returned true for an expired
