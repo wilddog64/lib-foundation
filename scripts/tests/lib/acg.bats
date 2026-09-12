@@ -88,3 +88,31 @@ setup() {
   run grep -nE 'Agent[12]([^0-9]|$)|agent[12]_ip' "${BATS_TEST_DIRNAME}/../../lib/acg/acg.sh"
   [ "${status}" -ne 0 ]
 }
+
+@test "acg CDP plist uses the Playwright browser and active profile" {
+  local browser_bin="${BATS_TEST_TMPDIR}/playwright-chromium"
+  touch "${browser_bin}"
+  chmod +x "${browser_bin}"
+  _acg_resolve_cdp_browser_bin() {
+    printf '%s\n' "${browser_bin}"
+  }
+
+  _acg_chrome_cdp_write_plist
+
+  [ -f "${_ACG_CHROME_CDP_PLIST}" ]
+  grep -F "<string>${browser_bin}</string>" "${_ACG_CHROME_CDP_PLIST}"
+  ! grep -F '/Applications/Google Chrome.app' "${_ACG_CHROME_CDP_PLIST}"
+  grep -F -- "--user-data-dir=${PLAYWRIGHT_AUTH_DIR}" "${_ACG_CHROME_CDP_PLIST}"
+  [[ "${PLAYWRIGHT_AUTH_DIR}" == */pw-profile ]]
+}
+
+@test "acg CDP plist is not written without a Playwright browser" {
+  _acg_resolve_cdp_browser_bin() {
+    return 1
+  }
+
+  run _acg_chrome_cdp_write_plist
+
+  [ "${status}" -ne 0 ]
+  [ ! -e "${_ACG_CHROME_CDP_PLIST}" ]
+}

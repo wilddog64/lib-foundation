@@ -29,6 +29,22 @@
   CORRECTION section: this change does **not** fix the 2026-09-12 `credential-test` failure,
   whose real cause is tracked in
   `docs/bugs/2026-09-12-acg-signin-wait-targets-dead-id-pluralsight-host.md`.
+- `scripts/lib/acg/vars.sh`, `scripts/lib/acg/acg.sh`, `scripts/lib/acg/cdp.sh`: make the
+  `com.k3d-manager.chrome-cdp` launchd agent actually usable. It is the mechanism that keeps
+  a long-lived CDP browser — and therefore the Pluralsight session — alive between runs,
+  which matters because the auth cookie `Identity.Session` is non-persistent and dies with
+  the browser process. It had two defects that made it worse than useless: the plist
+  hardcoded `/Applications/Google Chrome.app` (the operator's personal Chrome, superseded by
+  the Playwright-managed Chromium that `cdp.sh` resolves), and `PLAYWRIGHT_AUTH_DIR` pointed
+  at `~/.local/share/k3d-manager/profile` while the automation actually runs against
+  `pw-profile` — measured at 0 vs 34 Pluralsight cookies. With `KeepAlive` set, loading it
+  would have respawned a signed-out personal Chrome onto port 9222 after every reclaim.
+  `PLAYWRIGHT_AUTH_DIR` now names `pw-profile`; browser resolution is extracted into a
+  single shared `_acg_resolve_cdp_browser_bin` used by both `_browser_launch` and the plist
+  writer; and the writer now fails without emitting a plist when the browser cannot be
+  resolved. Neither profile directory is deleted or migrated. See
+  `docs/bugs/2026-09-12-chrome-cdp-launchd-agent-wrong-browser-and-dead-profile.md`.
+  Installing the agent remains a manual operator step.
 - `scripts/lib/acg/playwright/lib/sandbox.js`: stop waiting 300 seconds on a hostname that
   no longer exists. `handleSignIn` waited for `**id.pluralsight.com**`, but that host does
   not resolve in DNS (`dig` returns nothing; `curl` reports "Could not resolve host") —
