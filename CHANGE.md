@@ -82,6 +82,16 @@
   as a k3d-manager Copilot finding (PR #91, 2026-06-05) and deferred there as "lib-acg
   upstream debt"; that routing died with the lib-acg archive, so the fix lands here.
 
+### Changed
+- `scripts/lib/acg/package.json`, `scripts/lib/acg/package-lock.json`: rename the package
+  identity `lib-acg` → `lib-foundation-acg`. The name was inherited verbatim by the v0.4.0
+  absorption tree-copy and still claimed the standalone `wilddog64/lib-acg` repo, archived
+  2026-09-12. Metadata only: the package is `"private": true`, has never been published, and
+  nothing resolves it by name. `version` unchanged at `0.4.0`, no dependency graph change.
+  The ~89 historical `lib-acg` references in `CHANGE.md`, `docs/plans/`, `docs/bugs/`,
+  `docs/issues/`, `README.md` and `docs/api/acg.md` are provenance and deliberately left
+  as-is. Spec: `docs/bugs/2026-09-12-acg-package-name-still-lib-acg.md`.
+
 ## [v0.4.16] — 2026-09-12
 
 ### Security
