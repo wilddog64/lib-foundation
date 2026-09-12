@@ -56,9 +56,15 @@ pre-navigation probe would add a redundant path.
 ACG sandbox) — a selector change cannot be verified by unit tests alone.
 
 **Status 2026-09-12:** offline gates all green on `fix/acg-prism-monogram-selector`
-(`node --check`, shellcheck, 132 BATS, 7 Playwright). The live gate has NOT run: CDP on
-:9222 was not up, and the session needs a one-time manual Pluralsight login
-(see `reference_acg_login_reuses_cdp_session`). No PR until it passes.
+(`node --check`, shellcheck, 132 BATS, 7 Playwright). The live gate **RAN and FAILED** —
+see `2026-09-12-acg-session-check-false-green-on-signed-out-page.md`. The failure is not
+caused by this change: `pageLooksLoggedIn` reported `ACG_SESSION_OK` on a signed-out
+profile because `text=/Cloud Sandboxes/i` matches the signed-out page, so extraction ran
+against a logged-out session and died on a `waitForURL` timeout. That false green also
+invalidates the "Why it may not reproduce here" paragraph above — the content selectors do
+not merely mask the missing monogram, they actively defeat the check. The monogram selector
+added here becomes the load-bearing positive signal once they are removed. Both fixes land
+on this branch. No PR until the live gate passes.
 
 ## Already covered, for the record
 
