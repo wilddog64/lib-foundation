@@ -120,7 +120,12 @@ profile — that is the whole point of a long-lived session holder. Add a commen
 `KeepAlive` key in the heredoc noting that `_cdp_stop_chrome_cdp_agent` must boot the agent
 out before reclaiming port 9222, or launchd will respawn into the reclaimed port.
 
-### 4. BATS — `scripts/tests/lib/acg.bats` (or wherever `_acg_chrome_cdp_write_plist` is covered)
+### 4. BATS — `scripts/tests/lib/acg.bats`
+
+`_acg_chrome_cdp_write_plist` currently has **no** BATS coverage (verified: no test in
+`acg.bats` or `acg_cdp.bats` references it). Add it there, following the existing
+`HOME`-redirection style used by the other plist tests so nothing writes to the real
+`~/Library/LaunchAgents`.
 
 Add cases:
 
