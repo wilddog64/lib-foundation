@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Changed
+- `scripts/lib/acg/package.json`, `scripts/lib/acg/package-lock.json`: rename the package
+  identity `lib-acg` → `lib-foundation-acg`. The name was inherited verbatim by the v0.4.0
+  absorption tree-copy and still claimed the standalone `wilddog64/lib-acg` repo, archived
+  2026-09-12. Metadata only: the package is `"private": true`, has never been published, and
+  nothing resolves it by name. `version` unchanged at `0.4.0`, no dependency graph change.
+  The ~89 historical `lib-acg` references in `CHANGE.md`, `docs/plans/`, `docs/bugs/`,
+  `docs/issues/`, `README.md` and `docs/api/acg.md` are provenance and deliberately left
+  as-is. Spec: `docs/bugs/2026-09-12-acg-package-name-still-lib-acg.md`.
+
 ### Security
 - `scripts/lib/acg/package-lock.json`: bump `brace-expansion` 1.1.16 → 1.1.18
   (GHSA-mh99-v99m-4gvg, GHSA-rgw5-rvv9-x895) and `js-yaml` 3.15.1 → 3.15.2
