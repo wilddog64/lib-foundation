@@ -56,7 +56,9 @@ Safe because:
 ## Verification
 
 - `node -e` parse of both JSON files succeeds
-- the two files are the only ones changed
+- `scripts/lib/acg/package.json` and `scripts/lib/acg/package-lock.json` are the only files
+  carrying a code or metadata change; the branch also touches `CHANGE.md` and adds this spec
+  doc, which are documentation only and affect nothing at runtime
 - `npm ci` in `scripts/lib/acg/` still resolves, and `npm test` (28 jest) stays green
 
 ## Process note
