@@ -12,6 +12,15 @@
   `docs/issues/`, `README.md` and `docs/api/acg.md` are provenance and deliberately left
   as-is. Spec: `docs/bugs/2026-09-12-acg-package-name-still-lib-acg.md`.
 
+### Security
+- `scripts/lib/acg/package-lock.json`: bump `brace-expansion` 1.1.16 → 1.1.18
+  (GHSA-mh99-v99m-4gvg, GHSA-rgw5-rvv9-x895) and `js-yaml` 3.15.1 → 3.15.2
+  (GHSA-2883-xcg3-v3hh), clearing both high-severity `npm audit` findings. Both are dev-only
+  transitive dependencies of `jest@29.7.0` and are not reachable from any runtime path; the
+  patched releases already satisfy the semver ranges jest requests, so this is a lockfile
+  refresh only — no `overrides`, no `package.json` change, no jest bump. Spec:
+  `docs/bugs/2026-09-12-acg-npm-audit-brace-expansion-js-yaml.md`.
+
 ## [v0.4.17] — 2026-09-12
 
 ### Fixed
