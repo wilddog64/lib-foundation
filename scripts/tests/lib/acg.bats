@@ -185,6 +185,9 @@ EOF
   fixture_dir=$(_acg_credential_test_fixture)
   rm -f "${fixture_dir}/bin/aws"
   ln -s "$(command -v bash)" "${fixture_dir}/bin/bash"
+  if env PATH="${fixture_dir}/bin:/usr/bin:/bin" bash -c 'command -v aws' >/dev/null 2>&1; then
+    skip "aws is installed in /usr/bin or /bin; cannot exercise the missing-CLI branch on this host"
+  fi
 
   run env PATH="${fixture_dir}/bin:/usr/bin:/bin" ACG_RESTART_SENTINEL="${sentinel}" \
     "${fixture_dir}/bin/acg-credential-test" 'https://example.test/sandbox' --provider aws
