@@ -1,0 +1,295 @@
+# Headless Pluralsight auto-login hangs on `locator.click()` preconditions
+
+**Filed:** 2026-09-24
+**Branch:** `feat/v0.4.18-credential-test-observability`
+**File:** `scripts/lib/acg/playwright/lib/pluralsight_login.js`
+**Severity:** high — headless auto-login has never succeeded; every failure was mis-reported as an expired session.
+
+---
+
+## How it surfaced
+
+The v0.4.18 credential-test observability work (`1bcde41`) added an always-on credential
+report and path-explicit `ACG_SESSION_OK` markers. On the operator's first live
+`make credential-test` run after that landed, the new instrumentation produced, in order:
+
+```
+ACG_CREDENTIALS: username=present password=present
+Session not authenticated — attempting headless Pluralsight login...
+auto-login error: locator.click: Timeout 30000ms exceeded.
+  waiting for locator('input[type="password"]').first()
+  locator resolved to <input id="Password" ...>
+  attempting click action
+    waiting for element to be visible, enabled and stable
+headless auto-login did not succeed.
+ACG_SESSION_EXPIRED
+ERROR: ACG_SESSION_EXPIRED
+```
+
+**This is the finding the instrumentation was built to expose.** Before v0.4.18 the same run
+printed a bare `ACG_SESSION_EXPIRED` with no credential report and no path marker, so the
+operator's only reasonable reading was "the session expired, sign in again." The credential
+report rules that out — the Keychain values load correctly through `_secret_load_data` — and
+the path marker proves execution reached the auto-login branch. The real state is that
+**headless auto-login fails, and has been failing silently behind a misleading marker.**
+
+Both invocations (with and without `K3DM_ACG_REQUIRE_CREDENTIALS=1`) behaved identically,
+which also confirms the new gate does not false-positive when credentials are present.
+
+---
+
+## What is measured vs. what is not
+
+Stated plainly, because an earlier hypothesis in this investigation was wrong.
+
+**Measured:**
+
+- Credentials load correctly: `username=present password=present`, via the real loader.
+- The machine is genuinely signed out — both CDP tabs sit on `app.pluralsight.com/id/signin`.
+- The hang is `field.click()` inside `fillIfVisible`, on `input[type="password"]`.
+- A read-only CDP probe against that live page reported the field **visible, enabled,
+  editable**, with identical bounding boxes across two animation frames (**stable: true**),
+  `pointer-events: auto`, `animation: none`, and `document.elementFromPoint` at the field's
+  centre returning the input itself.
+
+**Not measured / not proven:**
+
+- Which of *visible, enabled, stable* actually failed during the operator's run. The probe
+  says a click **should** succeed against the current page state, so the naive
+  "the form animates, so the element is never stable" hypothesis is **disproven**.
+- Reproducing the failure requires driving a real login with the operator's credentials.
+  That is out of bounds for automated investigation, so no root cause is claimed here.
+
+**This fix is therefore justified as precondition reduction plus documented precedent, not
+as a reproduced root cause.** Every change below removes a way for the flow to hang or to
+fail silently, and none of them depends on knowing which condition tripped. The only real
+verification gate is the operator re-running `make credential-test`.
+
+---
+
+## Defects
+
+### D1 — `fillIfVisible` clicks a text input before filling it
+
+`pluralsight_login.js:77-86`:
+
+```js
+async function fillIfVisible(page, selector, value, timeoutMs) {
+  const field = page.locator(selector).first();
+  if (await field.isVisible({ timeout: timeoutMs }).catch(() => false)) {
+    await field.click();
+    await field.fill('');
+    await field.fill(value);
+    return true;
+  }
+  return false;
+}
+```
+
+Playwright's actionability requirements are asymmetric:
+
+| action | visible | enabled | editable | **stable** | **in viewport** |
+|---|---|---|---|---|---|
+| `locator.click()` | ✅ | ✅ | — | ✅ | ✅ |
+| `locator.fill()`  | ✅ | ✅ | ✅ | — | — |
+
+For an `<input>`, `fill()` focuses and sets the value on its own. The preceding `click()`
+buys nothing and adds two preconditions — **stable** (unchanged bounding box across two
+animation frames) and the viewport requirement — that `fill()` does not have. It is the
+only statement in this function that can wait on those two conditions, and it is the
+statement that timed out.
+
+### D2 — the visibility guard never waits
+
+`locator.isVisible()` **returns immediately**; its `timeout` option is effectively a no-op.
+So the `5000` passed at both call sites is inert, and a field that is still rendering is
+silently classified as absent.
+
+This is the same defect shape found repeatedly in this subsystem: **safety that looks
+present but isn't.** Compare `2026-07-07-acg-session-check-render-race-false-negative.md`.
+
+### D3 — the guard's return value is discarded, so the form submits blind
+
+`pluralsight_login.js:98-101`:
+
+```js
+  await fillIfVisible(page, EMAIL_SELECTOR, username, 5000);
+  await fillIfVisible(page, PASSWORD_SELECTOR, password, 5000);
+
+  await page.locator(SUBMIT_SELECTOR).first().click();
+```
+
+`fillIfVisible` returns a boolean that both call sites throw away. Combined with D2, a
+still-rendering field means the credential is never typed, submit fires against an empty
+form, and the operator sees only the generic terminal `login_failed` — with no signal
+distinguishing "wrong password" from "we never filled the password box."
+
+### D4 — the submit click ignores this subsystem's documented click precedent
+
+`sandbox.js:9-16` carries the precedent in a comment:
+
+```js
+// The Pluralsight sandbox SPA ignores Playwright's synthetic click (force:true only skips
+// actionability checks — it still issues the click the SPA drops). Reveal/provision buttons
+// must be driven with a dispatched DOM MouseEvent after scrolling into view.
+```
+
+`_robustClick` — `scrollIntoView` + `dispatchEvent(new MouseEvent('click', ...))` — is
+implemented in `sandbox.js:11-16` and `acg_restart.js:96-101`. **`pluralsight_login.js` is
+the one file that never received it.** Per the standing note on this trap, `force: true` is
+*not* the fix: it bypasses actionability but **not** the viewport requirement.
+
+The recorded history is that this defect recurred at least three times (lib-acg v0.1.2
+`sandbox.js`, v0.1.3 `acg_restart.js` Start Sandbox, v0.1.9 2026-06-21 the same sites)
+**because each fix was applied narrowly to the file that happened to break.** Fixing the
+submit click in the same pass — rather than waiting for it to bite once D1–D3 let execution
+reach it — is the direct lesson of those three recurrences.
+
+---
+
+## Fix
+
+### F1 — `pluralsight_login.js`: add `_robustClick`
+
+Insert after the `MFA_SELECTORS` block. Matches the throwing variant in
+`acg_restart.js:96-101` (see *Deliberately out of scope* on why the two existing copies are
+not unified here):
+
+```js
+// The Pluralsight identity SPA drops Playwright's synthetic click (force:true skips
+// actionability but still issues the click the SPA ignores, and does not waive the
+// viewport requirement). Drive submit with a dispatched DOM MouseEvent instead.
+async function _robustClick(locator) {
+  await locator.evaluate(el => {
+    el.scrollIntoView({ block: 'center', inline: 'center' });
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+  });
+}
+```
+
+### F2 — `fillIfVisible`: wait for real, drop the click
+
+Replace the whole function:
+
+```js
+async function fillIfVisible(page, selector, value, timeoutMs) {
+  const field = page.locator(selector).first();
+  try {
+    await field.waitFor({ state: 'visible', timeout: timeoutMs });
+  } catch {
+    return false;
+  }
+  await field.fill('');
+  await field.fill(value);
+  return true;
+}
+```
+
+`waitFor({ state: 'visible' })` genuinely waits, so `timeoutMs` becomes meaningful (D2).
+Dropping `click()` removes the stable + viewport preconditions (D1). `fill('')` is retained
+unchanged to keep the patch minimal.
+
+### F3 — `loginWithPage`: consume the return values, then dispatch submit
+
+Replace:
+
+```js
+  await fillIfVisible(page, EMAIL_SELECTOR, username, 5000);
+  await fillIfVisible(page, PASSWORD_SELECTOR, password, 5000);
+
+  await page.locator(SUBMIT_SELECTOR).first().click();
+```
+
+with:
+
+```js
+  const emailFilled = await fillIfVisible(page, EMAIL_SELECTOR, username, FIELD_TIMEOUT_MS);
+  const passwordFilled = await fillIfVisible(page, PASSWORD_SELECTOR, password, FIELD_TIMEOUT_MS);
+
+  if (!emailFilled || !passwordFilled) {
+    console.error(`ACG_LOGIN_FIELDS_MISSING: email=${emailFilled ? 'filled' : 'missing'} password=${passwordFilled ? 'filled' : 'missing'}`);
+    return { ok: false, reason: 'login_form_unavailable' };
+  }
+
+  await _robustClick(page.locator(SUBMIT_SELECTOR).first());
+```
+
+and add near the other module constants:
+
+```js
+const FIELD_TIMEOUT_MS = 15000;
+```
+
+`5000` was inert under D2; once the wait is real it becomes a live budget, and 5s is thin
+for this SPA's identity form. 15s stays well inside the caller's own 30s ceiling.
+
+The new `login_form_unavailable` reason is safe to introduce: `_autoLogin` in
+`acg_session_check.js` reads only `result.reason === 'mfa_required'` and `result.ok`, so no
+existing branch changes. **Do not emit the username or password into the log line** — only
+the two literal states `filled` / `missing`.
+
+### F4 — export `_robustClick`
+
+Add `_robustClick` to `module.exports` so the new jest tests can reach it. Keep the existing
+alphabetical ordering of the export block.
+
+---
+
+## Tests — `scripts/lib/acg/tests/providers/pluralsight_login.test.js`
+
+The existing mocks predate this change and must be extended, or the suite fails on a
+missing method rather than on behavior:
+
+- `makeLocator` needs `waitFor` (resolving when the mock is visible, rejecting when not) and
+  `evaluate` (resolving, recording that it was called).
+- The submit locator now receives `evaluate`, not `click`.
+
+Add these cases:
+
+1. **`fillIfVisible` no longer clicks the field** — after a successful `loginWithPage`,
+   assert the email and password locators' `click` mock was **never** called, and `fill` was.
+   *This is the D1 regression guard.*
+2. **a field that never becomes visible returns `login_form_unavailable`** — `waitFor`
+   rejects for `PASSWORD_SELECTOR`; assert `{ ok: false, reason: 'login_form_unavailable' }`
+   and that the submit locator's `evaluate` was **never** called (proves the form is not
+   submitted blind — the D3 guard).
+3. **submit is dispatched, not clicked** — on the success path assert the submit locator's
+   `evaluate` was called and its `click` was not. *The D4 guard.*
+4. **the missing-field log line leaks no credential** — capture `console.error`, assert the
+   emitted string contains `ACG_LOGIN_FIELDS_MISSING` and does **not** contain the test
+   password value.
+
+Before committing, confirm each new test actually fails against the **pre-fix** source —
+a test that passes both before and after guards nothing.
+
+---
+
+## Deliberately out of scope
+
+- **Unifying the two existing `_robustClick` copies** into a shared module. The duplication
+  is real and is plausibly why this defect recurred, but the copies are **not identical**:
+  `sandbox.js:11-16` swallows errors with `.catch(() => {})`, `acg_restart.js:96-101` does
+  not. Collapsing them would silently change error handling in the live sandbox-provisioning
+  path, which cannot be verified without a live sandbox. Filed as follow-up instead of
+  smuggled into a bugfix.
+- **Rewiring the k3d-manager Tier 2 preflight** in `scripts/plugins/e2e.sh` from Keychain
+  existence to the real loader. Waits on the v0.4.18 subtree pull.
+- Any edit under `scripts/lib/acg/` **in k3d-manager** — that is a subtree; this fix is
+  upstream-only.
+
+---
+
+## Verification
+
+| Gate | Who | Status |
+|---|---|---|
+| `node --check` on the modified file | agent | pending |
+| jest suite green, count rises from 32 | agent | pending |
+| new tests fail against pre-fix source | agent | pending |
+| `npm run check` clean | agent | pending |
+| `make bats` still 138/138 | agent | pending |
+| **`make credential-test` reaches `ACG_SESSION_OK path=auto-login`** | **operator only** | **pending** |
+
+The last row is the only gate that proves the fix. It needs a TTY and the operator's own
+credentials, so it cannot be delegated to any agent — and until it passes, this fix is
+**plausible, not confirmed.**
