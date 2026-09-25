@@ -89,6 +89,16 @@ describe('pluralsight login helper', () => {
     expect(page.locator(SUBMIT_SELECTOR).click).not.toHaveBeenCalled();
   });
 
+  test('the submit wait carries an explicit timeout, not Playwright default', async () => {
+    const page = makePage({ loggedInVisible: true });
+
+    await loginWithPage(page, 'user@example.com', 'secret');
+
+    expect(page.locator(SUBMIT_SELECTOR).waitFor).toHaveBeenCalledWith(
+      expect.objectContaining({ state: 'visible', timeout: expect.any(Number) }),
+    );
+  });
+
   test('the missing-field log line leaks no credential', async () => {
     const page = makePage({ passwordVisible: false });
     const error = jest.spyOn(console, 'error').mockImplementation(() => {});

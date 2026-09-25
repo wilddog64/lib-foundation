@@ -33,7 +33,11 @@ const MFA_SELECTORS = [
 // The Pluralsight identity SPA drops Playwright's synthetic click (force:true skips
 // actionability but still issues the click the SPA ignores, and does not waive the
 // viewport requirement). Drive submit with a dispatched DOM MouseEvent instead.
-async function _robustClick(locator) {
+// evaluate() would otherwise fall back to Playwright's 30s default budget while the rest of
+// this module waits on FIELD_TIMEOUT_MS. Wait explicitly so a never-rendered submit button
+// fails on this module's own budget.
+async function _robustClick(locator, timeoutMs = FIELD_TIMEOUT_MS) {
+  await locator.waitFor({ state: 'visible', timeout: timeoutMs });
   await locator.evaluate(el => {
     el.scrollIntoView({ block: 'center', inline: 'center' });
     el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
