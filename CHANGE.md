@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [v0.4.18] — 2026-09-24
+
 ### Changed
 - `scripts/lib/acg/acg_session_check.js`: report the authentication path in each
   `ACG_SESSION_OK` marker, report credential-store health without exposing values, and support
