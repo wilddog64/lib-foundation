@@ -281,14 +281,45 @@ a test that passes both before and after guards nothing.
 
 ## Verification
 
+Fix implemented in **`8a74258`**, local == origin.
+
 | Gate | Who | Status |
 |---|---|---|
-| `node --check` on the modified file | agent | pending |
-| jest suite green, count rises from 32 | agent | pending |
-| new tests fail against pre-fix source | agent | pending |
-| `npm run check` clean | agent | pending |
-| `make bats` still 138/138 | agent | pending |
-| **`make credential-test` reaches `ACG_SESSION_OK path=auto-login`** | **operator only** | **pending** |
+| `node --check` on both modified JS files | Claude | ✅ clean |
+| jest suite green, count rises from 32 | Claude | ✅ 7 suites / **36** tests |
+| new tests fail against pre-fix source | Claude | ✅ **4 failed / 32 passed** pre-fix |
+| `npm run check` clean | Claude | ✅ clean |
+| `make bats` still 138/138 | Claude | ✅ 138 ok, 0 not ok, 0 skips |
+| **`make credential-test` reaches `ACG_SESSION_OK path=auto-login`** | **operator only** | ⏳ **pending** |
+
+The agent (`codex exec`) wrote the change and ran `node --check` plus jest, but could not
+commit — `.git/index.lock: Operation not permitted`, its known sandbox limit — and so left the
+mutation check, `npm run check` and `make bats` unrun. It stopped and reported rather than
+working around the lock, which is correct. Claude reviewed the diff, ran the four outstanding
+gates, and committed.
+
+The mutation check was performed by swapping in the pre-fix source from `b48ad1c4` by file copy
+(not `git stash`, which is what failed for the agent) and confirming **exactly** the four new
+tests go red while all 32 pre-existing tests stay green:
+
+```
+● pluralsight login helper › fillIfVisible no longer clicks the fields
+● pluralsight login helper › a field that never becomes visible returns login_form_unavailable
+● pluralsight login helper › submit is dispatched, not clicked
+● pluralsight login helper › the missing-field log line leaks no credential
+Tests: 4 failed, 32 passed, 36 total
+```
+
+The last row is the only gate that proves the fix. It needs a TTY and the operator's own
+credentials, so it cannot be delegated to any agent — and until it passes, this fix is
+**plausible, not confirmed.**
+
+### Known cosmetic residue
+
+`_robustClick` is exported but no test imports it directly (the guards assert through the submit
+locator's `evaluate` mock instead). The export was requested by this spec and is harmless, but it
+widens the module surface with an underscore-private for no current consumer. Left as-is rather
+than churn a verified tree; fold into the `_robustClick` dedup follow-up.
 
 The last row is the only gate that proves the fix. It needs a TTY and the operator's own
 credentials, so it cannot be delegated to any agent — and until it passes, this fix is
