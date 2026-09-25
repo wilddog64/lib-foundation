@@ -2,7 +2,11 @@
 
 const SIGNIN_URL = 'https://app.pluralsight.com/id/signin';
 const SANDBOX_URL = 'https://app.pluralsight.com/hands-on/playground/cloud-sandboxes';
-const EMAIL_SELECTOR = 'input[type="email"], input[name="username"], input[name="email"]';
+// Pluralsight's identity form uses PascalCase attributes (name="Username", id="Username") on a
+// type="text" input. CSS attribute VALUES are case-sensitive, so a lowercase [name="username"]
+// arm matches nothing -- measured live: the old selector returned count=0 while the form was
+// fully rendered and visible. Keep the " i" flag on every name/id arm.
+const EMAIL_SELECTOR = 'input[type="email"], input[name="username" i], input[name="email" i], input[id="username" i]';
 const PASSWORD_SELECTOR = 'input[type="password"]';
 const SUBMIT_SELECTOR = 'button[type="submit"], button:has-text("Sign in"), input[type="submit"]';
 const FIELD_TIMEOUT_MS = 15000;

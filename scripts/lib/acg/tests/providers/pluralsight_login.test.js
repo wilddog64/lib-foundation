@@ -123,6 +123,32 @@ function makeSlowRenderPage({ loggedInVisibleFromAttempt = 1 } = {}) {
   };
 }
 
+describe('EMAIL_SELECTOR case sensitivity', () => {
+  // Pluralsight serves name="Username" (PascalCase) on a type="text" input. CSS attribute
+  // values are case-sensitive, so the old lowercase arms matched nothing and the email field
+  // was silently reported missing while the form was fully visible. jest has no DOM here
+  // (the suite is offline, no jsdom), so this guards the selector's shape; the behavioral
+  // proof is the live Playwright probe recorded in the bug doc: count 0 -> 1.
+  test('no bare case-sensitive name arm survives', () => {
+    expect(EMAIL_SELECTOR).not.toMatch(/\[name="username"\]/);
+    expect(EMAIL_SELECTOR).not.toMatch(/\[name="email"\]/);
+  });
+
+  test('username and email arms are case-insensitive', () => {
+    expect(EMAIL_SELECTOR).toMatch(/\[name="username" i\]/);
+    expect(EMAIL_SELECTOR).toMatch(/\[name="email" i\]/);
+  });
+
+  test('every name and id arm carries the case-insensitivity flag', () => {
+    const arms = EMAIL_SELECTOR.split(',').map((arm) => arm.trim());
+    const attrArms = arms.filter((arm) => /\[(name|id)=/.test(arm));
+    expect(attrArms.length).toBeGreaterThan(0);
+    for (const arm of attrArms) {
+      expect(arm).toMatch(/ i\]$/);
+    }
+  });
+});
+
 describe('pageLooksLoggedIn render-race hardening', () => {
   test('single attempt misses a slow-rendering logged-in page (reproduces the false negative)', async () => {
     const page = makeSlowRenderPage({ loggedInVisibleFromAttempt: 1 });

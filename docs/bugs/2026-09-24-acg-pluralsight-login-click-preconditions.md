@@ -147,6 +147,69 @@ reach it — is the direct lesson of those three recurrences.
 
 ---
 
+### D5 — `EMAIL_SELECTOR` never matches: CSS attribute values are case-sensitive
+
+**Found after F1–F4 shipped, and this one IS a reproduced root cause.** With the click hang gone,
+the operator's next `make credential-test` run reached the new D3 diagnostic:
+
+```
+ACG_CREDENTIALS: username=present password=present
+INFO: Session not authenticated — attempting headless Pluralsight login...
+ACG_LOGIN_FIELDS_MISSING: email=missing password=filled
+INFO: headless auto-login did not succeed.
+```
+
+Password filled; email never matched. A read-only CDP probe of the live signin form shows why:
+
+| field | type | name | id | visible |
+|---|---|---|---|---|
+| email | `text` | `Username` | `Username` | 418×48, yes |
+| password | `password` | `Password` | `Password` | 418×48, yes |
+
+The old selector was `input[type="email"], input[name="username"], input[name="email"]`. Every arm
+misses:
+
+- `input[type="email"]` — the field is `type="text"`.
+- `input[name="username"]` — **`"Username"` ≠ `"username"`. CSS attribute *values* are
+  case-sensitive** (attribute *names* are not, which is the trap). Pluralsight's ASP.NET identity
+  form uses PascalCase throughout.
+- `input[name="email"]` — no such field exists.
+
+Measured through Playwright's own selector engine against the live page:
+
+```
+OLD: count=0 firstVisible=n/a
+NEW: count=1 firstVisible=true
+```
+
+`count=0` on a fully rendered, visible form is the bug, reproduced end to end. This is **not** a
+hypothesis like D1 — the before/after counts were measured on the live DOM.
+
+Also probed, because it would have changed the verdict: `ShowCaptcha` is `"False"` and there are
+**zero** reCAPTCHA iframes, so no captcha is armed and unattended login is genuinely feasible.
+
+### D5 fix
+
+```js
+// Pluralsight's identity form uses PascalCase attributes (name="Username", id="Username") on a
+// type="text" input. CSS attribute VALUES are case-sensitive, so a lowercase [name="username"]
+// arm matches nothing -- measured live: the old selector returned count=0 while the form was
+// fully rendered and visible. Keep the " i" flag on every name/id arm.
+const EMAIL_SELECTOR = 'input[type="email"], input[name="username" i], input[name="email" i], input[id="username" i]';
+```
+
+The ` i` case-insensitivity flag was confirmed to be honored by **Playwright's** CSS parser, not
+just the browser's native `querySelectorAll` — worth checking separately, since Playwright
+implements its own selector engine.
+
+**Why D1–D4 hid this.** D2's non-waiting `isVisible()` returned `false` for the unmatched email
+locator and D3 discarded that `false`, so the form submitted with only a password and failed as a
+generic `login_failed`. The selector bug and the precondition bugs were stacked: fixing D1–D4 did
+not fix login, it *revealed* what was actually broken. That is the point of the D3 diagnostic, and
+it worked on its first run.
+
+---
+
 ## Fix
 
 ### F1 — `pluralsight_login.js`: add `_robustClick`
@@ -313,6 +376,28 @@ Tests: 4 failed, 32 passed, 36 total
 The last row is the only gate that proves the fix. It needs a TTY and the operator's own
 credentials, so it cannot be delegated to any agent — and until it passes, this fix is
 **plausible, not confirmed.**
+
+### Round 2 — D5 selector fix
+
+Fix in **`b180104`**.
+
+| Gate | Who | Status |
+|---|---|---|
+| `node --check` on both modified JS files | Claude | ✅ clean |
+| jest count rises from 36 | Claude | ✅ 7 suites / **39** tests |
+| new tests fail against the old selector | Claude | ✅ **3 failed / 36 passed** |
+| `npm run check` clean | Claude | ✅ clean |
+| `make bats` still 138/138 | Claude | ✅ 138 ok, 0 not ok, 0 skips |
+| live Playwright selector count 0 → 1 | Claude | ✅ measured on the live form |
+| **`make credential-test` reaches `ACG_SESSION_OK path=auto-login`** | **operator only** | ⏳ **pending** |
+
+**Test-coverage limitation, stated plainly.** jest here has no DOM — the suite is offline and
+`jest-environment-jsdom` is not installed — so the three new tests assert the selector's *shape*
+(no bare case-sensitive arm survives; every `name`/`id` arm carries ` i`), not CSS matching
+behavior. Installing jsdom for one test would add a dependency to an offline suite, which is out
+of proportion. The behavioral proof is the live Playwright probe above (`count=0` → `count=1`),
+which cannot run in CI because it needs the operator's CDP browser. The shape assertions are
+written as disappearance gates so the regression cannot silently return.
 
 ### Known cosmetic residue
 
