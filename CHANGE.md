@@ -26,6 +26,7 @@
   `docs/bugs/2026-09-12-acg-npm-audit-brace-expansion-js-yaml.md`.
 
 ### Fixed
+- `scripts/lib/acg/playwright/lib/pluralsight_login.js`: headless Pluralsight auto-login previously hung on `locator.click()` preconditions; see `docs/bugs/2026-09-24-acg-pluralsight-login-click-preconditions.md`.
 - `scripts/lib/acg/acg.sh`: `_acg_chrome_cdp_write_plist` no longer returns 1 silently when
   `_acg_resolve_cdp_browser_bin` fails (node or playwright missing) — the resolver failure now
   falls through to the existing "Playwright-managed Chromium not found" error.
