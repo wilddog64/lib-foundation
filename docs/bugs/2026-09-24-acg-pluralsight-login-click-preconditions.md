@@ -3,7 +3,10 @@
 **Filed:** 2026-09-24
 **Branch:** `feat/v0.4.18-credential-test-observability`
 **File:** `scripts/lib/acg/playwright/lib/pluralsight_login.js`
-**Severity:** high — headless auto-login has never succeeded; every failure was mis-reported as an expired session.
+**Severity:** high — headless auto-login had never succeeded; every failure was mis-reported as an expired session.
+**Status:** **RESOLVED & OPERATOR-CONFIRMED 2026-09-24.** `make credential-test` now reaches
+`ACG_SESSION_OK path=auto-login` and completes the full chain: sandbox start, credential
+extraction, and `sts:GetCallerIdentity` validation.
 
 ---
 
@@ -353,7 +356,7 @@ Fix implemented in **`8a74258`**, local == origin.
 | new tests fail against pre-fix source | Claude | ✅ **4 failed / 32 passed** pre-fix |
 | `npm run check` clean | Claude | ✅ clean |
 | `make bats` still 138/138 | Claude | ✅ 138 ok, 0 not ok, 0 skips |
-| **`make credential-test` reaches `ACG_SESSION_OK path=auto-login`** | **operator only** | ⏳ **pending** |
+| **`make credential-test` reaches `ACG_SESSION_OK path=auto-login`** | **operator only** | ✅ **CONFIRMED 2026-09-24** |
 
 The agent (`codex exec`) wrote the change and ran `node --check` plus jest, but could not
 commit — `.git/index.lock: Operation not permitted`, its known sandbox limit — and so left the
@@ -373,9 +376,52 @@ tests go red while all 32 pre-existing tests stay green:
 Tests: 4 failed, 32 passed, 36 total
 ```
 
-The last row is the only gate that proves the fix. It needs a TTY and the operator's own
-credentials, so it cannot be delegated to any agent — and until it passes, this fix is
-**plausible, not confirmed.**
+---
+
+## Outcome — operator-confirmed 2026-09-24
+
+The operator's third `make credential-test` run closed the loop:
+
+```
+ACG_CREDENTIALS: username=present password=present
+INFO: Session not authenticated — attempting headless Pluralsight login...
+ACG_SESSION_OK path=auto-login
+INFO: Using provider aws
+INFO: Clicking Open Sandbox...
+INFO: Clicking Start Sandbox (Step 2)...
+INFO: Extracting credentials...
+INFO: Found 4 copyable inputs.
+INFO: AWS credentials written to ~/.aws/credentials [default]
+INFO: AWS credentials validated (sts:GetCallerIdentity OK)
+```
+
+`ACG_SESSION_OK path=auto-login` from a signed-out start is the first successful headless
+Pluralsight login in this subsystem's history, and the chain behind it completed end to end —
+sandbox start, credential extraction, and live STS validation. **All five defects are fixed and
+the fix is confirmed, not merely plausible.**
+
+Note the marker itself is what makes this legible: `path=auto-login` proves the credentials were
+read and used. A bare `ACG_SESSION_OK` would have been indistinguishable from
+`path=existing-session`, which never touches the credential store at all.
+
+### What this bug is worth remembering for
+
+Three separate diagnoses were wrong before the right one, and each was only reachable after the
+previous layer was removed:
+
+| Symptom seen | Natural reading | Actual state |
+|---|---|---|
+| `ACG_SESSION_EXPIRED` (pre-v0.4.18) | session expired, sign in again | auto-login had never worked |
+| `locator.click` 30s timeout | the form animates, element never stable | **disproven** by probe; click was simply unnecessary |
+| generic `login_failed` | wrong password | email field never matched at all |
+
+The fix that mattered was not any one code change but **naming the failing stage**. D1–D4 did not
+repair login; they exposed D5. `ACG_LOGIN_FIELDS_MISSING: email=missing password=filled` pointed
+straight at the selector on its first run, after two rounds of theorizing had pointed elsewhere.
+
+**Rule earned: when a symptom is generic, instrument the stages before theorizing about any one of
+them.** And probe the live DOM before adjusting timeouts — a `count=0` locator on a rendered,
+visible form is a wrong selector, never a slow page.
 
 ### Round 2 — D5 selector fix
 
@@ -389,7 +435,7 @@ Fix in **`b180104`**.
 | `npm run check` clean | Claude | ✅ clean |
 | `make bats` still 138/138 | Claude | ✅ 138 ok, 0 not ok, 0 skips |
 | live Playwright selector count 0 → 1 | Claude | ✅ measured on the live form |
-| **`make credential-test` reaches `ACG_SESSION_OK path=auto-login`** | **operator only** | ⏳ **pending** |
+| **`make credential-test` reaches `ACG_SESSION_OK path=auto-login`** | **operator only** | ✅ **CONFIRMED 2026-09-24** |
 
 **Test-coverage limitation, stated plainly.** jest here has no DOM — the suite is offline and
 `jest-environment-jsdom` is not installed — so the three new tests assert the selector's *shape*
@@ -406,6 +452,49 @@ locator's `evaluate` mock instead). The export was requested by this spec and is
 widens the module surface with an underscore-private for no current consumer. Left as-is rather
 than churn a verified tree; fold into the `_robustClick` dedup follow-up.
 
-The last row is the only gate that proves the fix. It needs a TTY and the operator's own
-credentials, so it cannot be delegated to any agent — and until it passes, this fix is
-**plausible, not confirmed.**
+---
+
+## Outcome — operator-confirmed 2026-09-24
+
+The operator's third `make credential-test` run closed the loop:
+
+```
+ACG_CREDENTIALS: username=present password=present
+INFO: Session not authenticated — attempting headless Pluralsight login...
+ACG_SESSION_OK path=auto-login
+INFO: Using provider aws
+INFO: Clicking Open Sandbox...
+INFO: Clicking Start Sandbox (Step 2)...
+INFO: Extracting credentials...
+INFO: Found 4 copyable inputs.
+INFO: AWS credentials written to ~/.aws/credentials [default]
+INFO: AWS credentials validated (sts:GetCallerIdentity OK)
+```
+
+`ACG_SESSION_OK path=auto-login` from a signed-out start is the first successful headless
+Pluralsight login in this subsystem's history, and the chain behind it completed end to end —
+sandbox start, credential extraction, and live STS validation. **All five defects are fixed and
+the fix is confirmed, not merely plausible.**
+
+Note the marker itself is what makes this legible: `path=auto-login` proves the credentials were
+read and used. A bare `ACG_SESSION_OK` would have been indistinguishable from
+`path=existing-session`, which never touches the credential store at all.
+
+### What this bug is worth remembering for
+
+Three separate diagnoses were wrong before the right one, and each was only reachable after the
+previous layer was removed:
+
+| Symptom seen | Natural reading | Actual state |
+|---|---|---|
+| `ACG_SESSION_EXPIRED` (pre-v0.4.18) | session expired, sign in again | auto-login had never worked |
+| `locator.click` 30s timeout | the form animates, element never stable | **disproven** by probe; click was simply unnecessary |
+| generic `login_failed` | wrong password | email field never matched at all |
+
+The fix that mattered was not any one code change but **naming the failing stage**. D1–D4 did not
+repair login; they exposed D5. `ACG_LOGIN_FIELDS_MISSING: email=missing password=filled` pointed
+straight at the selector on its first run, after two rounds of theorizing had pointed elsewhere.
+
+**Rule earned: when a symptom is generic, instrument the stages before theorizing about any one of
+them.** And probe the live DOM before adjusting timeouts — a `count=0` locator on a rendered,
+visible form is a wrong selector, never a slow page.
