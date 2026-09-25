@@ -37,10 +37,13 @@ Environment:
 | `PLAYWRIGHT_CDP_HOST` / `PLAYWRIGHT_CDP_PORT` | CDP endpoint, default `127.0.0.1:9222`. |
 
 Markers written to stdout/stderr are the machine-readable contract — see the session-check table
-in the repo `README.md`. `ACG_SESSION_OK` always carries a `path=` suffix
-(`existing-session` or `auto-login`) so a caller can tell a working unattended login from a reused
-human session. `ACG_CREDENTIALS` reports only the state of each field (`present`, `empty`,
-`absent`); credential values are never printed.
+in the repo `README.md`. `ACG_SESSION_OK` always carries a `path=` suffix, and the complete set of
+values is `existing-session`, `auto-login` and `manual-login`, so a caller can tell a working
+unattended login from a reused human session. `manual-login` is only reachable when
+`K3DM_NONINTERACTIVE` is unset **and** stdout is a TTY, so it never occurs in CI or an unattended
+gate; a gate that must prove unattended login should accept `auto-login` alone and treat any
+unrecognized `path=` value as a failure. `ACG_CREDENTIALS` reports only the state of each field
+(`present`, `empty`, `absent`); credential values are never printed.
 
 Two selector notes for anyone touching `playwright/lib/pluralsight_login.js`:
 

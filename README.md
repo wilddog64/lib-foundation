@@ -55,6 +55,7 @@ authenticated browser and never prints a credential value:
 |---|---|
 | `ACG_SESSION_OK path=existing-session` | already authenticated; no login attempted |
 | `ACG_SESSION_OK path=auto-login` | signed in unattended during this run |
+| `ACG_SESSION_OK path=manual-login` | a human signed in interactively during this run; only reachable when `K3DM_NONINTERACTIVE` is unset **and** stdout is a TTY, so it never occurs in CI or an unattended gate |
 | `ACG_CREDENTIALS: username=… password=…` | store health only — `present`, `empty` or `absent` |
 | `ACG_CREDENTIALS_REQUIRED` | store unusable while `K3DM_ACG_REQUIRE_CREDENTIALS=1` |
 | `ACG_LOGIN_FIELDS_MISSING` | the sign-in form did not yield both fields |
@@ -64,7 +65,10 @@ authenticated browser and never prints a credential value:
 The `path=` suffix is load-bearing for callers that need to prove auto-login itself works:
 without it, a run that merely reused a human's leftover browser session was indistinguishable
 from a successful unattended login, which is how headless auto-login stayed broken while the
-gate reported success.
+gate reported success. The three values above are the complete set emitted by
+`acg_session_check.js` — a caller matching on `path=` should treat an unrecognized value as a
+failure rather than as success, and a gate that must prove *unattended* login should accept
+`auto-login` alone.
 
 `K3DM_ACG_REQUIRE_CREDENTIALS=1` makes the check **fail closed** — it exits on
 `ACG_CREDENTIALS_REQUIRED` when the credential store is unusable instead of falling back to a
