@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Changed
+- `_agent_audit`: accept a trailing `# agent-audit: remote-sudo` marker for privileged commands
+  that run on another host, where `_run_command` cannot apply; any other comment does not exempt
+  a line from the bare-sudo audit.
 - `README.md`, `docs/api/acg.md`: document the session-check contract that shipped **in**
   v0.4.18 but was described nowhere — the marker table, why `ACG_SESSION_OK` carries a
   `path=` suffix (without it a reused human session was indistinguishable from a working
