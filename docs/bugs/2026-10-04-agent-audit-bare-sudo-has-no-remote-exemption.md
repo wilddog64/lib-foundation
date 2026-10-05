@@ -2,7 +2,7 @@
 
 **Filed:** 2026-10-04, Claude
 **Branch:** `fix/agent-audit-remote-sudo-marker`
-**Status:** remote-sudo marker FIXED in `44e7e8d` (#57). Recurrence (2026-10-05, `_run_command` flag false positive) OPEN — dispatched to Codex.
+**Status:** remote-sudo marker FIXED in `44e7e8d` (#57). Recurrence (2026-10-05, `_run_command` flag false positive) FIXED `16908e5`.
 **Severity:** low. It leads agents to defeat the audit instead of passing it.
 
 ## Observed
