@@ -1,6 +1,6 @@
 # Bug: `_browser_launch` dies with `_antigravity_browser_ready: command not found` under a host
 
-**Status:** OPEN — spec ready, dispatched to Codex
+**Status:** FIXED — branch `fix/cdp-browser-ready-host-load`
 **Filed:** 2026-10-05
 **Severity:** High — the first `make up` after Chrome is closed fails at step 1 (exit 127)
 
