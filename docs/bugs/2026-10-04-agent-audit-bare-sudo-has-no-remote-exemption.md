@@ -61,7 +61,7 @@ line.
 
 **Filed:** 2026-10-05, Claude
 **Branch:** `fix/agent-audit-sudo-flag-false-positive`
-**Status:** OPEN — dispatched to Codex.
+**Status:** FIXED — Codex, verified by Claude 2026-10-05: `_agent_audit` matches `sudo` only as a command word. 46/46 BATS; restoring `\bsudo` turns the new prefix test red.
 
 ### Observed
 

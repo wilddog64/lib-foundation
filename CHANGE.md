@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+- `scripts/lib/agent_rigor.sh`: stop flagging `_run_command`'s `--prefer-sudo`, `--require-sudo`,
+  and `--interactive-sudo` flags when the call does not start the line; real `sudo` after a pipe,
+  quote, or `&&` is still flagged.
+
 ## [v0.5.0] — 2026-10-04
 
 ### Added
