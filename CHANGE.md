@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+- `_agent_audit` now audits staged Python files for test shrinkage, syntax errors, and dangerous calls,
+  including extensionless Python scripts identified by a Python shebang.
+
 ### Changed
 - `_agent_audit`: accept a trailing `# agent-audit: remote-sudo` marker for privileged commands
   that run on another host, where `_run_command` cannot apply; any other comment does not exempt
