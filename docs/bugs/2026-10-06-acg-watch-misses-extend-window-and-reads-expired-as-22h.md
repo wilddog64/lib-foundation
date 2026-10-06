@@ -1,6 +1,6 @@
 # Bug: the ACG watcher runs too rarely to hit the extend window, and reads an expired sandbox as ~22 h left
 
-**Status:** OPEN
+**Status:** FIXED
 **Filed:** 2026-10-06
 **Branch:** `fix/acg-watch-interval-and-expired-ttl`
 **Severity:** High. The launchd watcher lets the sandbox expire overnight and then reports it as
