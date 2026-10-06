@@ -1,6 +1,6 @@
 # Bug: ACG sandbox extend almost never succeeds unattended — the extend script never waits for the button, and the launchd watcher has never run it
 
-**Status:** OPEN
+**Status:** FIXED
 **Filed:** 2026-10-05
 **Branch:** `fix/acg-extend-wait-for-button`
 **Severity:** High. With the operator away, an ACG sandbox dies at its first shutdown unless a person
