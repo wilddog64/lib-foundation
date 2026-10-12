@@ -6,7 +6,7 @@
 **Approval:** explicit 2026-10-11 (operator chose "Add an audit allow marker" when k3d-manager's pre-commit blocked a spec-mandated assertion replacement)
 **Priority:** P2 — a spec-required test change cannot be committed; the only workaround is `--no-verify`, which is forbidden
 **Severity:** medium
-**Files:** `scripts/lib/agent_rigor.sh`, `scripts/tests/lib/agent_rigor.bats`, `docs/api/functions.md` (if it documents `_agent_audit` checks), `CHANGE.md`
+**Files:** `scripts/lib/agent_rigor.sh`, `scripts/tests/lib/agent_rigor.bats`, `docs/api/functions.md` (the `_agent_audit` row), `README.md` (the `# agent-audit: allow` marker section), `CHANGE.md`
 
 ## Symptom
 
@@ -151,8 +151,10 @@ Gates: `bats scripts/tests/lib/agent_rigor.bats` and the full `bats scripts/test
 ## Docs
 
 - `CHANGE.md` `[Unreleased]` → `### Fixed` entry.
-- If `docs/api/functions.md` or any doc describes `_agent_audit`'s Python checks or the
-  `# agent-audit: allow` markers, add `assert-removed` there.
+- `docs/api/functions.md` `_agent_audit` row: add the `# agent-audit: allow assert-removed <reason>`
+  marker (per file, on an added line, reason required; the test-count check has no marker).
+- `README.md`, the section around the `# agent-audit: allow shell-true` example: one short
+  paragraph and example for `assert-removed`.
 
 ## What NOT to Do
 
