@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- `_secret_store_data` now sends the value over `security -i` stdin as hex rather than on argv; failed writes return non-zero, and `-U` replaces the pre-delete so a failed write keeps the existing item.
+
 ## [v0.5.2] — 2026-10-11
 
 ### Fixed
