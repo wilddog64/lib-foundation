@@ -67,9 +67,11 @@ _acg_get_instance_attr() {
     --query "$query" --output text 2>/dev/null || true
 }
 
+# Update the provisioned server and tunnel HostName entries, creating the server alias when absent.
 _acg_update_ssh_config() {
   local new_ip="$1"
-  [[ -f "${_ACG_SSH_CONFIG}" ]] || return 0
+  mkdir -p "$(dirname "${_ACG_SSH_CONFIG}")"
+  touch "${_ACG_SSH_CONFIG}"
   _info "[acg] Updating SSH config with IP ${new_ip}"
   local python_cmd
   python_cmd=$(cat <<PY
@@ -84,7 +86,8 @@ with open(path, 'w') as f:
     f.write(content)
 PY
 )
-  _run_command -- python3 -c "$python_cmd"
+  _run_command -- python3 -c "$python_cmd" || return 1
+  _acg_upsert_ssh_host ubuntu "${new_ip}"
 }
 
 _acg_upsert_ssh_host() {
