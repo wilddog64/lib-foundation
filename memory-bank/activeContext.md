@@ -1,5 +1,15 @@
 # Active Context — lib-foundation
 
+## 2026-10-21 ACG server SSH host target
+
+The follow-up for k3d-manager's missing `Host ubuntu` block is implemented on
+`fix/acg-ssh-server-target` at `9796162`, pushed to origin. Clean-environment
+`scripts/tests/lib/acg.bats` passed 28/28; `shellcheck scripts/lib/acg/acg.sh`,
+`AGENT_AUDIT_MAX_IF=8 bash scripts/lib/agent_rigor.sh scripts/lib/acg/acg.sh`,
+and `git diff --check` passed. Claude owns PR/release/tag; after integration,
+k3d-manager must subtree-pull this change before the operator can live-verify.
+No PR was created and no AWS infrastructure was changed.
+
 **2026-08-20 fleet lifecycle Phase A COMPLETE (Codex, `8148e33`):** on `feat/v0.4.12`,
 `scripts/lib/acg/acg.sh` now validates `ACG_AGENT_COUNT` before any AWS call, renders an N-agent
 CloudFormation template into a temporary deploy file, and discovers ordered `Agent*PublicIP`

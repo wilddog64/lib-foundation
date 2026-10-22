@@ -1,5 +1,19 @@
 # Progress — lib-foundation
 
+## 2026-10-21 ACG server SSH host target
+
+- The k3d-manager live follow-up exposed that `~/.ssh/config` may contain only
+  `ubuntu-1`/`ubuntu-2`; lib-foundation's `_acg_update_ssh_config` logged an
+  update but silently failed to create the missing `Host ubuntu` target. Added
+  idempotent config creation and server-host upsert, preserving agent and tunnel
+  aliases, with three BATS regressions. Commit `9796162` pushed to
+  `origin/fix/acg-ssh-server-target`. Clean-env `acg.bats` passed 28/28;
+  `shellcheck` on `acg.sh`, if-count audit, and diff check passed. A broader
+  extra ShellCheck invocation including `acg.bats` returned existing info-level
+  warnings in that test file; it is not part of the documented `.sh` lint gate.
+  No PR was created. Claude must review/release/tag, then k3d-manager must
+  subtree-pull before its bug can be marked VERIFIED or live-verified.
+
 - [x] **v1.26.0 fleet lifecycle Phase A (2026-08-20):** commit `8148e33` (`feat(acg): make
   CloudFormation agent fleet count-agnostic`) pushed to `origin/feat/v0.4.12`. The ACG module now
   validates `ACG_AGENT_COUNT` before AWS access, emits N discrete agent resources/outputs to a
