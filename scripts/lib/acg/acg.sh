@@ -86,7 +86,7 @@ with open(path, 'w') as f:
     f.write(content)
 PY
 )
-  _run_command -- python3 -c "$python_cmd" || return 1
+  _run_command -- python3 -c "$python_cmd"
   _acg_upsert_ssh_host ubuntu "${new_ip}"
 }
 
