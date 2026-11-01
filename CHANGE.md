@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+- `_install_macmon` installs the macmon sensor reader with Homebrew on Apple Silicon macOS.
+
 ## [v0.5.4] — 2026-10-17
 
 ### Fixed
