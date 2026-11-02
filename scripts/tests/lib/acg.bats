@@ -640,6 +640,12 @@ STUB
   _acg_real_duplicate_key ed25519
   run _acg_import_key
   [ "$status" -eq 0 ]
+  export ACG_REMOTE_FP="${ACG_REMOTE_FP}="
+  run _acg_import_key
+  [ "$status" -eq 0 ]
+  export ACG_REMOTE_FP="${ACG_REMOTE_FP}junk"
+  run _acg_import_key
+  [ "$status" -ne 0 ]
   export ACG_REMOTE_FP='SHA256:wrong'
   run _acg_import_key
   [ "$status" -ne 0 ]

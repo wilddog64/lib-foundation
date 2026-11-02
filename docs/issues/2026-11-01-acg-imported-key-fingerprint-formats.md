@@ -19,3 +19,14 @@ not ok 2 acg provisioning accepts matching imported RSA fingerprint and rejects 
 ```
 
 The implementation selects SHA-256 for Ed25519 and the user-guide DER MD5 algorithm for RSA; unknown and malformed keys fail closed. Follow-up: compare both algorithms against a read-only `describe-key-pairs` capture from the operator's sandbox before claiming live verification. Retain the existing fail-closed mismatch behavior.
+
+AWS notes that fingerprint padding may be present. A focused Ed25519 test with a trailing `=` initially failed:
+
+```text
+1..1
+not ok 1 acg provisioning accepts matching imported Ed25519 fingerprint and rejects mismatch
+# (in test file scripts/tests/lib/acg.bats, line 645)
+#   `[ "$status" -eq 0 ]' failed
+```
+
+After normalizing trailing `=` only for SHA-256 fingerprints, the same case passed. A fingerprint containing non-padding text after `=` still fails closed. The final clean-environment ACG suite passed 37/37; the earlier clean-environment system/core/agent-rigor/ACG run passed 154/154.

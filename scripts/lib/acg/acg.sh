@@ -247,6 +247,7 @@ _acg_import_key() {
       *InvalidKeyPair.Duplicate*)
         _remote=$(_run_command --soft -- aws ec2 describe-key-pairs --region "${ACG_REGION}" --key-names "${_ACG_KEY_NAME}" --query 'KeyPairs[0].KeyFingerprint' --output text) || return 1
         _local=$(_acg_imported_key_fingerprint "${_pub}") || return 1
+        case "${_remote}" in SHA256:*) while [[ "${_remote}" == *= ]]; do _remote="${_remote%=}"; done ;; esac
         if [[ -z "${_local}" || "${_local}" != "${_remote}" ]]; then
           printf 'ERROR: [acg] Key fingerprint mismatch: local %s, AWS %s\n' "${_local}" "${_remote}" >&2
           return 1
