@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- ACG provisioning validates the hub SSH key and its AWS fingerprint before deployment; sandbox extend and restart use the active Playwright profile.
+
 ## [v0.5.4] — 2026-10-17
 
 ### Fixed
