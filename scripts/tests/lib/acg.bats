@@ -629,7 +629,8 @@ STUB
   chmod +x "${BATS_TEST_TMPDIR}/key-bin/ssh-keygen"
   export REAL_SSH_KEYGEN="$real_ssh"
   if [[ "$kind" == ed25519 ]]; then
-    ACG_REMOTE_FP="$("$real_ssh" -E sha256 -lf "${_ACG_KEY_PEM%.pem}.pub" | awk '{print $2}')"
+    # Captured on m5-air, 2026-11-03: AWS returns bare SHA-256 Base64 with padding.
+    ACG_REMOTE_FP="$("$real_ssh" -E sha256 -lf "${_ACG_KEY_PEM%.pem}.pub" | awk '{sub(/^SHA256:/, "", $2); print $2"="}')"
   else
     ACG_REMOTE_FP="$("$real_ssh" -f "${_ACG_KEY_PEM%.pem}.pub" -e -m PKCS8 | "$real_openssl" pkey -pubin -outform DER | "$real_openssl" md5 -c | awk '{print $NF}')"
   fi
@@ -637,16 +638,27 @@ STUB
 }
 
 @test "acg provisioning accepts matching imported Ed25519 fingerprint and rejects mismatch" {
+  local local_fp
   _acg_real_duplicate_key ed25519
+  local_fp="${ACG_REMOTE_FP%=}"
+  run _acg_imported_key_fingerprint "${_ACG_KEY_PEM%.pem}.pub"
+  [ "$status" -eq 0 ]
+  [ "$output" = "$local_fp" ]
   run _acg_import_key
   [ "$status" -eq 0 ]
-  export ACG_REMOTE_FP="${ACG_REMOTE_FP}="
+  export ACG_REMOTE_FP="$local_fp"
   run _acg_import_key
   [ "$status" -eq 0 ]
-  export ACG_REMOTE_FP="${ACG_REMOTE_FP}junk"
+  export ACG_REMOTE_FP="SHA256:${local_fp}="
+  run _acg_import_key
+  [ "$status" -eq 0 ]
+  export ACG_REMOTE_FP="${local_fp}=junk"
   run _acg_import_key
   [ "$status" -ne 0 ]
-  export ACG_REMOTE_FP='SHA256:wrong'
+  export ACG_REMOTE_FP="${local_fp}=="
+  run _acg_import_key
+  [ "$status" -ne 0 ]
+  export ACG_REMOTE_FP='wrong'
   run _acg_import_key
   [ "$status" -ne 0 ]
   [[ "$output" == *'fingerprint mismatch'* ]]

@@ -214,7 +214,7 @@ _acg_imported_key_fingerprint() {
   case "${_type}" in
     ssh-ed25519)
       _fingerprint=$(_run_command --soft -- ssh-keygen -E sha256 -lf "$1") || return 1
-      printf '%s\n' "${_fingerprint}" | awk '{print $2}'
+      printf '%s\n' "${_fingerprint}" | awk '{sub(/^SHA256:/, "", $2); print $2}'
       ;;
     ssh-rsa)
       _fingerprint=$(set -o pipefail; _run_command --soft -- ssh-keygen -f "$1" -e -m PKCS8 \
@@ -247,7 +247,10 @@ _acg_import_key() {
       *InvalidKeyPair.Duplicate*)
         _remote=$(_run_command --soft -- aws ec2 describe-key-pairs --region "${ACG_REGION}" --key-names "${_ACG_KEY_NAME}" --query 'KeyPairs[0].KeyFingerprint' --output text) || return 1
         _local=$(_acg_imported_key_fingerprint "${_pub}") || return 1
-        case "${_remote}" in SHA256:*) while [[ "${_remote}" == *= ]]; do _remote="${_remote%=}"; done ;; esac
+        _remote="${_remote#SHA256:}"
+        if [[ "${_local}" =~ ^[A-Za-z0-9+/]{43}$ ]]; then
+          _remote="${_remote%=}"
+        fi
         if [[ -z "${_local}" || "${_local}" != "${_remote}" ]]; then
           printf 'ERROR: [acg] Key fingerprint mismatch: local %s, AWS %s\n' "${_local}" "${_remote}" >&2
           return 1

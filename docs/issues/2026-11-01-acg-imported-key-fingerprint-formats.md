@@ -30,3 +30,5 @@ not ok 1 acg provisioning accepts matching imported Ed25519 fingerprint and reje
 ```
 
 After normalizing trailing `=` only for SHA-256 fingerprints, the same case passed. A fingerprint containing non-padding text after `=` still fails closed. The final clean-environment ACG suite passed 37/37; the earlier clean-environment system/core/agent-rigor/ACG run passed 154/154.
+
+Live verification on `m5-air`, 2026-11-03, captured the EC2 `DescribeKeyPairs` fingerprint for the matching imported Ed25519 key as `DWj8LMmMqaZ9O3vJ8oG6xflnl5I/W5HmeoHVYWcR83A=`. AWS returns bare Base64 SHA-256 with one trailing padding character and no `SHA256:` prefix. The local `ssh-keygen -E sha256 -lf` output includes `SHA256:` and omits that padding, so the duplicate-key comparison removes the optional prefix and exactly one trailing `=` for a 43-character local digest. Extra trailing text and mismatched digests remain errors.

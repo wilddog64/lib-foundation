@@ -4,6 +4,7 @@
 
 ### Fixed
 - ACG provisioning validates the hub SSH key and its AWS fingerprint before deployment, using the matching imported-key algorithm for RSA and Ed25519; sandbox extend and restart use the active Playwright profile.
+- ACG duplicate-key checks accept AWS's unprefixed, padded Ed25519 SHA-256 fingerprint while rejecting malformed trailing data.
 
 ## [v0.5.4] — 2026-10-17
 
