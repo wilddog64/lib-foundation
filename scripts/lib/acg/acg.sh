@@ -214,16 +214,19 @@ _acg_imported_key_fingerprint() {
   case "${_type}" in
     ssh-ed25519)
       _fingerprint=$(_run_command --soft -- ssh-keygen -E sha256 -lf "$1") || return 1
-      printf '%s\n' "${_fingerprint}" | awk '{sub(/^SHA256:/, "", $2); print $2}'
+      _fingerprint=$(printf '%s\n' "${_fingerprint}" | awk '{sub(/^SHA256:/, "", $2); print $2}')
       ;;
     ssh-rsa)
+      command -v openssl >/dev/null 2>&1 || { printf 'ERROR: [acg] openssl is required to verify RSA key fingerprint\n' >&2; return 1; }
       _fingerprint=$(set -o pipefail; _run_command --soft -- ssh-keygen -f "$1" -e -m PKCS8 \
         | _run_command --soft -- openssl pkey -pubin -outform DER \
         | _run_command --soft -- openssl md5 -c) || return 1
-      printf '%s\n' "${_fingerprint}" | awk '{print $NF}'
+      _fingerprint=$(printf '%s\n' "${_fingerprint}" | awk '{print $NF}')
       ;;
     *) printf 'ERROR: [acg] Unsupported public key type: %s\n' "${_type}" >&2; return 1 ;;
   esac
+  [[ -n "${_fingerprint}" ]] || { printf 'ERROR: [acg] Failed to parse public key fingerprint from %s\n' "$1" >&2; return 1; }
+  printf '%s\n' "${_fingerprint}"
 }
 
 _acg_import_key() {

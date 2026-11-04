@@ -617,7 +617,6 @@ _acg_real_duplicate_key() {
   local kind="$1"
   local real_ssh real_openssl
   real_ssh="$(command -v ssh-keygen)"
-  real_openssl="$(command -v openssl)"
   [[ "$HOME" == "$BATS_TEST_TMPDIR/"* ]]
   _acg_key_fixture duplicate
   "$real_ssh" -q -t "$kind" -N '' -f "$_ACG_KEY_PEM"
@@ -632,6 +631,7 @@ STUB
     # Captured on m5-air, 2026-11-03: AWS returns bare SHA-256 Base64 with padding.
     ACG_REMOTE_FP="$("$real_ssh" -E sha256 -lf "${_ACG_KEY_PEM%.pem}.pub" | awk '{sub(/^SHA256:/, "", $2); print $2"="}')"
   else
+    real_openssl="$(command -v openssl)"
     ACG_REMOTE_FP="$("$real_ssh" -f "${_ACG_KEY_PEM%.pem}.pub" -e -m PKCS8 | "$real_openssl" pkey -pubin -outform DER | "$real_openssl" md5 -c | awk '{print $NF}')"
   fi
   export ACG_REMOTE_FP
