@@ -741,7 +741,7 @@ STUB
   rm "${VM_CASK_BIN}/VBoxManage"
   export VM_CASK_BREW_STATUS=17
   if _install_virtualbox; then status=0; else status=$?; fi
-  [ "${status}" -ne 0 ]
+  [ "${status}" -eq 17 ]
   [ "$(cat "${VM_CASK_LOG}")" = "install --cask virtualbox" ]
 }
 

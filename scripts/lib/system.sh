@@ -780,7 +780,7 @@ function _install_mac_cask() {
     _warn "Homebrew is required to install ${label}"
     return 1
   fi
-  ( _run_command -- brew install --cask "${cask}" ) || return $?
+  _run_command --soft -- brew install --cask "${cask}" || return $?
   _info "${label} installed"
 }
 
