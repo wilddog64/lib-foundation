@@ -792,6 +792,76 @@ function _install_vagrant() {
   _install_mac_cask Vagrant vagrant vagrant
 }
 
+function _promtool_pinned_sha256() {
+  local version="$1" os="$2" arch="$3"
+  [[ "$version" == "3.1.0" ]] || return 1
+  case "${os}-${arch}" in
+    darwin-amd64) printf '%s\n' 'de958826f9ca20003b30c48fa3f2fcfa67b2a3aebcabd6230e90bb94f92d86e8' ;;
+    darwin-arm64) printf '%s\n' '8ebe1d60d8864ae3e10a359c3b543563e972505e5ef6fe1d00586d86a7e813fc' ;;
+    linux-amd64) printf '%s\n' '9a9d1e115d1745826b13aec3f1409780b9fcf1d4206746cb4faee46ca5add70c' ;;
+    linux-arm64) printf '%s\n' 'c12b9e368006873df0c8865771af0434a3edfc8c8eaeea62b73d3974bff7f2a1' ;;
+    *) return 1 ;;
+  esac
+}
+
+function _install_promtool() {
+  local version="${PROMTOOL_VERSION:-3.1.0}" os arch target work tarball url expected actual extracted tmp_target rc=0
+  target="${PROMTOOL_INSTALL_DIR:-${HOME}/.local/bin}/promtool"
+  mkdir -p "${target%/*}" || return 1
+  if [[ -x "$target" ]] && "$target" --version 2>/dev/null | head -n 1 | grep -Fq "promtool, version ${version} "; then
+    return 0
+  fi
+  case "$(uname -s)" in
+    Darwin) os="darwin" ;;
+    Linux) os="linux" ;;
+    *) _warn "Cannot install promtool: unsupported platform '$(uname -s)'"; return 1 ;;
+  esac
+  case "$(uname -m)" in
+    arm64|aarch64) arch="arm64" ;;
+    x86_64|amd64) arch="amd64" ;;
+    *) _warn "Cannot install promtool: unsupported architecture '$(uname -m)'"; return 1 ;;
+  esac
+  expected="$(_promtool_pinned_sha256 "$version" "$os" "$arch")" || {
+    _warn "No pinned promtool checksum for ${version}-${os}-${arch}"
+    return 1
+  }
+  tarball="prometheus-${version}.${os}-${arch}.tar.gz"
+  url="${PROMTOOL_BASE_URL:-https://github.com/prometheus/prometheus/releases/download}/v${version}/${tarball}"
+  work="$(mktemp -d 2>/dev/null)" || return 1
+  if [[ -z "$work" ]]; then return 1; fi
+  if ! ( _run_command -- curl -fsSL -o "${work}/${tarball}" "$url" ); then
+    rm -rf "$work"
+    return 1
+  fi
+  if command -v shasum >/dev/null 2>&1; then
+    actual="$(shasum -a 256 "${work}/${tarball}" | awk '{print $1}')" || rc=1
+  elif command -v sha256sum >/dev/null 2>&1; then
+    actual="$(sha256sum "${work}/${tarball}" | awk '{print $1}')" || rc=1
+  else
+    _warn "Cannot verify promtool: shasum or sha256sum is required"
+    rm -rf "$work"
+    return 1
+  fi
+  if (( rc != 0 )) || [[ "$actual" != "$expected" ]]; then
+    _warn "promtool checksum mismatch: expected ${expected}, actual ${actual}"
+    rm -rf "$work"
+    return 1
+  fi
+  if ! tar -xzf "${work}/${tarball}" -C "$work" "prometheus-${version}.${os}-${arch}/promtool"; then
+    rm -rf "$work"
+    return 1
+  fi
+  extracted="${work}/prometheus-${version}.${os}-${arch}/promtool"
+  tmp_target="${target}.tmp.$$"
+  if ! cp "$extracted" "$tmp_target" || ! chmod 0755 "$tmp_target" || ! mv -f "$tmp_target" "$target"; then
+    rm -f "$tmp_target"
+    rm -rf "$work"
+    return 1
+  fi
+  rm -rf "$work"
+  return 0
+}
+
 function _is_linux() {
    if [[ "$(uname -s)" == "Linux" ]]; then
       return 0
