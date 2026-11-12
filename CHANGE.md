@@ -3,8 +3,10 @@
 ## [Unreleased]
 
 ### Added
+- `_run_parallel` runs NUL-separated items with bounded concurrency and per-item logs, results and optional retry.
 - `_install_macmon` installs the macmon sensor reader with Homebrew on Apple Silicon macOS.
 - `_install_virtualbox` and `_install_vagrant` install their Homebrew casks on macOS when their binaries are missing.
+- `_install_promtool` installs pinned Prometheus promtool 3.1.0 with platform-specific SHA-256 verification.
 
 ### Fixed
 - ACG provisioning validates the hub SSH key and its AWS fingerprint before deployment, using the matching imported-key algorithm for RSA and Ed25519; sandbox extend and restart use the active Playwright profile.
