@@ -1,8 +1,7 @@
 # vCluster CLI lock is dropped early under functrace; concurrent callers collide on `.vcluster.$$`
 
-**Status:** LANDED — fixed on PR #83 branch 2026-11-12 (it failed PR #83's bats job twice in a row, so the PR could not merge)
+**Status:** VERIFIED — merged in PR #83 (`5d301c1`, 2026-11-12); main CI run 43279250425 green with the new functrace test, 2026-11-12
 **Priority:** P3 (proposed: today it only makes a CI test flaky; production callers rarely run with `set -T`)
-**Waiting on:** live check — since 2026-11-12 (PR #83 CI)
 **Introduced by:** `0a3e404` v0.4.13 (foundation-managed vCluster CLI, #44)
 **Should have been caught by:** review
 **Prior art:** not run
