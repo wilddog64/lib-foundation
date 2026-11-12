@@ -2213,7 +2213,7 @@ function foundation_ensure_vcluster_cli() {
     _foundation_vcluster_release
     _err "${message}"
   }
-  trap _foundation_vcluster_release RETURN
+  trap '[[ "${FUNCNAME[0]:-}" != foundation_ensure_vcluster_cli ]] || _foundation_vcluster_release' RETURN
   if _foundation_vcluster_matches_version "${managed_binary}" "${version}"; then
     printf '%s\n' "${managed_binary}"
     return 0
@@ -2227,7 +2227,7 @@ function foundation_ensure_vcluster_cli() {
   [[ "${expected}" =~ ^[0-9a-fA-F]{64}$ ]] || _foundation_vcluster_abort "checksum manifest has no SHA-256 entry for ${asset_name}"
   _foundation_vcluster_checksum "${asset_file}" "${expected}" || _foundation_vcluster_abort "checksum verification failed for ${asset_name}"
   mkdir -p -- "${managed_dir}" || _foundation_vcluster_abort "unable to create managed vCluster directory"
-  staged_binary="${managed_dir}/.vcluster.$$"
+  staged_binary="$(mktemp "${managed_dir}/.vcluster.XXXXXX")" || _foundation_vcluster_abort "unable to stage vCluster CLI"
   cp -- "${asset_file}" "${staged_binary}" || _foundation_vcluster_abort "unable to stage vCluster CLI"
   chmod 0755 "${staged_binary}" || _foundation_vcluster_abort "unable to mark vCluster CLI executable"
   mv -f -- "${staged_binary}" "${managed_binary}" || _foundation_vcluster_abort "unable to activate vCluster CLI"

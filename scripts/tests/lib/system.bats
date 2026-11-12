@@ -669,7 +669,7 @@ EOF
   run foundation_ensure_vcluster_cli 0.20.0
   [ "$status" -ne 0 ]
   [[ "$("${managed}" --version)" == *"0.19.0"* ]]
-  [ ! -e "${managed%/*}/.vcluster.$$" ]
+  [ -z "$(find "${managed%/*}" -name '.vcluster.*' 2>/dev/null)" ]
 }
 
 @test "foundation_ensure_vcluster_cli: failed download preserves prior binary" {
@@ -683,6 +683,21 @@ EOF
   run foundation_ensure_vcluster_cli 0.20.0
   [ "$status" -ne 0 ]
   [[ "$("${managed}" --version)" == *"0.19.0"* ]]
+}
+
+@test "foundation_ensure_vcluster_cli: holds the lock through the download under functrace" {
+  foundation_vcluster_fixture
+  [[ "$-" == *T* ]]
+  mv "${VCLUSTER_STUB_BIN}/curl" "${VCLUSTER_STUB_BIN}/curl.real"
+  cat > "${VCLUSTER_STUB_BIN}/curl" <<'EOF'
+#!/usr/bin/env bash
+if [[ -d "${XDG_DATA_HOME}/lib-foundation/vcluster/0.20.0.lock" ]]; then echo held >> "${BATS_TEST_TMPDIR}/lock.log"; else echo dropped >> "${BATS_TEST_TMPDIR}/lock.log"; fi
+exec "${VCLUSTER_STUB_BIN}/curl.real" "$@"
+EOF
+  chmod 0755 "${VCLUSTER_STUB_BIN}/curl"
+  foundation_ensure_vcluster_cli 0.20.0 > /dev/null
+  [ "$(sort -u "${BATS_TEST_TMPDIR}/lock.log")" = "held" ]
+  [ ! -e "${XDG_DATA_HOME}/lib-foundation/vcluster/0.20.0.lock" ]
 }
 
 @test "foundation_ensure_vcluster_cli: concurrent callers leave one binary and no lock" {
