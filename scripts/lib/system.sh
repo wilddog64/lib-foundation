@@ -909,7 +909,8 @@ function _run_parallel() {
   else jobs=1
   fi
   mkdir -p "$out" || return 1
-  rm -f "$out"/*.log "$out"/*.rc "$out"/*.sec "$out"/*.item "$out"/times.txt "$out"/*.try1.log "$out"/.*.lock 2>/dev/null || true
+  rm -f "$out"/*.log "$out"/*.rc "$out"/*.sec "$out"/*.item "$out"/times.txt "$out"/*.try1.log 2>/dev/null || true
+  rm -rf "$out"/.*.lock 2>/dev/null || true
   tmp="$(mktemp -d "${TMPDIR:-/tmp}/run-parallel.XXXXXX")" || return 1
   started="$(date +%s)"
   while IFS= read -r -d '' item || [[ -n "$item" ]]; do items+=("$item"); done
@@ -938,7 +939,7 @@ function _run_parallel() {
     printf '%s\0' "${items[@]}" >"$tmp/input"
   fi
   # shellcheck disable=SC2016
-  xargs -0 -r -n 1 -P "$jobs" bash -c 'source "$1"; shift; out="$1"; shift; _run_parallel_worker "$out" "$@"' _ "${BASH_SOURCE[0]}" "$out" "$@" <"$tmp/input"
+  xargs -0 -n 1 -P "$jobs" bash -c 'source "$1"; shift; out="$1"; shift; _run_parallel_worker "$out" "$@"' _ "${BASH_SOURCE[0]}" "$out" "$@" <"$tmp/input"
   rc=$?
   (( rc == 0 )) || { rm -rf "$tmp"; return 1; }
   : >"$out/times.txt"

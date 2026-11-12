@@ -79,7 +79,6 @@ source "$(dirname "$0")/lib/agent_rigor.sh"
 | `_install_virtualbox` | Install VirtualBox with its Homebrew cask on macOS when `VBoxManage` is missing. |
 | `_install_vagrant` | Install Vagrant with its Homebrew cask on macOS when `vagrant` is missing. |
 | `_install_promtool` | Install the pinned Prometheus `promtool` release after verifying its platform-specific SHA-256 checksum. |
-
 | `_install_kubernetes_cli` | Install `kubectl` (Debian/RedHat/mac). |
 | `_install_orbstack` | Install OrbStack on macOS. |
 | `_install_bats_from_source` | Build and install BATS from source tarball. |
