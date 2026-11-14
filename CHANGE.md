@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- `_run_command` and `_run_command_resolve_sudo` run under macOS `/bin/bash` 3.2 with `set -u`: empty `probe_args` (any call without `--probe`) and empty `sudo_flags` (interactive sudo on a TTY) aborted with `unbound variable`. Reference: k3d-manager `docs/bugs/2026-11-14-machine-setup-promtool-install-fails-under-macos-bash-3-2.md`.
+
 ## [v0.5.5] — 2026-11-12
 
 ### Added
