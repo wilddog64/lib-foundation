@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [v0.5.7] — 2026-11-18
+
+### Fixed
+- `run_parallel.bats` (test-only): the summary test accepts any whole number of seconds for the failing job, since job time is a difference of whole-second `date +%s` readings and a fast job that straddles a second reports `1s` (10/150 runs on amd64 under emulation). The collision test checks `log`, `rc`, `sec` and `item` for every key and, on the first missing file, prints its name, the out directory and every item mapping; the old `&&` chain could only fail on its last check. Reference: k3d-manager `docs/bugs/2026-11-14-lib-foundation-run-parallel-collision-test-flakes-on-linux.md`.
+
 ## [v0.5.6] — 2026-11-14
 
 ### Fixed
