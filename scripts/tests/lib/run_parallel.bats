@@ -54,6 +54,13 @@ PY
         echo "missing: $key.$ext"
         ls -la "$RP_ROOT/out"
         for f in "$RP_ROOT/out"/*.item; do [ -e "$f" ] && printf '%s -> %s\n' "${f##*/}" "$(cat "$f")"; done
+        echo "job saw:"; cat "$RP_LOG" 2>/dev/null || true
+        echo "workers still running:"; ps -eo pid,ppid,etime,args 2>/dev/null | grep -E '[_]run_parallel_worker|[x]args -0' || echo none
+        sleep 2
+        echo "out after 2s: $(ls -A "$RP_ROOT/out" | tr '\n' ' ')"
+        echo "job saw after 2s:"; cat "$RP_LOG" 2>/dev/null || true
+        grep -E '^Sig(Blk|Ign|Cgt):' /proc/$$/status 2>/dev/null || true
+        echo "xargs: $(xargs --version 2>/dev/null | head -1) nproc: $(nproc 2>/dev/null || true)"
         return 1
       fi
     done
