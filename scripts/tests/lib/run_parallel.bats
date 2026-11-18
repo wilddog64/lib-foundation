@@ -54,19 +54,29 @@ PY
         echo "missing: $key.$ext"
         ls -la "$RP_ROOT/out"
         for f in "$RP_ROOT/out"/*.item; do [ -e "$f" ] && printf '%s -> %s\n' "${f##*/}" "$(cat "$f")"; done
-        echo "job saw:"; cat "$RP_LOG" 2>/dev/null || true
-        echo "workers still running:"; ps -eo pid,ppid,etime,args 2>/dev/null | grep -E '[_]run_parallel_worker|[x]args -0' || echo none
-        sleep 2
-        echo "out after 2s: $(ls -A "$RP_ROOT/out" | tr '\n' ' ')"
-        echo "job saw after 2s:"; cat "$RP_LOG" 2>/dev/null || true
-        grep -E '^Sig(Blk|Ign|Cgt):' /proc/$$/status 2>/dev/null || true
-        echo "xargs: $(xargs --version 2>/dev/null | head -1) nproc: $(nproc 2>/dev/null || true)"
         return 1
       fi
     done
   done
   [ "$(cat "$RP_ROOT/out/a_b.rc")" -eq 0 ]
   [ "$(cat "$RP_ROOT/out/a_b-2.rc")" -eq 0 ]
+}
+
+@test "colliding keys stay separate even when mkdir succeeds on an existing directory" {
+  real="$(command -v mkdir)"
+  mkdir "$RP_ROOT/bin"
+  cat >"$RP_ROOT/bin/mkdir" <<EOF
+#!/bin/sh
+# mimics uutils coreutils 0.10.0 mkdir losing a race (ubuntu:26.04, 2026-11-18): exits 0 when the directory already exists
+for a in "\$@"; do last="\$a"; done; [ -d "\$last" ] && exit 0; exec "$real" "\$@"
+EOF
+  chmod +x "$RP_ROOT/bin/mkdir"
+  PATH="$RP_ROOT/bin:$PATH"; export PATH
+  mkdir "$RP_ROOT/probe"; mkdir "$RP_ROOT/probe"
+  printf 'a b\0a_b\0' | _run_parallel --jobs 1 --out "$RP_ROOT/out" -- "$RP_JOB"
+  [ -f "$RP_ROOT/out/a_b.item" ]
+  [ -f "$RP_ROOT/out/a_b-2.item" ]
+  [ "$(sort "$RP_ROOT/out/a_b.item" "$RP_ROOT/out/a_b-2.item")" = $'a b\na_b' ]
 }
 
 @test "orders unknown items first and known items longest first; times file is reusable" {
