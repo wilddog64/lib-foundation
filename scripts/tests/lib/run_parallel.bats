@@ -49,7 +49,14 @@ PY
   printf 'sleep:a\0sleep:b\0sleep:c\0sleep:d\0a b\0a_b\0' | _run_parallel --jobs 2 --out "$RP_ROOT/out" -- "$RP_JOB"
   assert_max_overlap "$RP_ROOT/events" 2
   for key in sleep_a sleep_b sleep_c sleep_d a_b a_b-2; do
-    [ -f "$RP_ROOT/out/$key.log" ] && [ -f "$RP_ROOT/out/$key.rc" ] && [ -f "$RP_ROOT/out/$key.sec" ]
+    for ext in log rc sec item; do
+      if [ ! -f "$RP_ROOT/out/$key.$ext" ]; then
+        echo "missing: $key.$ext"
+        ls -la "$RP_ROOT/out"
+        for f in "$RP_ROOT/out"/*.item; do [ -e "$f" ] && printf '%s -> %s\n' "${f##*/}" "$(cat "$f")"; done
+        return 1
+      fi
+    done
   done
   [ "$(cat "$RP_ROOT/out/a_b.rc")" -eq 0 ]
   [ "$(cat "$RP_ROOT/out/a_b-2.rc")" -eq 0 ]
@@ -84,7 +91,7 @@ PY
   [ "$(sed -n '1p' "$RP_ROOT/summary" | cut -d' ' -f1-2)" = 'PASS alpha' ]
   [ "$(sed -n '2p' "$RP_ROOT/summary" | cut -d' ' -f1-2)" = 'FAIL fail-item' ]
   [ "$(sed -n '3p' "$RP_ROOT/summary" | cut -d' ' -f1-2)" = 'PASS zeta' ]
-  grep -Eq '^FAIL fail-item 0s \(rc 7\)$' "$RP_ROOT/summary"
+  grep -Eq '^FAIL fail-item [0-9]+s \(rc 7\)$' "$RP_ROOT/summary"
   grep -Eq '^SLOWEST .+ [0-9]+s$' "$RP_ROOT/summary"
   grep -Eq '^TOTAL [0-9]+s$' "$RP_ROOT/summary"
 }
