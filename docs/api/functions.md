@@ -79,6 +79,8 @@ source "$(dirname "$0")/lib/agent_rigor.sh"
 | `_install_virtualbox` | Install VirtualBox with its Homebrew cask on macOS when `VBoxManage` is missing. |
 | `_install_vagrant` | Install Vagrant with its Homebrew cask on macOS when `vagrant` is missing. |
 | `_install_promtool` | Install the pinned Prometheus `promtool` release after verifying its platform-specific SHA-256 checksum. |
+| `_install_istioctl` | Install Istio `istioctl` 1.31.4 from its release archive after verifying the platform-specific SHA-256 checksum; accepts an existing build with the pinned minor. Set `ISTIOCTL_VERSION` to select a version with a recorded checksum. |
+| `_istioctl_pinned_sha256 <version> <os> <arch>` | Print the pinned Istio `istioctl` SHA-256 checksum for a supported version and platform. |
 | `_install_kubernetes_cli` | Install `kubectl` (Debian/RedHat/mac). |
 | `_install_orbstack` | Install OrbStack on macOS. |
 | `_install_bats_from_source` | Build and install BATS from source tarball. |
