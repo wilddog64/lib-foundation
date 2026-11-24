@@ -469,56 +469,40 @@ function _istioctl_pinned_sha256() {
    esac
 }
 
-function _install_istioctl() {
-   local install_dir="${1:-/usr/local/bin}"
-   local version="${ISTIOCTL_VERSION:-1.31.4}"
-   local found_path=""
-   local found_version="unknown"
+function _istioctl_find_existing() {
+   local install_dir="$1"
+   _ISTIOCTL_FOUND_PATH=""
+   if [[ -x "${install_dir}/istioctl" ]]; then
+      _ISTIOCTL_FOUND_PATH="${install_dir}/istioctl"
+   elif command -v istioctl >/dev/null 2>&1; then
+      _ISTIOCTL_FOUND_PATH="$(command -v istioctl)"
+   fi
+}
+
+function _istioctl_client_version() {
+   local path="$1"
    local version_output=""
    local version_line=""
-   local pinned_minor=""
-   local found_minor=""
+   version_output="$("$path" version --short 2>/dev/null || "$path" version 2>/dev/null || true)"
+   version_line="${version_output%%$'\n'*}"
+   _ISTIOCTL_FOUND_VERSION="unknown"
+   if [[ "$version_line" =~ ^client\ version:\ ([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+      _ISTIOCTL_FOUND_VERSION="${BASH_REMATCH[1]}"
+   fi
+}
+
+function _istioctl_platform() {
    local os_name=""
    local machine=""
-   local os=""
-   local arch=""
-   local checksum=""
-   local archive=""
-   local base_url="${ISTIOCTL_BASE_URL:-https://github.com/istio/istio/releases/download}"
-   local tmp_dir=""
-   local actual_checksum=""
-
-   if [[ -x "${install_dir}/istioctl" ]]; then
-      found_path="${install_dir}/istioctl"
-   elif command -v istioctl >/dev/null 2>&1; then
-      found_path="$(command -v istioctl)"
-   fi
-
-   pinned_minor="${version%.*}"
-   if [[ -n "$found_path" ]]; then
-      version_output="$("$found_path" version --short 2>/dev/null || "$found_path" version 2>/dev/null || true)"
-      version_line="${version_output%%$'\n'*}"
-      if [[ "$version_line" =~ ^client\ version:\ ([0-9]+\.[0-9]+\.[0-9]+) ]]; then
-         found_version="${BASH_REMATCH[1]}"
-      fi
-      if [[ "$found_version" != "unknown" ]]; then
-         found_minor="${found_version%.*}"
-      fi
-      if [[ "$found_minor" == "$pinned_minor" ]]; then
-         printf 'istioctl %s at %s matches pin %s (minor %s)\n' "$found_version" "$found_path" "$version" "$pinned_minor"
-         return 0
-      fi
-      _err "istioctl ${found_version} at ${found_path} does not match pin ${version}; install a compatible release from https://github.com/istio/istio/releases, run 'brew unlink istioctl', or set ISTIOCTL_VERSION."
-   fi
-
    os_name="$(uname -s 2>/dev/null || true)"
    machine="$(uname -m 2>/dev/null || true)"
-   case "$os_name" in Darwin) os="osx" ;; Linux) os="linux" ;; *) _err "unsupported istioctl platform: ${os_name}-${machine}" ;; esac
-   case "$machine" in arm64|aarch64) arch="arm64" ;; amd64|x86_64) arch="amd64" ;; *) _err "unsupported istioctl architecture: ${machine}" ;; esac
-   checksum="$(_istioctl_pinned_sha256 "$version" "$os" "$arch")" || _err "no pinned checksum for ${version}-${os}-${arch}"
+   case "$os_name" in Darwin) _ISTIOCTL_OS="osx" ;; Linux) _ISTIOCTL_OS="linux" ;; *) _err "unsupported istioctl platform: ${os_name}-${machine}" ;; esac
+   case "$machine" in arm64|aarch64) _ISTIOCTL_ARCH="arm64" ;; amd64|x86_64) _ISTIOCTL_ARCH="amd64" ;; *) _err "unsupported istioctl architecture: ${machine}" ;; esac
+}
 
-   tmp_dir="$(mktemp -d)" || _err "failed to create temporary directory for istioctl"
-   archive="${tmp_dir}/istioctl.tar.gz"
+function _istioctl_fetch_verified() {
+   local version="$1" os="$2" arch="$3" checksum="$4" base_url="$5" tmp_dir="$6"
+   local archive="${tmp_dir}/istioctl.tar.gz" actual_checksum=""
    if ! curl -fsSL "${base_url}/${version}/istioctl-${version}-${os}-${arch}.tar.gz" -o "$archive"; then
       rm -rf "$tmp_dir"
       _err "failed to download istioctl ${version} archive"
@@ -539,6 +523,10 @@ function _install_istioctl() {
       rm -rf "$tmp_dir"
       _err "failed to extract istioctl ${version} archive"
    fi
+}
+
+function _istioctl_copy_into() {
+   local tmp_dir="$1" install_dir="$2"
    if [[ ! -d "$install_dir" ]]; then
       if ! mkdir -p "$install_dir" 2>/dev/null; then
          if ! _run_command --soft --prefer-sudo -- mkdir -p "$install_dir"; then
@@ -558,15 +546,48 @@ function _install_istioctl() {
          _err "failed to install istioctl into ${install_dir}"
       fi
    fi
-   rm -rf "$tmp_dir"
+}
 
-   found_path="${install_dir}/istioctl"
-   version_output="$("$found_path" version --short 2>/dev/null || "$found_path" version 2>/dev/null || true)"
-   found_version="unknown"
-   version_line="${version_output%%$'\n'*}"
-   if [[ "$version_line" =~ ^client\ version:\ ([0-9]+\.[0-9]+\.[0-9]+) ]]; then
-      found_version="${BASH_REMATCH[1]}"
+function _install_istioctl() {
+   local install_dir="${1:-/usr/local/bin}"
+   local version="${ISTIOCTL_VERSION:-1.31.4}"
+   local found_path=""
+   local found_version="unknown"
+   local pinned_minor="${ISTIOCTL_VERSION:-1.31.4}"
+   local found_minor=""
+   local os=""
+   local arch=""
+   local checksum=""
+   local base_url="${ISTIOCTL_BASE_URL:-https://github.com/istio/istio/releases/download}"
+   local tmp_dir=""
+
+   pinned_minor="${version%.*}"
+   _ISTIOCTL_FOUND_PATH=""
+   _istioctl_find_existing "$install_dir"
+   found_path="$_ISTIOCTL_FOUND_PATH"
+   if [[ -n "$found_path" ]]; then
+      _istioctl_client_version "$found_path"
+      found_version="$_ISTIOCTL_FOUND_VERSION"
+      if [[ "$found_version" != "unknown" ]]; then
+         found_minor="${found_version%.*}"
+      fi
+      if [[ "$found_minor" == "$pinned_minor" ]]; then
+         printf 'istioctl %s at %s matches pin %s (minor %s)\n' "$found_version" "$found_path" "$version" "$pinned_minor"
+         return 0
+      fi
+      _err "istioctl ${found_version} at ${found_path} does not match pin ${version}; install a compatible release from https://github.com/istio/istio/releases, run 'brew unlink istioctl', or set ISTIOCTL_VERSION."
    fi
+   _istioctl_platform
+   os="$_ISTIOCTL_OS"
+   arch="$_ISTIOCTL_ARCH"
+   checksum="$(_istioctl_pinned_sha256 "$version" "$os" "$arch")" || _err "no pinned checksum for ${version}-${os}-${arch}"
+   tmp_dir="$(mktemp -d)" || _err "failed to create temporary directory for istioctl"
+   _istioctl_fetch_verified "$version" "$os" "$arch" "$checksum" "$base_url" "$tmp_dir"
+   _istioctl_copy_into "$tmp_dir" "$install_dir"
+   rm -rf "$tmp_dir"
+   found_path="${install_dir}/istioctl"
+   _istioctl_client_version "$found_path"
+   found_version="$_ISTIOCTL_FOUND_VERSION"
    found_minor="${found_version%.*}"
    if [[ "$found_minor" == "$pinned_minor" ]]; then
       printf 'istioctl %s at %s matches pin %s (minor %s)\n' "$found_version" "$found_path" "$version" "$pinned_minor"

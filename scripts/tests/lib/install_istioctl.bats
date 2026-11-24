@@ -7,12 +7,15 @@ _err() {
 }
 
 setup() {
+  unset ISTIOCTL_CURL_FAIL ISTIOCTL_TAR_FAIL ISTIOCTL_MKDIR_FAIL_PATH ISTIOCTL_CP_FAIL_PATH
   CORE_LIB="${BATS_TEST_DIRNAME}/../../lib/core.sh"
   STUB_BIN="${BATS_TEST_TMPDIR}/bin"
   INSTALL_DIR="${BATS_TEST_TMPDIR}/install"
   mkdir -p "$STUB_BIN" "$INSTALL_DIR"
   export CORE_LIB STUB_BIN INSTALL_DIR
   export ISTIOCTL_URL_LOG="${BATS_TEST_TMPDIR}/curl.log"
+  export TEST_TMP_ROOT="$BATS_TEST_TMPDIR"
+  export ISTIOCTL_TMP_LOG="${BATS_TEST_TMPDIR}/mktemp.log"
   export ISTIOCTL_CHECKSUM_MODE="valid"
   : > "$ISTIOCTL_URL_LOG"
   cat > "$STUB_BIN/uname" <<'EOF'
@@ -32,6 +35,7 @@ done
 printf '%s\n' "$url" >> "$ISTIOCTL_URL_LOG"
 case "$url" in
   */istioctl-*.tar.gz)
+    [ "${ISTIOCTL_CURL_FAIL:-0}" = 1 ] && exit 8
     out=""
     previous=""
     for arg do
@@ -61,9 +65,37 @@ done
 exec /bin/rm "$@"
 EOF
   chmod +x "$STUB_BIN/uname" "$STUB_BIN/curl" "$STUB_BIN/shasum" "$STUB_BIN/rm"
+  cat > "$STUB_BIN/mktemp" <<'EOF'
+#!/bin/sh
+dir="${TEST_TMP_ROOT}/worktmp"
+/bin/rm -rf "$dir"
+/bin/mkdir -p "$dir"
+printf '%s\n' "$dir" > "$ISTIOCTL_TMP_LOG"
+printf '%s\n' "$dir"
+EOF
+  cat > "$STUB_BIN/tar" <<'EOF'
+#!/bin/sh
+[ "${ISTIOCTL_TAR_FAIL:-0}" = 1 ] && exit 9
+exec /usr/bin/tar "$@"
+EOF
+  cat > "$STUB_BIN/mkdir" <<'EOF'
+#!/bin/sh
+case "$*" in *"${ISTIOCTL_MKDIR_FAIL_PATH:-__no_match__}"*) exit 10 ;; esac
+exec /bin/mkdir "$@"
+EOF
+  cat > "$STUB_BIN/cp" <<'EOF'
+#!/bin/sh
+case "$*" in *"${ISTIOCTL_CP_FAIL_PATH:-__no_match__}"*) exit 11 ;; esac
+exec /bin/cp "$@"
+EOF
+  chmod +x "$STUB_BIN/mktemp" "$STUB_BIN/tar" "$STUB_BIN/mkdir" "$STUB_BIN/cp"
   export PATH="$STUB_BIN:/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin"
   export ISTIOCTL_EXPECTED_SHA=2be63df4a0fedb10c9c5402cdbf2f666e84330f3c68aef244975225ea63ef675
   _make_fixture
+}
+
+teardown() {
+  chmod -R u+w "$BATS_TEST_TMPDIR" 2>/dev/null || true
 }
 
 _make_fixture() {
@@ -198,4 +230,87 @@ _write_existing() {
   [ "$(command -v istioctl 2>/dev/null || true)" = "" ]
   run bash -c 'trap "echo sentinel" EXIT; source "$CORE_LIB"; _run_command() { while [ "$1" != "--" ]; do shift; done; shift; "$@"; }; _install_istioctl "$INSTALL_DIR"; trap -p EXIT'
   [ "$status" -eq 0 ]; [[ "$output" == *sentinel* ]]
+}
+
+@test "unsupported OS and architecture refuse before downloading" {
+  [ "$INSTALL_DIR" = "${BATS_TEST_TMPDIR}/install" ]
+  [[ "$TEST_TMP_ROOT" == "$BATS_TEST_TMPDIR" ]]
+  for platform in FreeBSD OpenBSD; do
+    export TEST_UNAME_S="$platform" TEST_UNAME_M=arm64
+    run bash -c 'source "$CORE_LIB"; _err() { printf "ERROR: %s\n" "$*" >&2; exit 1; }; _install_istioctl "$INSTALL_DIR"'
+    [ "$status" -eq 1 ]
+    [ "$output" = "ERROR: unsupported istioctl platform: ${platform}-arm64" ]
+    [ ! -s "$ISTIOCTL_URL_LOG" ]
+  done
+  export TEST_UNAME_S=Darwin TEST_UNAME_M=mips
+  run bash -c 'source "$CORE_LIB"; _err() { printf "ERROR: %s\n" "$*" >&2; exit 1; }; _install_istioctl "$INSTALL_DIR"'
+  [ "$status" -eq 1 ]
+  [ "$output" = "ERROR: unsupported istioctl architecture: mips" ]
+  [ ! -s "$ISTIOCTL_URL_LOG" ]
+}
+
+@test "download failure reports exact error and removes temporary directory" {
+  [ "$INSTALL_DIR" = "${BATS_TEST_TMPDIR}/install" ]; [[ "$TEST_TMP_ROOT" == "$BATS_TEST_TMPDIR" ]]
+  export ISTIOCTL_CURL_FAIL=1
+  run bash -c 'source "$CORE_LIB"; _err() { printf "ERROR: %s\n" "$*" >&2; exit 1; }; _install_istioctl "$INSTALL_DIR"'
+  [ "$status" -eq 1 ]; [ "$output" = "ERROR: failed to download istioctl 1.31.4 archive" ]
+  [ ! -e "$(cat "$ISTIOCTL_TMP_LOG")" ]
+}
+
+@test "extraction failure reports exact error and removes temporary directory" {
+  [ "$INSTALL_DIR" = "${BATS_TEST_TMPDIR}/install" ]; [[ "$TEST_TMP_ROOT" == "$BATS_TEST_TMPDIR" ]]
+  export ISTIOCTL_TAR_FAIL=1
+  run bash -c 'source "$CORE_LIB"; _err() { printf "ERROR: %s\n" "$*" >&2; exit 1; }; _run_command() { return 1; }; _install_istioctl "$INSTALL_DIR"'
+  [ "$status" -eq 1 ]; [ "$output" = "ERROR: failed to extract istioctl 1.31.4 archive" ]
+  [ ! -e "$(cat "$ISTIOCTL_TMP_LOG")" ]
+}
+
+@test "plain and privileged mkdir failures report exact error and clean up" {
+  [ "$INSTALL_DIR" = "${BATS_TEST_TMPDIR}/install" ]; [[ "$TEST_TMP_ROOT" == "$BATS_TEST_TMPDIR" ]]
+  local target="$INSTALL_DIR/../new-install"
+  export ISTIOCTL_MKDIR_FAIL_PATH="$target"
+  run bash -c 'source "$CORE_LIB"; _err() { printf "ERROR: %s\n" "$*" >&2; exit 1; }; _run_command() { return 1; }; _install_istioctl "$INSTALL_DIR/../new-install"'
+  [ "$status" -eq 1 ]; [ "$output" = "ERROR: failed to create istioctl install directory $target" ]
+  [ ! -e "$(cat "$ISTIOCTL_TMP_LOG")" ]
+}
+
+@test "cp failure in writable install directory reports exact error and cleans up" {
+  [ "$INSTALL_DIR" = "${BATS_TEST_TMPDIR}/install" ]; [[ "$TEST_TMP_ROOT" == "$BATS_TEST_TMPDIR" ]]
+  export ISTIOCTL_CP_FAIL_PATH="$INSTALL_DIR/istioctl"
+  run bash -c 'source "$CORE_LIB"; _err() { printf "ERROR: %s\n" "$*" >&2; exit 1; }; _run_command() { while [ "$1" != "--" ]; do shift; done; shift; "$@"; }; _install_istioctl "$INSTALL_DIR"'
+  [ "$status" -eq 1 ]; [ "$output" = "ERROR: failed to install istioctl into $INSTALL_DIR" ]
+  [ ! -e "$(cat "$ISTIOCTL_TMP_LOG")" ]
+}
+
+@test "cp failure through prefer-sudo reports exact error and cleans up" {
+  [ "$INSTALL_DIR" = "${BATS_TEST_TMPDIR}/install" ]; [[ "$TEST_TMP_ROOT" == "$BATS_TEST_TMPDIR" ]]
+  chmod 555 "$INSTALL_DIR"
+  export ISTIOCTL_CP_FAIL_PATH="$INSTALL_DIR/istioctl"
+  run bash -c 'source "$CORE_LIB"; _err() { printf "ERROR: %s\n" "$*" >&2; exit 1; }; _run_command() { case "$*" in *--prefer-sudo*) while [ "$1" != "--" ]; do shift; done; shift; "$@" ;; *) return 1 ;; esac; }; _install_istioctl "$INSTALL_DIR"'
+  [ "$status" -eq 1 ]; [ "$output" = "ERROR: failed to install istioctl into $INSTALL_DIR" ]
+  [ ! -e "$(cat "$ISTIOCTL_TMP_LOG")" ]
+}
+
+@test "post-install wrong minor reports exact error after cleanup" {
+  [ "$INSTALL_DIR" = "${BATS_TEST_TMPDIR}/install" ]; [[ "$TEST_TMP_ROOT" == "$BATS_TEST_TMPDIR" ]]
+  cat > "$BATS_TEST_TMPDIR/wrong-version" <<'EOF'
+#!/bin/sh
+printf '%s\n' 'client version: 1.32.0'
+EOF
+  chmod +x "$BATS_TEST_TMPDIR/wrong-version"
+  export ISTIOCTL_WRONG_BINARY="$BATS_TEST_TMPDIR/wrong-version"
+  run bash -c 'source "$CORE_LIB"; _err() { printf "ERROR: %s\n" "$*" >&2; exit 1; }; _run_command() { if [[ "$*" == *"$INSTALL_DIR/istioctl"* ]]; then cp "$ISTIOCTL_WRONG_BINARY" "$INSTALL_DIR/istioctl"; else while [ "$1" != "--" ]; do shift; done; shift; "$@"; fi; }; _install_istioctl "$INSTALL_DIR"'
+  [ "$status" -eq 1 ]
+  [ "$output" = "ERROR: installed istioctl 1.32.0 at $INSTALL_DIR/istioctl does not match pin 1.31.4; install a compatible release from https://github.com/istio/istio/releases, run 'brew unlink istioctl', or set ISTIOCTL_VERSION." ]
+  [ ! -e "$(cat "$ISTIOCTL_TMP_LOG")" ]
+}
+
+@test "non-writable install directory uses prefer-sudo for successful copy" {
+  [ "$INSTALL_DIR" = "${BATS_TEST_TMPDIR}/install" ]; [[ "$TEST_TMP_ROOT" == "$BATS_TEST_TMPDIR" ]]
+  chmod 555 "$INSTALL_DIR"
+  export ISTIOCTL_SUDO_LOG="$BATS_TEST_TMPDIR/sudo.log"
+  run bash -c 'source "$CORE_LIB"; _run_command() { case "$*" in *--prefer-sudo*) printf sudo >> "$ISTIOCTL_SUDO_LOG"; chmod 755 "$INSTALL_DIR"; while [ "$1" != "--" ]; do shift; done; shift; "$@"; local rc=$?; chmod 555 "$INSTALL_DIR"; return "$rc";; esac; while [ "$1" != "--" ]; do shift; done; shift; "$@"; }; _install_istioctl "$INSTALL_DIR"'
+  [ "$status" -eq 0 ]; [ -x "$INSTALL_DIR/istioctl" ]
+  [ "$(cat "$ISTIOCTL_SUDO_LOG")" = sudo ]
+  [ ! -e "$(cat "$ISTIOCTL_TMP_LOG")" ]
 }
