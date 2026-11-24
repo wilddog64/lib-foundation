@@ -471,6 +471,7 @@ function _istioctl_pinned_sha256() {
 
 function _istioctl_find_existing() {
    local install_dir="$1"
+   _ISTIOCTL_FOUND_PATH=""
    if [[ -x "${install_dir}/istioctl" ]]; then
       _ISTIOCTL_FOUND_PATH="${install_dir}/istioctl"
    elif command -v istioctl >/dev/null 2>&1; then
