@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [v0.5.8] — 2026-11-24
+
+### Fixed
+- `_install_istioctl` pins istioctl `${ISTIOCTL_VERSION:-1.31.4}` and installs it from the GitHub release archive verified against a pinned SHA-256 (`_istioctl_pinned_sha256`, osx/linux × amd64/arm64), instead of running `downloadIstioCandidate.sh` from Istio's `master` branch, which fetched the latest release (1.32 rejects k3s 1.32 clusters). An existing `istioctl` (in `install_dir`, then `PATH`) of the same minor is accepted with no download; another minor, or a version line that does not parse, is refused with one line naming the found version, its path, the pin and the fix. A checksum mismatch installs nothing. The installed binary is re-checked by full path. No global EXIT trap (the caller's is preserved), no `cd`. Reference: k3d-manager `docs/bugs/2026-11-23-dr-drill-hub-up-istioctl-1-32-rejects-k3s-1-32.md`, spec `docs/plans/v1.45.1-istioctl-a-lib-foundation.md`.
+
 ## [v0.5.7] — 2026-11-18
 
 ### Fixed
