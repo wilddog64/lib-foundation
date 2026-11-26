@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+- `_install_tailscale_app` installs the Tailscale Standalone cask on macOS and refuses when the Homebrew formula, App Store app, or an unrecognized Tailscale bundle is present. It does not call sudo itself.
+
 ## [v0.5.10] — 2026-11-24
 
 ### Fixed
