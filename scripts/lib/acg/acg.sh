@@ -72,8 +72,8 @@ _acg_get_instance_attr() {
 function _acg_update_ssh_config() {
   local new_ip="$1"
   _info "[acg] Updating sandbox SSH fragment with IP ${new_ip}"
-  _ssh_fragment_set_hostname ubuntu-tunnel "$new_ip"
-  _acg_upsert_ssh_host ubuntu "$new_ip"
+  _ssh_fragment_set_hostname ubuntu-tunnel "$new_ip" || return $?
+  _acg_upsert_ssh_host ubuntu "$new_ip" || return $?
   _ssh_fragment_check_resolves ubuntu "$new_ip"
 }
 
@@ -82,10 +82,15 @@ function _acg_upsert_ssh_host() {
   block=$(mktemp "${TMPDIR:-/tmp}/k3dm-block.XXXXXX") || return 1
   printf 'Host %s\n  HostName %s\n  User ubuntu\n  IdentityFile ~/.ssh/k3d-manager-key.pem\n  StrictHostKeyChecking no\n' \
     "$alias" "$ip" > "$block" || { rm -f "$block"; return 1; }
-  _ssh_fragment_upsert "$alias" "$block"
-  rc=$?
+  if _ssh_fragment_upsert "$alias" "$block"; then
+    rc=0
+  else
+    rc=$?
+  fi
   rm -f "$block"
-  _info "[acg] Updated SSH fragment: Host ${alias} → ${ip}"
+  if (( rc == 0 )); then
+    _info "[acg] Updated SSH fragment: Host ${alias} → ${ip}"
+  fi
   return "$rc"
 }
 
@@ -290,11 +295,11 @@ _acg_cf_deploy() {
     --query "Stacks[0].Outputs[?OutputKey==\`ServerPublicIP\`].OutputValue" --output text)
   _acg_discover_agent_ips
 
-  _acg_update_ssh_config "${server_ip}"
+  _acg_update_ssh_config "${server_ip}" || return $?
   local _agent_index=0
   for _agent_ip in "${_ACG_AGENT_IPS[@]}"; do
     _agent_index=$((_agent_index + 1))
-    _acg_upsert_ssh_host "ubuntu-${_agent_index}" "${_agent_ip}"
+    _acg_upsert_ssh_host "ubuntu-${_agent_index}" "${_agent_ip}" || return $?
   done
 
   _info "[acg] Server:  ${server_ip}"
@@ -568,7 +573,7 @@ HELP
   local state public_ip
   state=$(_acg_get_instance_attr "$instance_id" 'Reservations[0].Instances[0].State.Name')
   public_ip=$(_acg_get_instance_attr "$instance_id" 'Reservations[0].Instances[0].PublicIpAddress')
-  _acg_update_ssh_config "$public_ip"
+  _acg_update_ssh_config "$public_ip" || return $?
   _info "[acg] Instance ${instance_id} is ${state} at ${public_ip}"
   _acg_check_k3s
 }

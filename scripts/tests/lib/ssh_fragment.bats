@@ -52,8 +52,8 @@ EOF
   grep -A1 '^Host ubuntu$' "$(_ssh_fragment_path)" | grep -q '192.0.2.1'
   grep -q '203.0.113.8' "$(_ssh_fragment_path)"
   _ssh_fragment_remove acg ubuntu ubuntu-tunnel
-  ! grep -q '^Host ubuntu$' "$(_ssh_fragment_path)"
-  ! grep -q '^Host ubuntu-3$' "$(_ssh_fragment_path)"
+  run ! grep -q '^Host ubuntu$' "$(_ssh_fragment_path)"
+  run ! grep -q '^Host ubuntu-3$' "$(_ssh_fragment_path)"
   grep -q '^Host ubuntu-gcp$' "$(_ssh_fragment_path)"
   grep -q '^Host ubuntu-1x$' "$(_ssh_fragment_path)"
   grep -q '^Host ubuntu-azure$' "$(_ssh_fragment_path)"
@@ -141,4 +141,33 @@ EOF
   printf 'Host ubuntu\n  HostName 192.0.2.1\n' >"$(_ssh_fragment_path)"
   _ssh_fragment_remove acg ubuntu
   [ ! -e "$(_ssh_fragment_path)" ]
+}
+
+@test "commented and multi-alias headers are not treated as exact aliases" {
+  local block
+  mkdir -p "${HOME}/.ssh"
+  cat >"$(_ssh_fragment_path)" <<'EOF'
+Host ubuntu-gcp # formerly ubuntu
+  HostName 203.0.113.8
+Host ubuntu-gcp ubuntu
+  HostName 203.0.113.9
+EOF
+  block="${BATS_TEST_TMPDIR}/block"
+  printf 'Host ubuntu\n  HostName 192.0.2.1\n' >"$block"
+  _ssh_fragment_upsert ubuntu "$block" 2>"${BATS_TEST_TMPDIR}/warnings"
+  _ssh_fragment_set_hostname ubuntu 192.0.2.2 2>>"${BATS_TEST_TMPDIR}/warnings"
+  _ssh_fragment_remove acg ubuntu 2>>"${BATS_TEST_TMPDIR}/warnings"
+  grep -q 'Host ubuntu-gcp # formerly ubuntu' "$(_ssh_fragment_path)"
+  grep -q 'Host ubuntu-gcp ubuntu' "$(_ssh_fragment_path)"
+  [ "$(grep -c 'multi-alias stanza unchanged' "${BATS_TEST_TMPDIR}/warnings")" -ge 1 ]
+}
+
+@test "preflight recognizes equals headers and ignores empty includes" {
+  mkdir -p "${HOME}/.ssh"
+  printf 'Include ""\nHost=foo\nInclude %s\n' "$(_ssh_fragment_path)" >"$(_ssh_fragment_main_config)"
+  run _ssh_fragment_include_preflight
+  [ "$status" -ne 0 ]
+  printf 'Match=all\nInclude=~/.ssh/k3dm-sandbox.conf\n' >"$(_ssh_fragment_main_config)"
+  run _ssh_fragment_include_preflight
+  [ "$status" -ne 0 ]
 }

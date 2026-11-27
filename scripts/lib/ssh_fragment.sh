@@ -28,15 +28,19 @@ import os, re, sys
 path, out, mode, alias, extra = sys.argv[1:]
 text = open(path).read() if os.path.exists(path) else ''
 lines = text.splitlines(True)
-starts = [i for i, line in enumerate(lines) if re.match(r'^\s*(Host|Match)\s', line, re.I)]
+starts = [i for i, line in enumerate(lines) if re.match(r'^\s*(Host|Match)(?:\s|=)', line, re.I)]
 blocks = []
 for n, start in enumerate(starts):
     end = starts[n + 1] if n + 1 < len(starts) else len(lines)
     chunk = lines[start:end]
-    head = chunk[0].strip().split()
+    header = chunk[0].split('#', 1)[0].strip().replace('=', ' ', 1)
+    head = header.split()
     blocks.append((head, chunk))
 def matches(head, name):
-    return len(head) > 1 and head[0].lower() == 'host' and name in head[1:]
+    selected = len(head) > 1 and head[0].lower() == 'host'
+    if selected and len(head) > 2 and name in head[1:]:
+        print('WARN: [ssh-fragment] leaving multi-alias stanza unchanged: ' + ' '.join(head), file=sys.stderr)
+    return selected and head[1:] == [name]
 outlines, found = (list(lines[:starts[0]]) if starts else list(lines)), False
 if mode == 'upsert':
     block = open(extra).read()
@@ -113,7 +117,7 @@ import re, sys
 lines = open(sys.argv[1]).read().splitlines()
 active = False
 for line in lines:
-    head = re.match(r'^\s*(Host|Match)\s+(.+)', line, re.I)
+    head = re.match(r'^\s*(Host|Match)(?:\s+|=)(.+)', line, re.I)
     if head:
         active = head.group(1).lower() == 'host' and sys.argv[2] in head.group(2).split()
     elif active:
@@ -132,7 +136,7 @@ import re, sys
 lines = open(sys.argv[1]).read().splitlines()
 active = False
 for line in lines:
-    head = re.match(r'^\s*(Host|Match)\s+(.+)', line, re.I)
+    head = re.match(r'^\s*(Host|Match)(?:\s+|=)(.+)', line, re.I)
     if head:
         active = head.group(1).lower() == 'host' and sys.argv[2] in head.group(2).split()
     elif active:
@@ -162,12 +166,12 @@ except OSError:
     lines = []
 for line in lines:
     stripped = line.strip()
-    if re.match(r'^(Host|Match)\s', stripped, re.I):
+    if re.match(r'^(Host|Match)(?:\s|=)', stripped, re.I):
         break
-    match = re.match(r'^Include\s+(.+?)\s*$', stripped, re.I)
+    match = re.match(r'^Include(?:\s|=)(.*)$', stripped, re.I)
     if match:
-        value = match.group(1).strip('"\'')
-        matches = matches or value in (fragment, homeform, relative)
+        value = match.group(1).strip().strip('"\'')
+        matches = matches or (bool(value) and value in (fragment, homeform, relative))
 if not matches:
     line = 'Include ' + (homeform or fragment)
     label = ('WARN' if mode == 'warn' else 'ERROR')

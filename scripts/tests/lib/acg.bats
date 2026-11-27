@@ -485,7 +485,7 @@ EOF
   [ "${status}" -eq 0 ]
   [[ "${output}" == *"nothing to tear down"* ]]
   [[ "${output}" != *"ValidationError"* ]]
-  ! grep -q '^Host ubuntu$' "$(_ssh_fragment_path)"
+  run ! grep -q '^Host ubuntu$' "$(_ssh_fragment_path)"
   grep -q '^Host ubuntu-gcp$' "$(_ssh_fragment_path)"
   run ! grep -F 'cloudformation delete-stack' "${calls}"
 }
@@ -723,4 +723,16 @@ STUB
   printf 'ssh-rsa invalid\n' > "$public"
   run _acg_imported_key_fingerprint "$public"
   [ "$status" -ne 0 ]
+}
+
+@test "failed fragment write propagates and cleans the block temp file" {
+  local target
+  mkdir -p "${HOME}/.ssh"
+  target="${BATS_TEST_TMPDIR}/fragment-target"
+  printf 'keep\n' >"$target"
+  ln -s "$target" "$(_ssh_fragment_path)"
+  run bash -c 'source "${1}"; _info() { printf "%s\n" "$*"; }; _run_command() { while [[ "$1" == --* ]]; do [[ "$1" == -- ]] && { shift; break; }; shift; done; "$@"; }; _acg_update_ssh_config 192.0.2.1' _ "${BATS_TEST_DIRNAME}/../../lib/acg/acg.sh"
+  [ "$status" -ne 0 ]
+  [[ "$output" != *'Updated SSH fragment'* ]]
+  [ -z "$(find "${TMPDIR:-/tmp}" -maxdepth 1 -name 'k3dm-block.*' -print -quit)" ]
 }
